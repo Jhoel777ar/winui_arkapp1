@@ -13,7 +13,12 @@
     </Window.SystemBackdrop>
 
     <Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Width="400">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Width="400">
             <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" />
             <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
             <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
@@ -35,6 +40,11 @@
                 Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
                 IsClosable="True"
                 IsIconVisible="True"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Spacing="10" Margin="0,0,0,10">
+            <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png" Width="24" Height="24" />
+            <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA" VerticalAlignment="Center" />
         </StackPanel>
     </Grid>
 </Window>

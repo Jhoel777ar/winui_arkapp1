@@ -48,6 +48,10 @@ namespace ark_app1
             this.InitializeComponent();
             AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+            
+            // Set a fixed window size
+            AppWindow.Resize(new SizeInt32(500, 770));
+
             CenterWindow();
         }
 
@@ -92,6 +96,7 @@ namespace ark_app1
                 try
                 {
                     await connection.OpenAsync();
+                    DatabaseManager.ConnectionString = connectionString;
                     InfoBarTitle = "Conexión exitosa";
                     InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
                     InfoBarSeverity = InfoBarSeverity.Success;
@@ -109,7 +114,15 @@ namespace ark_app1
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica de conexión aquí 
+            // You can now access the connection string from anywhere using DatabaseManager.ConnectionString
+            if (!string.IsNullOrEmpty(DatabaseManager.ConnectionString))
+            {
+                // Proceed with the logic that requires the connection string
+            }
+            else
+            {
+                // Handle the case where the connection has not been established yet
+            }
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
