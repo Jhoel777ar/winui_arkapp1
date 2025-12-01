@@ -18,41 +18,39 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel 
-            Grid.Row="0" 
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Center" 
-            Spacing="15" 
-            Width="450">
-            
-            <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
-            
-            <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
-            
-            <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
-                <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
-                <ComboBoxItem Content="SQL Server Authentication"/>
-            </ComboBox>
-            
-            <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="15">
-                <TextBox Header="Username" x:Name="UsernameTextBox" />
-                <PasswordBox Header="Password" x:Name="PasswordBox" />
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Spacing="15" 
+                Width="500">
+                
+                <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
+                
+                <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
+                
+                <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
+                    <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
+                    <ComboBoxItem Content="SQL Server Authentication"/>
+                </ComboBox>
+                
+                <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="15">
+                    <TextBox Header="Username" x:Name="UsernameTextBox" />
+                    <PasswordBox Header="Password" x:Name="PasswordBox" />
+                </StackPanel>
+                
+                <Button Content="Conectar" x:Name="ConnectButton" Click="ConnectButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
+                
+                <InfoBar 
+                    IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
+                    Title="{x:Bind InfoBarTitle, Mode=OneWay}"
+                    Message="{x:Bind InfoBarMessage, Mode=OneWay}"
+                    Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
+                    IsClosable="True"
+                    IsIconVisible="True"
+                    Margin="0,20,0,0"/>
             </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,20,0,0">
-                <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click" Style="{ThemeResource AccentButtonStyle}"/>
-                <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
-            </StackPanel>
-            
-            <InfoBar 
-                IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
-                Title="{x:Bind InfoBarTitle, Mode=OneWay}"
-                Message="{x:Bind InfoBarMessage, Mode=OneWay}"
-                Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
-                IsClosable="True"
-                IsIconVisible="True"
-                Margin="0,20,0,0"/>
-        </StackPanel>
+        </ScrollViewer>
 
         <StackPanel 
             Grid.Row="1" 

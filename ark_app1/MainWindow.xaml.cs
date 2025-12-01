@@ -50,7 +50,7 @@ namespace ark_app1
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
             
             // Set a fixed window size
-            AppWindow.Resize(new SizeInt32(600, 800));
+            AppWindow.Resize(new SizeInt32(700, 800));
 
             CenterWindow();
         }
@@ -73,7 +73,7 @@ namespace ark_app1
             }
         }
 
-        private async void TestConnectionButton_Click(object sender, RoutedEventArgs e)
+        private async void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
             IsInfoBarOpen = false;
             string serverName = ServerNameTextBox.Text;
@@ -101,6 +101,8 @@ namespace ark_app1
                     InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
                     InfoBarSeverity = InfoBarSeverity.Success;
                     IsInfoBarOpen = true;
+
+                    // Optionally, close the login window or open a new one after successful connection
                 }
                 catch (Exception ex)
                 {
@@ -109,19 +111,6 @@ namespace ark_app1
                     InfoBarSeverity = InfoBarSeverity.Error;
                     IsInfoBarOpen = true;
                 }
-            }
-        }
-
-        private void ConnectButton_Click(object sender, RoutedEventArgs e)
-        {
-            // You can now access the connection string from anywhere using DatabaseManager.ConnectionString
-            if (!string.IsNullOrEmpty(DatabaseManager.ConnectionString))
-            {
-                // Proceed with the logic that requires the connection string
-            }
-            else
-            {
-                // Handle the case where the connection has not been established yet
             }
         }
 
