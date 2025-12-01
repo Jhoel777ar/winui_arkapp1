@@ -1,3 +1,4 @@
+using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Windowing;
@@ -49,13 +50,13 @@ namespace ark_app1
             var selectedItem = (ComboBoxItem)AuthenticationComboBox.SelectedItem;
             if (selectedItem.Content.ToString() == "Windows Authentication")
             {
-                connectionString = $"Server={serverName};Database=master;Integrated Security=True;";
+                connectionString = $"Server={serverName};Database=master;Integrated Security=True;TrustServerCertificate=True;";
             }
             else
             {
                 string username = UsernameTextBox.Text;
                 string password = PasswordBox.Password;
-                connectionString = $"Server={serverName};Database=master;User ID={username};Password={password};";
+                connectionString = $"Server={serverName};Database=master;User ID={username};Password={password};TrustServerCertificate=True;";
             }
 
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -87,8 +88,8 @@ namespace ark_app1
         }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Handle connection logic here
+        { 
+            // Lógica de conexión aquí 
         }
     }
 }
