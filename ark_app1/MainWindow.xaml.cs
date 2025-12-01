@@ -11,7 +11,6 @@ namespace ark_app1
 {
     public sealed partial class MainWindow : Window, INotifyPropertyChanged
     {
-        // Data-binding fields
         private bool _isInfoBarOpen;
         private string _infoBarTitle = string.Empty;
         private string _infoBarMessage = string.Empty;
@@ -47,11 +46,8 @@ namespace ark_app1
         {
             this.InitializeComponent();
             AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
-            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-            
-            // Set a fixed window size
-            AppWindow.Resize(new SizeInt32(700, 800));
-
+            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;         
+            AppWindow.Resize(new SizeInt32(900, 800));
             CenterWindow();
         }
 
@@ -101,8 +97,6 @@ namespace ark_app1
                     InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
                     InfoBarSeverity = InfoBarSeverity.Success;
                     IsInfoBarOpen = true;
-
-                    // Optionally, close the login window or open a new one after successful connection
                 }
                 catch (Exception ex)
                 {
