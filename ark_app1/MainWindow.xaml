@@ -28,7 +28,7 @@
                 <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click"/>
                 <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
             </StackPanel>
-            <InfoBar x:Name="InfoBar" IsOpen="False" IsIconVisible="True" IsClosable="True" />
+            <InfoBar x:Name="connectionInfoBar" IsOpen="False" IsIconVisible="True" IsClosable="True" />
         </StackPanel>
     </Grid>
 </Window>

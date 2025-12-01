@@ -44,7 +44,7 @@ namespace ark_app1
 
         private async void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            InfoBar.IsOpen = false;
+            connectionInfoBar.IsOpen = false;
             string serverName = ServerNameTextBox.Text;
             string connectionString;
 
@@ -65,17 +65,17 @@ namespace ark_app1
                 try
                 {
                     await connection.OpenAsync();
-                    InfoBar.Title = "Conexión exitosa";
-                    InfoBar.Message = "La conexión al servidor SQL se ha establecido correctamente.";
-                    InfoBar.Severity = InfoBarSeverity.Success;
-                    InfoBar.IsOpen = true;
+                    connectionInfoBar.Title = "Conexión exitosa";
+                    connectionInfoBar.Message = "La conexión al servidor SQL se ha establecido correctamente.";
+                    connectionInfoBar.Severity = InfoBarSeverity.Success;
+                    connectionInfoBar.IsOpen = true;
                 }
                 catch (Exception ex)
                 {
-                    InfoBar.Title = "Error de conexión";
-                    InfoBar.Message = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
-                    InfoBar.Severity = InfoBarSeverity.Error;
-                    InfoBar.IsOpen = true;
+                    connectionInfoBar.Title = "Error de conexión";
+                    connectionInfoBar.Message = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
+                    connectionInfoBar.Severity = InfoBarSeverity.Error;
+                    connectionInfoBar.IsOpen = true;
                 }
             }
         }
