@@ -14,6 +14,22 @@
     </Window.SystemBackdrop>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
+        <StackPanel Grid.Row="0" Margin="20">
+            <TextBlock Text="Login" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+            <TextBox Header="Username" Width="250"/>
+            <PasswordBox Header="Password" Width="250"/>
+            <Button Content="Login" Width="100" HorizontalAlignment="Center" Margin="0,20,0,0"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" Text="ARK DEV SYSTEM" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="20"/>
     </Grid>
 </Window>
