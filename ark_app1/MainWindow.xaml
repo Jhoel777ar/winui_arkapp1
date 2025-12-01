@@ -12,20 +12,23 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Width="300">
-        <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" />
-        <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
-        <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
-            <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
-            <ComboBoxItem Content="SQL Server Authentication"/>
-        </ComboBox>
-        <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="10">
-            <TextBox Header="Username" x:Name="UsernameTextBox" />
-            <PasswordBox Header="Password" x:Name="PasswordBox" />
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Width="400">
+            <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" />
+            <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
+            <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
+                <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
+                <ComboBoxItem Content="SQL Server Authentication"/>
+            </ComboBox>
+            <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="10">
+                <TextBox Header="Username" x:Name="UsernameTextBox" />
+                <PasswordBox Header="Password" x:Name="PasswordBox" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click"/>
+                <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
+            </StackPanel>
+            <InfoBar x:Name="InfoBar" IsOpen="False" />
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,20,0,0">
-            <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click"/>
-            <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
-        </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

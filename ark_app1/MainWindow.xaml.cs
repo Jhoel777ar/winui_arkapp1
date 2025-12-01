@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace ark_app1
 {
@@ -44,6 +44,7 @@ namespace ark_app1
 
         private async void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
+            InfoBar.IsOpen = false;
             string serverName = ServerNameTextBox.Text;
             string connectionString;
 
@@ -64,25 +65,17 @@ namespace ark_app1
                 try
                 {
                     await connection.OpenAsync();
-                    ContentDialog dialog = new ContentDialog
-                    {
-                        Title = "Conexión exitosa",
-                        Content = "La conexión al servidor SQL se ha establecido correctamente.",
-                        CloseButtonText = "Aceptar",
-                        XamlRoot = this.Content.XamlRoot
-                    };
-                    await dialog.ShowAsync();
+                    InfoBar.Title = "Conexión exitosa";
+                    InfoBar.Message = "La conexión al servidor SQL se ha establecido correctamente.";
+                    InfoBar.Severity = InfoBarSeverity.Success;
+                    InfoBar.IsOpen = true;
                 }
                 catch (Exception ex)
                 {
-                    ContentDialog dialog = new ContentDialog
-                    {
-                        Title = "Error de conexión",
-                        Content = $"No se pudo establecer la conexión con el servidor SQL.\nError: {ex.Message}",
-                        CloseButtonText = "Aceptar",
-                        XamlRoot = this.Content.XamlRoot
-                    };
-                    await dialog.ShowAsync();
+                    InfoBar.Title = "Error de conexión";
+                    InfoBar.Message = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
+                    InfoBar.Severity = InfoBarSeverity.Error;
+                    InfoBar.IsOpen = true;
                 }
             }
         }
