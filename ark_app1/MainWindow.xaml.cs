@@ -4,18 +4,50 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Windowing;
 using Windows.Graphics;
 using Microsoft.Data.SqlClient;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ark_app1
 {
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow : Window, INotifyPropertyChanged
     {
+        // Data-binding fields
+        private bool _isInfoBarOpen;
+        private string _infoBarTitle = string.Empty;
+        private string _infoBarMessage = string.Empty;
+        private InfoBarSeverity _infoBarSeverity = InfoBarSeverity.Informational;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public bool IsInfoBarOpen
+        {
+            get => _isInfoBarOpen;
+            set => SetProperty(ref _isInfoBarOpen, value);
+        }
+
+        public string InfoBarTitle
+        {
+            get => _infoBarTitle;
+            set => SetProperty(ref _infoBarTitle, value);
+        }
+
+        public string InfoBarMessage
+        {
+            get => _infoBarMessage;
+            set => SetProperty(ref _infoBarMessage, value);
+        }
+
+        public InfoBarSeverity InfoBarSeverity
+        {
+            get => _infoBarSeverity;
+            set => SetProperty(ref _infoBarSeverity, value);
+        }
+
         public MainWindow()
         {
             this.InitializeComponent();
             AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-
-            // Center the window on the screen.
             CenterWindow();
         }
 
@@ -31,20 +63,15 @@ namespace ark_app1
             if (SqlAuthenticationStackPanel != null)
             {
                 var selectedItem = (ComboBoxItem)AuthenticationComboBox.SelectedItem;
-                if (selectedItem.Content.ToString() == "SQL Server Authentication")
-                {
-                    SqlAuthenticationStackPanel.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    SqlAuthenticationStackPanel.Visibility = Visibility.Collapsed;
-                }
+                SqlAuthenticationStackPanel.Visibility = (selectedItem.Content.ToString() == "SQL Server Authentication")
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
             }
         }
 
         private async void TestConnectionButton_Click(object sender, RoutedEventArgs e)
         {
-            connectionInfoBar.IsOpen = false;
+            IsInfoBarOpen = false;
             string serverName = ServerNameTextBox.Text;
             string connectionString;
 
@@ -65,24 +92,37 @@ namespace ark_app1
                 try
                 {
                     await connection.OpenAsync();
-                    connectionInfoBar.Title = "Conexión exitosa";
-                    connectionInfoBar.Message = "La conexión al servidor SQL se ha establecido correctamente.";
-                    connectionInfoBar.Severity = InfoBarSeverity.Success;
-                    connectionInfoBar.IsOpen = true;
+                    InfoBarTitle = "Conexión exitosa";
+                    InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
+                    InfoBarSeverity = InfoBarSeverity.Success;
+                    IsInfoBarOpen = true;
                 }
                 catch (Exception ex)
                 {
-                    connectionInfoBar.Title = "Error de conexión";
-                    connectionInfoBar.Message = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
-                    connectionInfoBar.Severity = InfoBarSeverity.Error;
-                    connectionInfoBar.IsOpen = true;
+                    InfoBarTitle = "Error de conexión";
+                    InfoBarMessage = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
+                    InfoBarSeverity = InfoBarSeverity.Error;
+                    IsInfoBarOpen = true;
                 }
             }
         }
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
-        { 
+        {
             // Lógica de conexión aquí 
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (Equals(storage, value)) return false;
+            storage = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }

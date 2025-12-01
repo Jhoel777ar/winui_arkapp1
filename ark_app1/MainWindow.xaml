@@ -28,7 +28,13 @@
                 <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click"/>
                 <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
             </StackPanel>
-            <InfoBar x:Name="connectionInfoBar" IsOpen="False" IsIconVisible="True" IsClosable="True" />
+            <InfoBar 
+                IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
+                Title="{x:Bind InfoBarTitle, Mode=OneWay}"
+                Message="{x:Bind InfoBarMessage, Mode=OneWay}"
+                Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
+                IsClosable="True"
+                IsIconVisible="True"/>
         </StackPanel>
     </Grid>
 </Window>
