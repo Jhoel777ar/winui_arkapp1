@@ -12,39 +12,58 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" Width="400">
-            <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" />
+        <StackPanel 
+            Grid.Row="0" 
+            HorizontalAlignment="Center" 
+            VerticalAlignment="Center" 
+            Spacing="15" 
+            Width="450">
+            
+            <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
+            
             <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
+            
             <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
                 <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
                 <ComboBoxItem Content="SQL Server Authentication"/>
             </ComboBox>
-            <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="10">
+            
+            <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="15">
                 <TextBox Header="Username" x:Name="UsernameTextBox" />
                 <PasswordBox Header="Password" x:Name="PasswordBox" />
             </StackPanel>
+            
             <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,20,0,0">
-                <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click"/>
+                <Button Content="Probar conexión" x:Name="TestConnectionButton" Click="TestConnectionButton_Click" Style="{ThemeResource AccentButtonStyle}"/>
                 <Button Content="Aceptar" x:Name="ConnectButton" Click="ConnectButton_Click"/>
             </StackPanel>
+            
             <InfoBar 
                 IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
                 Title="{x:Bind InfoBarTitle, Mode=OneWay}"
                 Message="{x:Bind InfoBarMessage, Mode=OneWay}"
                 Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
                 IsClosable="True"
-                IsIconVisible="True"/>
+                IsIconVisible="True"
+                Margin="0,20,0,0"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Spacing="10" Margin="0,0,0,10">
-            <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png" Width="24" Height="24" />
-            <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA" VerticalAlignment="Center" />
+        <StackPanel 
+            Grid.Row="1" 
+            Orientation="Horizontal" 
+            HorizontalAlignment="Center" 
+            VerticalAlignment="Bottom" 
+            Spacing="12" 
+            Margin="0,20,0,0">
+            
+            <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png" Width="32" Height="32" />
+            <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
         </StackPanel>
     </Grid>
 </Window>

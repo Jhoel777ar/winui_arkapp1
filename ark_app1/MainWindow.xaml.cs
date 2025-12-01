@@ -50,7 +50,7 @@ namespace ark_app1
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
             
             // Set a fixed window size
-            AppWindow.Resize(new SizeInt32(500, 770));
+            AppWindow.Resize(new SizeInt32(600, 800));
 
             CenterWindow();
         }
