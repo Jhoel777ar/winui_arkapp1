@@ -20,7 +20,6 @@ namespace ark_app1
         private string _infoBarMessage = string.Empty;
         private InfoBarSeverity _infoBarSeverity = InfoBarSeverity.Informational;
         MicaController? micaController;
-        DesktopAcrylicController? acrylicController;
         SystemBackdropConfiguration? configurationSource;
 
         public event PropertyChangedEventHandler? PropertyChanged;

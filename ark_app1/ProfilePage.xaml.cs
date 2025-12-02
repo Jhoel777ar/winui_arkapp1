@@ -1,6 +1,6 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Data.SqlClient;
 using System;
 
 namespace ark_app1
@@ -15,42 +15,40 @@ namespace ark_app1
 
         private void LoadUserProfile()
         {
-            var user = (Application.Current as App).CurrentUser;
+            var user = (Application.Current as App)?.CurrentUser;
             if (user != null)
             {
-                FullNameTextBox.Text = user.NombreCompleto;
-                CiTextBox.Text = user.CI;
-                EmailTextBox.Text = user.Email;
-                PhoneTextBox.Text = user.Telefono;
+                FullNameTextBox.Text = user.NombreCompleto ?? string.Empty;
+                CiTextBox.Text = user.CI ?? string.Empty;
+                EmailTextBox.Text = user.Email ?? string.Empty;
+                PhoneTextBox.Text = user.Telefono ?? string.Empty;
             }
         }
 
         private void SaveChanges_Click(object sender, RoutedEventArgs e)
         {
-            var user = (Application.Current as App).CurrentUser;
-            if (user != null)
-            {
-                try
-                {
-                    using (var conn = new SqlConnection(DatabaseManager.ConnectionString))
-                    {
-                        conn.Open();
-                        var updateCmd = conn.CreateCommand();
-                        updateCmd.CommandText = "UPDATE Usuarios SET NombreCompleto = @NombreCompleto, Telefono = @Telefono WHERE Id = @Id";
-                        updateCmd.Parameters.AddWithValue("@NombreCompleto", FullNameTextBox.Text);
-                        updateCmd.Parameters.AddWithValue("@Telefono", PhoneTextBox.Text);
-                        updateCmd.Parameters.AddWithValue("@Id", user.Id);
-                        updateCmd.ExecuteNonQuery();
-                    }
-                    user.NombreCompleto = FullNameTextBox.Text;
-                    user.Telefono = PhoneTextBox.Text;
+            var user = (Application.Current as App)?.CurrentUser;
+            if (user == null) return;
 
-                    ShowInfoBar("Éxito", "Sus cambios se han guardado exitosamente.", InfoBarSeverity.Success);
-                }
-                catch (Exception ex)
-                {
-                    ShowInfoBar("Error", $"No se pudieron guardar los cambios: {ex.Message}", InfoBarSeverity.Error);
-                }
+            try
+            {
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                conn.Open();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = "UPDATE Usuarios SET NombreCompleto = @nombre, Telefono = @tel WHERE Id = @id";
+                cmd.Parameters.AddWithValue("@nombre", FullNameTextBox.Text.Trim());
+                cmd.Parameters.AddWithValue("@tel", (object)PhoneTextBox.Text.Trim() ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@id", user.Id);
+                cmd.ExecuteNonQuery();
+
+                user.NombreCompleto = FullNameTextBox.Text.Trim();
+                user.Telefono = PhoneTextBox.Text.Trim();
+
+                ShowInfoBar("Éxito", "Cambios guardados correctamente.", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("Error", $"Error al guardar: {ex.Message}", InfoBarSeverity.Error);
             }
         }
 
@@ -61,44 +59,25 @@ namespace ark_app1
                 ShowInfoBar("Error", "Las contraseñas no coinciden.", InfoBarSeverity.Error);
                 return;
             }
-
             if (string.IsNullOrWhiteSpace(NewPasswordBox.Password))
             {
                 ShowInfoBar("Error", "La contraseña no puede estar vacía.", InfoBarSeverity.Error);
                 return;
             }
 
-            var user = (Application.Current as App).CurrentUser;
-            if (user != null)
-            {
-                try
-                {
-                    DatabaseManager.UpdateUserPassword(user.Id, NewPasswordBox.Password);
-                    ShowInfoBar("Éxito", "Su contraseña ha sido cambiada exitosamente.", InfoBarSeverity.Success);
-                    NewPasswordBox.Password = string.Empty;
-                    ConfirmNewPasswordBox.Password = string.Empty;
-                }
-                catch (Exception ex)
-                {
-                    ShowInfoBar("Error", $"No se pudo cambiar la contraseña: {ex.Message}", InfoBarSeverity.Error);
-                }
-            }
-        }
+            var user = (Application.Current as App)?.CurrentUser;
+            if (user == null) return;
 
-        private void ForgotPassword_Click(object sender, RoutedEventArgs e)
-        {
-            var user = (Application.Current as App).CurrentUser;
-            if (user != null)
+            try
             {
-                try
-                {
-                    DatabaseManager.UpdateUserPassword(user.Id, user.CI);
-                    ShowInfoBar("Información", "Su contraseña ha sido restablecida a su CI. Por favor, cambie su contraseña lo antes posible.", InfoBarSeverity.Informational);
-                }
-                catch (Exception ex)
-                {
-                    ShowInfoBar("Error", $"No se pudo restablecer la contraseña: {ex.Message}", InfoBarSeverity.Error);
-                }
+                DatabaseManager.UpdateUserPassword(user.Id, NewPasswordBox.Password);
+                NewPasswordBox.Password = string.Empty;
+                ConfirmNewPasswordBox.Password = string.Empty;
+                ShowInfoBar("Éxito", "Contraseña cambiada correctamente.", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("Error", $"Error al cambiar contraseña: {ex.Message}", InfoBarSeverity.Error);
             }
         }
 
