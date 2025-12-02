@@ -9,11 +9,13 @@ namespace ark_app1;
 
 public sealed partial class MainPage : Window
 {
+    MicaController? micaController;
+    SystemBackdropConfiguration? configurationSource;
     public MainPage(string userFullName)
     {
         this.InitializeComponent();
         UserPicture.DisplayName = userFullName;
-        TitleBar.Subtitle = $"Bienvenido, {userFullName}";
+        AppTitleBar.Subtitle = $"Bienvenido, {userFullName}";
         TrySetMicaBackdrop();
         ContentFrame.Navigate(typeof(HomePage));
     }
@@ -42,35 +44,13 @@ public sealed partial class MainPage : Window
     {
         if (MicaController.IsSupported())
         {
-            var configurationSource = new SystemBackdropConfiguration();
-            this.Activated += (sender, args) =>
-            {
-                if (args.WindowActivationState != WindowActivationState.Deactivated)
-                {
-                    configurationSource.IsInputActive = true;
-                }
-                else
-                {
-                    configurationSource.IsInputActive = false;
-                }
-            };
-            this.Closed += (sender, args) =>
-            {
-                micaController?.Dispose();
-                micaController = null;
-            };
-
-            ((FrameworkElement)this.Content).ActualThemeChanged += (sender, args) =>
-            {
-                if (configurationSource != null)
-                {
-                    SetConfigurationSourceTheme();
-                }
-            };
-
+            configurationSource = new SystemBackdropConfiguration();
+            this.Activated += Window_Activated;
+            this.Closed += Window_Closed;
+            ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
             configurationSource.IsInputActive = true;
             SetConfigurationSourceTheme();
-            var micaController = new MicaController();
+            micaController = new MicaController();
             micaController.Kind = MicaKind.BaseAlt;
             micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
             micaController.SetSystemBackdropConfiguration(configurationSource);
@@ -79,10 +59,44 @@ public sealed partial class MainPage : Window
         }
         return false;
     }
-    MicaController? micaController;
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (configurationSource != null)
+            configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        micaController?.Dispose();
+        micaController = null;
+        configurationSource = null;
+        this.Activated -= Window_Activated;
+        this.Closed -= Window_Closed;
+        ((FrameworkElement)this.Content).ActualThemeChanged -= Window_ThemeChanged;
+
+    }
+
+    private void Window_ThemeChanged(FrameworkElement sender, object args)
+    {
+        if (configurationSource != null)
+            SetConfigurationSourceTheme();
+    }
 
     private void SetConfigurationSourceTheme()
     {
-        // Implement this method to set the theme for the backdrop
+        if (configurationSource == null) return;
+
+        switch (((FrameworkElement)this.Content).ActualTheme)
+        {
+            case ElementTheme.Dark:
+                configurationSource.Theme = SystemBackdropTheme.Dark;
+                break;
+            case ElementTheme.Light:
+                configurationSource.Theme = SystemBackdropTheme.Light;
+                break;
+            case ElementTheme.Default:
+                configurationSource.Theme = SystemBackdropTheme.Default;
+                break;
+        }
     }
 }
