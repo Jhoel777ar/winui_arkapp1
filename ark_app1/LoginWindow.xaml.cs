@@ -71,20 +71,29 @@ public sealed partial class LoginWindow : Window
                 await conn.OpenAsync();
 
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT PasswordHash, NombreCompleto FROM Usuarios WHERE Email = @cred OR CI = @cred";
+                cmd.CommandText = "SELECT Id, PasswordHash, NombreCompleto, CI, Email, Telefono FROM Usuarios WHERE Email = @cred OR CI = @cred";
                 cmd.Parameters.AddWithValue("@cred", cred);
 
                 using var reader = await cmd.ExecuteReaderAsync();
                 if (reader.Read())
                 {
-                    string hash = reader.GetString(0);
-                    string nombre = reader.GetString(1);
+                    string hash = reader.GetString(1);
 
                     if (BCrypt.Net.BCrypt.Verify(pass, hash))
                     {
+                         var user = new User
+                        {
+                            Id = reader.GetInt32(0),
+                            NombreCompleto = reader.GetString(2),
+                            CI = reader.GetString(3),
+                            Email = reader.GetString(4),
+                            Telefono = reader.IsDBNull(5) ? string.Empty : reader.GetString(5)
+                        };
+
                         DispatcherQueue.TryEnqueue(() =>
                         {
-                            var mainPage = new MainPage(nombre);
+                            (Application.Current as App).CurrentUser = user;
+                            var mainPage = new MainPage(user.NombreCompleto);
                             mainPage.Activate();
                             this.Close();
                         });

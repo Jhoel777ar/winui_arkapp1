@@ -11,6 +11,7 @@ namespace ark_app1
     public partial class App : Application
     {
         public static Window Window { get; private set; }
+        public User? CurrentUser { get; set; } // This will hold the logged-in user's data.
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

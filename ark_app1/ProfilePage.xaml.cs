@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Data.Sqlite;
+using Microsoft.Data.SqlClient;
 using System;
 
 namespace ark_app1
@@ -32,10 +32,10 @@ namespace ark_app1
             {
                 try
                 {
-                    using (var db = new SqliteConnection($"Filename={DatabaseManager.DatabasePath}"))
+                    using (var conn = new SqlConnection(DatabaseManager.ConnectionString))
                     {
-                        db.Open();
-                        var updateCmd = db.CreateCommand();
+                        conn.Open();
+                        var updateCmd = conn.CreateCommand();
                         updateCmd.CommandText = "UPDATE Usuarios SET Telefono = @Telefono WHERE Id = @Id";
                         updateCmd.Parameters.AddWithValue("@Telefono", PhoneTextBox.Text);
                         updateCmd.Parameters.AddWithValue("@Id", user.Id);
