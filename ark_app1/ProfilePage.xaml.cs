@@ -36,11 +36,13 @@ namespace ark_app1
                     {
                         conn.Open();
                         var updateCmd = conn.CreateCommand();
-                        updateCmd.CommandText = "UPDATE Usuarios SET Telefono = @Telefono WHERE Id = @Id";
+                        updateCmd.CommandText = "UPDATE Usuarios SET NombreCompleto = @NombreCompleto, Telefono = @Telefono WHERE Id = @Id";
+                        updateCmd.Parameters.AddWithValue("@NombreCompleto", FullNameTextBox.Text);
                         updateCmd.Parameters.AddWithValue("@Telefono", PhoneTextBox.Text);
                         updateCmd.Parameters.AddWithValue("@Id", user.Id);
                         updateCmd.ExecuteNonQuery();
                     }
+                    user.NombreCompleto = FullNameTextBox.Text;
                     user.Telefono = PhoneTextBox.Text;
 
                     ShowInfoBar("Éxito", "Sus cambios se han guardado exitosamente.", InfoBarSeverity.Success);

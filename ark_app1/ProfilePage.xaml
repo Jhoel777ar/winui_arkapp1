@@ -12,7 +12,7 @@
         <StackPanel x:Name="MainStackPanel" Spacing="10" Margin="20">
             <TextBlock Text="Mi Perfil" Style="{StaticResource HeaderTextBlockStyle}" Margin="0,0,0,10"/>
 
-            <TextBox Header="Nombre Completo" x:Name="FullNameTextBox" IsReadOnly="True"/>
+            <TextBox Header="Nombre Completo" x:Name="FullNameTextBox" IsReadOnly="False"/>
             <TextBox Header="Cédula de Identidad (CI)" x:Name="CiTextBox" IsReadOnly="True"/>
             <TextBox Header="Email" x:Name="EmailTextBox" IsReadOnly="True"/>
             <TextBox Header="Teléfono" x:Name="PhoneTextBox" IsReadOnly="False"/>
