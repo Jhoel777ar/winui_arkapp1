@@ -7,7 +7,46 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="Página de Términos y Condiciones" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{ThemeResource TitleTextBlockStyle}"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Términos y Condiciones" Style="{ThemeResource TitleTextBlockStyle}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="Bienvenido al sistema de ARK DEV." Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
+                
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <TextBlock Text="Este software es un proyecto desarrollado por ARK DEV. Puede encontrar más información sobre nosotros en " VerticalAlignment="Center"/>
+                    <HyperlinkButton Content="ark-dev.org" NavigateUri="http://ark-dev.org"/>
+                </StackPanel>
+
+                <TextBlock Text="Privacidad y Seguridad de los Datos" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,10,0,10"/>
+                <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
+                    Este sistema ha sido diseñado con la máxima prioridad en su privacidad y la seguridad de sus datos. Es importante que entienda los siguientes puntos clave:
+                </TextBlock>
+                <StackPanel Margin="20,0,0,0">
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                        <Run FontWeight="Bold">1. Sistema Local:</Run> Toda la aplicación se ejecuta de forma local en su propio ordenador. No se establece ninguna conexión remota a servidores externos para el funcionamiento principal de la aplicación.
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                        <Run FontWeight="Bold">2. Almacenamiento de Datos:</Run> Todos los datos que usted genere y utilice dentro de esta aplicación, incluyendo su información de usuario, contraseñas y cualquier otro registro, se almacenan exclusivamente en una base de datos local en su propio PC. Sus datos no se transmiten ni se guardan en la nube ni en ningún servidor remoto.
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
+                        <Run FontWeight="Bold">3. Seguridad:</Run> Nos comprometemos a seguir los estándares de seguridad de la industria para proteger la información almacenada en su equipo. Esto incluye prácticas de codificación segura y protección de datos sensibles como su contraseña.
+                    </TextBlock>
+                </StackPanel>
+                 <TextBlock Text="Uso del Software" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,10,0,10"/>
+                 <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
+                    Al utilizar este software, usted acepta ser el único responsable de la seguridad de su equipo y de la información almacenada en él. Le recomendamos mantener su sistema operativo y software antivirus actualizados.
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                    Gracias por confiar en ARK DEV.
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Page>
