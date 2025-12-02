@@ -107,7 +107,7 @@ namespace ark_app1
                     
                     var loginWindow = new LoginWindow();
                     loginWindow.Activate();
-                    this.Close();
+                    this.AppWindow.Hide(); // Hide the main window instead of closing it
 
                 }
                 catch (Exception ex)

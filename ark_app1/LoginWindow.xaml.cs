@@ -15,6 +15,12 @@ public sealed partial class LoginWindow : Window
 
         // Center the window on the screen.
         CenterWindow();
+        this.Closed += LoginWindow_Closed;
+    }
+
+    private void LoginWindow_Closed(object sender, WindowEventArgs args)
+    {
+        Application.Current.Exit();
     }
 
     private void CenterWindow()
