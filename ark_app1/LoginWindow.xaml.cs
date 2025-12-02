@@ -1,4 +1,4 @@
-﻿using BCrypt.Net;
+using BCrypt.Net;
 using Microsoft.Data.SqlClient;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
@@ -35,7 +35,6 @@ public sealed partial class LoginWindow : Window
         CenterWindow();
         EnsureCorrectDatabase();
         TrySetMicaBackdrop();
-        this.Closed += LoginWindow_Closed;
     }
 
     private void EnsureCorrectDatabase()
@@ -84,7 +83,11 @@ public sealed partial class LoginWindow : Window
                     if (BCrypt.Net.BCrypt.Verify(pass, hash))
                     {
                         DispatcherQueue.TryEnqueue(() =>
-                            ShowInfoBar("¡Bienvenido!", $"Hola, {nombre} 👋", InfoBarSeverity.Success));
+                        {
+                            var mainPage = new MainPage(nombre);
+                            mainPage.Activate();
+                            this.Close();
+                        });
                     }
                     else
                     {
@@ -207,7 +210,6 @@ public sealed partial class LoginWindow : Window
         TitleTextBlock.Text = "Iniciar Sesión";
         LoginInfoBar.IsOpen = false;
     }
-    private void LoginWindow_Closed(object sender, WindowEventArgs args) => Application.Current.Exit();
 
     bool TrySetMicaBackdrop()
     {
