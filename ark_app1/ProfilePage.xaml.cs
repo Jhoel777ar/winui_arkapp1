@@ -18,8 +18,18 @@ namespace ark_app1
             this.InitializeComponent();
             LoadUserProfile();
             UpdateBadge();
+            this.Unloaded += ProfilePage_Unloaded;
         }
 
+        private void ProfilePage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ClearBadge();
+        }
+        private void ClearBadge()
+        {
+            _badgeCount = 0;
+            BadgeUpdateManager.CreateBadgeUpdaterForApplication().Clear();
+        }
         private void LoadUserProfile()
         {
             var user = (Application.Current as App)?.CurrentUser;

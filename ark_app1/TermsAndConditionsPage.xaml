@@ -1,52 +1,67 @@
-<Page
-    x:Class="ark_app1.TermsAndConditionsPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ark_app1"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+<Page x:Class="ark_app1.TermsAndConditionsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d">
 
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="32,20">
+        <StackPanel MaxWidth="800" Spacing="28">
 
-        <TextBlock Text="Términos y Condiciones" Style="{ThemeResource TitleTextBlockStyle}" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock Text="Bienvenido al sistema de ARK DEV." Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
-                
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                    <TextBlock Text="Este software es un proyecto desarrollado por ARK DEV. Puede encontrar más información sobre nosotros en " VerticalAlignment="Center"/>
-                    <HyperlinkButton Content="ark-dev.org" NavigateUri="http://ark-dev.org"/>
-                </StackPanel>
-
-                <TextBlock Text="Privacidad y Seguridad de los Datos" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,10,0,10"/>
-                <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
-                    Este sistema ha sido diseñado con la máxima prioridad en su privacidad y la seguridad de sus datos. Es importante que entienda los siguientes puntos clave:
-                </TextBlock>
-                <StackPanel Margin="20,0,0,0">
-                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
-                        <Run FontWeight="Bold">1. Sistema Local:</Run> Toda la aplicación se ejecuta de forma local en su propio ordenador. No se establece ninguna conexión remota a servidores externos para el funcionamiento principal de la aplicación.
-                    </TextBlock>
-                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
-                        <Run FontWeight="Bold">2. Almacenamiento de Datos:</Run> Todos los datos que usted genere y utilice dentro de esta aplicación, incluyendo su información de usuario, contraseñas y cualquier otro registro, se almacenan exclusivamente en una base de datos local en su propio PC. Sus datos no se transmiten ni se guardan en la nube ni en ningún servidor remoto.
-                    </TextBlock>
-                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
-                        <Run FontWeight="Bold">3. Seguridad:</Run> Nos comprometemos a seguir los estándares de seguridad de la industria para proteger la información almacenada en su equipo. Esto incluye prácticas de codificación segura y protección de datos sensibles como su contraseña.
-                    </TextBlock>
-                </StackPanel>
-                 <TextBlock Text="Uso del Software" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="0,10,0,10"/>
-                 <TextBlock TextWrapping="Wrap" Margin="0,0,0,15">
-                    Al utilizar este software, usted acepta ser el único responsable de la seguridad de su equipo y de la información almacenada en él. Le recomendamos mantener su sistema operativo y software antivirus actualizados.
-                </TextBlock>
-                <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
-                    Gracias por confiar en ARK DEV.
-                </TextBlock>
+            <StackPanel HorizontalAlignment="Center" Spacing="20">
+                <Image Source="https://www.ark-dev.org/logos/arkdevsystem.png"
+                       Width="300" Height="200" Stretch="Uniform"/>
+                <TextBlock Text="Términos y Condiciones"
+                           Style="{ThemeResource TitleTextBlockStyle}"
+                           FontSize="34" HorizontalAlignment="Center"/>
             </StackPanel>
-        </ScrollViewer>
-    </Grid>
+
+            <TextBlock Text="ARK DEV SYSTEM – Sistema de Ventas e Inventario"
+                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                       FontSize="22" HorizontalAlignment="Center"/>
+
+            <TextBlock TextWrapping="WrapWholeWords" FontSize="16" LineHeight="26" TextAlignment="Center">
+                ARK DEV SYSTEM es un software gratuito de punto de venta e inventario diseñado para cualquier tipo de tienda. 
+                Desarrollado por <Hyperlink NavigateUri="https://ark-dev.org">ARK DEV</Hyperlink>, 
+                subempresa liderada por su CEO Joel Andrés.
+            </TextBlock>
+
+            <TextBlock Text="Privacidad y Seguridad de tus Datos"
+                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                       Margin="0,20,0,8"/>
+
+            <TextBlock TextWrapping="Wrap" FontSize="15" LineHeight="24">
+                Tu privacidad es nuestra máxima prioridad. El sistema funciona 100% local:
+            </TextBlock>
+
+            <StackPanel Margin="24,0,0,0" Spacing="14">
+                <TextBlock Text="• La aplicación se ejecuta completamente en tu computadora. No requiere conexión a internet."
+                           FontSize="15"/>
+                <TextBlock Text="• Todos los datos (clientes, productos, ventas, usuarios y contraseñas) se guardan exclusivamente en una base de datos local en tu PC."
+                           FontSize="15"/>
+                <TextBlock Text="• Ningún dato se sube a la nube ni se comparte con terceros. Tu información nunca abandona tu equipo."
+                           FontSize="15"/>
+                <TextBlock Text="• Las contraseñas están protegidas con cifrado BCrypt de estándar industrial."
+                           FontSize="15"/>
+            </StackPanel>
+
+            <TextBlock Text="Uso del Software"
+                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                       Margin="0,20,0,8"/>
+
+            <TextBlock TextWrapping="Wrap" FontSize="15" LineHeight="24">
+                Al utilizar ARK DEV SYSTEM aceptas ser el único responsable de la seguridad de tu equipo y de los datos almacenados en él. 
+                Recomendamos mantener Windows y tu antivirus siempre actualizados.
+            </TextBlock>
+
+            <TextBlock TextWrapping="Wrap" FontSize="16" LineHeight="28" Margin="0,40,0,0" HorizontalAlignment="Center">
+                <Run FontWeight="SemiBold">Gracias por confiar en ARK DEV SYSTEM.</Run>
+                <LineBreak/>
+                <Run FontStyle="Italic" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                    Software gratuito • 100% local • Sin rastreo • Desarrollado por Joel Andrés (CEO) con ❤️ para tu negocio
+                </Run>
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>
