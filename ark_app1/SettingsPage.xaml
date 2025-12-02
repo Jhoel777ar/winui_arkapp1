@@ -4,10 +4,36 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="Welcome to the Settings Page!" FontSize="48" />
-    </StackPanel>
+    <ScrollViewer>
+        <StackPanel Spacing="10" Padding="20">
+            <TextBlock Text="Apariencia" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,10"/>
+
+            <ComboBox x:Name="BackdropComboBox" Header="Tipo de Fondo de Ventana" SelectionChanged="BackdropComboBox_SelectionChanged">
+                <ComboBoxItem Content="Color de Ventana por Defecto" Tag="Default"/>
+                <ComboBoxItem Content="Mica" Tag="Mica"/>
+                <ComboBoxItem Content="Mica Alt" Tag="MicaAlt"/>
+                <ComboBoxItem Content="Acrílico (Fondo de Escritorio)" Tag="Acrylic"/>
+                <ComboBoxItem Content="Acrílico Fino (Fondo de Escritorio)" Tag="ThinAcrylic"/>
+            </ComboBox>
+
+            <TextBlock TextWrapping="WrapWholeWords" Margin="0,10,0,0">
+                <Run FontWeight="Bold">Mica:</Run> Es un material opaco y dinámico que incorpora el tema y el fondo de pantalla del escritorio para pintar el fondo de las ventanas. Está diseñado para el rendimiento, ya que solo toma una muestra del fondo de pantalla del escritorio una vez para crear su visualización.
+            </TextBlock>
+
+            <TextBlock TextWrapping="WrapWholeWords" Margin="0,10,0,0">
+                 <Run FontWeight="Bold">Mica Alt:</Run> Es una variante de Mica, con un tinte más fuerte del fondo de escritorio del usuario. Se recomienda al crear una aplicación con una barra de título con pestañas.
+            </TextBlock>
+
+            <TextBlock TextWrapping="WrapWholeWords" Margin="0,10,0,0">
+                <Run FontWeight="Bold">Acrílico:</Run> Es un material semitransparente que replica el efecto del vidrio esmerilado. Revela el fondo de pantalla del escritorio y otras ventanas que están detrás de la aplicación actualmente activa.
+            </TextBlock>
+            
+            <TextBlock TextWrapping="WrapWholeWords" Margin="0,10,0,0">
+                <Run FontWeight="Bold">Acrílico Fino:</Run> Una variante más transparente del acrílico, que permite ver más del contenido que hay detrás.
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>

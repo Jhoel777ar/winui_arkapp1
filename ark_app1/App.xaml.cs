@@ -10,7 +10,7 @@ namespace ark_app1
     /// </summary>
     public partial class App : Application
     {
-        private Window? _window;
+        public static Window Window { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -26,13 +26,11 @@ namespace ark_app1
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
-        {
-            // Ensure the default WinUI control resources are loaded.
-            // This is critical for secondary windows to find their styles.
+        {            
             this.Resources.MergedDictionaries.Add(new Microsoft.UI.Xaml.Controls.XamlControlsResources());
 
-            _window = new MainWindow();
-            _window.Activate();
+            Window = new MainWindow();
+            Window.Activate();
         }
     }
 }

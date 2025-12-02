@@ -4,10 +4,39 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="Welcome to the Profile Page!" FontSize="48" />
-    </StackPanel>
+    <ScrollViewer>
+        <StackPanel Spacing="15" Padding="30" MaxWidth="600">
+            <TextBlock Text="Mi Perfil" Style="{ThemeResource HeaderTextBlockStyle}" />
+
+            <!-- User Information -->
+            <StackPanel Spacing="10">
+                <TextBox Header="Nombre" x:Name="FirstNameTextBox" Text="" />
+                <TextBox Header="Apellidos" x:Name="LastNameTextBox" Text="" />
+                <TextBox Header="Correo Electrónico" x:Name="EmailTextBox" IsEnabled="False" Text="" />
+            </StackPanel>
+
+            <Button Content="Guardar Cambios" Click="SaveChanges_Click" HorizontalAlignment="Left"/>
+
+            <Rectangle Height="1" Fill="{ThemeResource CardStrokeColorDefaultBrush}" Margin="0,20"/>
+
+            <!-- Password Management -->
+            <TextBlock Text="Cambiar Contraseña" Style="{ThemeResource SubheaderTextBlockStyle}" />
+
+            <PasswordBox Header="Contraseña Actual" x:Name="CurrentPasswordBox" />
+            <PasswordBox Header="Nueva Contraseña" x:Name="NewPasswordBox" />
+            <PasswordBox Header="Confirmar Nueva Contraseña" x:Name="ConfirmNewPasswordBox" />
+
+            <Button Content="Actualizar Contraseña" Click="UpdatePassword_Click" HorizontalAlignment="Left"/>
+
+            <HyperlinkButton Click="ForgotPassword_Click" Margin="0,15,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <FontIcon Glyph="&#xE8D1;"/>
+                    <TextBlock Text="He olvidado mi contraseña"/>
+                </StackPanel>
+            </HyperlinkButton>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>
