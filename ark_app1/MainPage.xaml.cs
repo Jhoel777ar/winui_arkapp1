@@ -1,3 +1,4 @@
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -6,9 +7,18 @@ namespace ark_app1;
 
 public sealed partial class MainPage : Window
 {
+    public AppWindow AppWindow { get; private set; }
+
     public MainPage(string userFullName)
     {
         this.InitializeComponent();
+        
+        var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(windowHandle);
+        AppWindow = AppWindow.GetFromWindowId(windowId);
+
+        AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+
         UserPicture.DisplayName = userFullName;
         AppTitleBar.Subtitle = $"Bienvenido, {userFullName}";
         ContentFrame.Navigate(typeof(HomePage));
@@ -20,21 +30,29 @@ public sealed partial class MainPage : Window
         if (selectedItem != null)
         {
             string selectedItemTag = ((string)selectedItem.Tag);
-            NavView.Header = selectedItemTag;
-            string pageName = "ark_app1." + selectedItemTag + "Page";
-            Type pageType = Type.GetType(pageName);
-            ContentFrame.Navigate(pageType);
+
+            // Navigate only if a valid page exists
+            if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev")
+            {
+                NavView.Header = selectedItem.Content.ToString();
+                string pageName = "ark_app1." + selectedItemTag + "Page";
+                Type pageType = Type.GetType(pageName);
+                ContentFrame.Navigate(pageType);
+            }
         }
     }
 
     private void ProfileFlyoutItem_Click(object sender, RoutedEventArgs e)
     {
+        NavView.Header = "Mi Perfil";
         ContentFrame.Navigate(typeof(ProfilePage));
     }
 
     private void LogoutFlyoutItem_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Implement proper logout logic (e.g., return to login screen)
+        // You would typically navigate back to the login window and close this one.
+        var mainWindow = new MainWindow();
+        mainWindow.Activate();
         this.Close();
     }
 }

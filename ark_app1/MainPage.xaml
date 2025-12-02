@@ -39,8 +39,6 @@
                 <NavigationViewItem Content="Home" Icon="Home" Tag="Home" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                 <NavigationViewItem Content="Settings" Icon="Setting" Tag="Settings" />
-                 <NavigationViewItemSeparator/>
                  <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />
                  <NavigationViewItem Content="Acerca de ARK DEV" Icon="Help" Tag="AboutArkDev" />
             </NavigationView.FooterMenuItems>
