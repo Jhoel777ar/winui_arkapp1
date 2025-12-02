@@ -6,6 +6,11 @@ using Windows.Graphics;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using WinRT;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
+
 
 namespace ark_app1
 {
@@ -42,13 +47,19 @@ namespace ark_app1
             set => SetProperty(ref _infoBarSeverity, value);
         }
 
+        DesktopAcrylicController? acrylicController;
+        SystemBackdropConfiguration? configurationSource;
+
         public MainWindow()
         {
             this.InitializeComponent();
             AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
-            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;         
-            AppWindow.Resize(new SizeInt32(900, 800));
+            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+
+            AppWindow.Resize(new SizeInt32(700, 800));
+
             CenterWindow();
+            TrySetAcrylicBackdrop();
         }
 
         private void CenterWindow()
@@ -97,6 +108,7 @@ namespace ark_app1
                     InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
                     InfoBarSeverity = InfoBarSeverity.Success;
                     IsInfoBarOpen = true;
+
                 }
                 catch (Exception ex)
                 {
@@ -119,6 +131,66 @@ namespace ark_app1
             storage = value;
             OnPropertyChanged(propertyName);
             return true;
+        }
+
+        bool TrySetAcrylicBackdrop()
+        {
+            if (DesktopAcrylicController.IsSupported())
+            {
+                configurationSource = new SystemBackdropConfiguration();
+                this.Activated += Window_Activated;
+                this.Closed += Window_Closed;
+                ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
+                configurationSource.IsInputActive = true;
+                SetConfigurationSourceTheme();
+                acrylicController = new DesktopAcrylicController();
+                acrylicController.Kind = DesktopAcrylicKind.Base;
+                acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+                acrylicController.SetSystemBackdropConfiguration(configurationSource);
+                return true; 
+            }
+
+            return false;
+        }
+
+        private void Window_Activated(object sender, WindowActivatedEventArgs args)
+        {
+            if (configurationSource is not null)
+            {
+                configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+            }
+        }
+
+        private void Window_Closed(object sender, WindowEventArgs args)
+        {
+            if (acrylicController != null)
+            {
+                acrylicController.Dispose();
+                acrylicController = null;
+            }
+            this.Activated -= Window_Activated;
+            configurationSource = null;
+        }
+
+        private void Window_ThemeChanged(FrameworkElement sender, object args)
+        {
+            if (configurationSource != null)
+            {
+                SetConfigurationSourceTheme();
+            }
+        }
+
+        private void SetConfigurationSourceTheme()
+        {
+            if (configurationSource is not null)
+            {
+                switch (((FrameworkElement)this.Content).ActualTheme)
+                {
+                    case ElementTheme.Dark: configurationSource.Theme = SystemBackdropTheme.Dark; break;
+                    case ElementTheme.Light: configurationSource.Theme = SystemBackdropTheme.Light; break;
+                    case ElementTheme.Default: configurationSource.Theme = SystemBackdropTheme.Default; break;
+                }
+            }
         }
     }
 }

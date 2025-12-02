@@ -8,10 +8,6 @@
     mc:Ignorable="d"
     Title="SQL Server Login">
 
-    <Window.SystemBackdrop>
-        <MicaBackdrop />
-    </Window.SystemBackdrop>
-
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -24,23 +20,23 @@
                 VerticalAlignment="Center" 
                 Spacing="15" 
                 Width="500">
-                
+
                 <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
-                
+
                 <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
-                
+
                 <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
                     <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
                     <ComboBoxItem Content="SQL Server Authentication"/>
                 </ComboBox>
-                
+
                 <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="15">
                     <TextBox Header="Username" x:Name="UsernameTextBox" />
                     <PasswordBox Header="Password" x:Name="PasswordBox" />
                 </StackPanel>
-                
+
                 <Button Content="Conectar" x:Name="ConnectButton" Click="ConnectButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-                
+
                 <InfoBar 
                     IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
                     Title="{x:Bind InfoBarTitle, Mode=OneWay}"
@@ -59,7 +55,7 @@
             VerticalAlignment="Bottom" 
             Spacing="12" 
             Margin="0,20,0,0">
-            
+
             <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png" Width="32" Height="32" />
             <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
         </StackPanel>
