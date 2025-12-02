@@ -104,10 +104,10 @@ namespace ark_app1
                 {
                     await connection.OpenAsync();
                     DatabaseManager.ConnectionString = connectionString;
-                    InfoBarTitle = "Conexión exitosa";
-                    InfoBarMessage = "La conexión al servidor SQL se ha establecido correctamente.";
-                    InfoBarSeverity = InfoBarSeverity.Success;
-                    IsInfoBarOpen = true;
+                    
+                    var loginWindow = new LoginWindow();
+                    loginWindow.Activate();
+                    this.Close();
 
                 }
                 catch (Exception ex)

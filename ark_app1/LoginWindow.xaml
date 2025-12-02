@@ -1,0 +1,38 @@
+<Window
+    x:Class="ark_app1.LoginWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop/>
+    </Window.SystemBackdrop>
+
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15" MinWidth="300">
+        <TextBlock Text="Login" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
+
+        <InfoBar x:Name="LoginInfoBar" IsOpen="False" Margin="0,0,0,10"/>
+
+        <!-- Login Fields -->
+        <StackPanel x:Name="LoginStackPanel" Spacing="15">
+            <TextBox Header="Correo o CI" x:Name="LoginCredentialTextBox"/>
+            <PasswordBox Header="Password" x:Name="LoginPasswordBox"/>
+            <Button Content="Login" x:Name="LoginButton" Click="LoginButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
+            <Button Content="No tienes cuenta? Regístrate" x:Name="ShowRegisterButton" Click="ShowRegisterButton_Click" HorizontalAlignment="Center" Style="{ThemeResource HyperlinkButtonStyle}"/>
+        </StackPanel>
+
+        <!-- Registration Fields (Initially hidden) -->
+        <StackPanel x:Name="RegisterStackPanel" Visibility="Collapsed" Spacing="15">
+            <TextBox Header="Nombre Completo" x:Name="FullNameTextBox"/>
+            <TextBox Header="Teléfono" x:Name="PhoneTextBox"/>
+            <TextBox Header="CI" x:Name="CiTextBox"/>
+            <TextBox Header="Correo" x:Name="EmailTextBox"/>
+            <PasswordBox Header="Password" x:Name="RegisterPasswordBox"/>
+            <Button Content="Registrar" x:Name="RegisterButton" Click="RegisterButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
+            <Button Content="Ya tienes cuenta? Inicia Sesión" x:Name="ShowLoginButton" Click="ShowLoginButton_Click" HorizontalAlignment="Center" Style="{ThemeResource HyperlinkButtonStyle}"/>
+        </StackPanel>
+        
+    </StackPanel>
+</Window>
