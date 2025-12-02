@@ -1,5 +1,7 @@
 ﻿using BCrypt.Net;
 using Microsoft.Data.SqlClient;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,6 +9,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Graphics;
+using WinRT;
 
 namespace ark_app1;
 
@@ -14,6 +17,8 @@ public sealed partial class LoginWindow : Window
 {
     private readonly Regex _emailRegex = new(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$", RegexOptions.Compiled);
     private readonly Regex _numericRegex = new(@"^\d+$", RegexOptions.Compiled);
+    MicaController? micaController;
+    SystemBackdropConfiguration? configurationSource;
 
     public LoginWindow()
     {
@@ -29,6 +34,7 @@ public sealed partial class LoginWindow : Window
         AppWindow.Resize(new SizeInt32(750, 1004));
         CenterWindow();
         EnsureCorrectDatabase();
+        TrySetMicaBackdrop();
         this.Closed += LoginWindow_Closed;
     }
 
@@ -202,4 +208,61 @@ public sealed partial class LoginWindow : Window
         LoginInfoBar.IsOpen = false;
     }
     private void LoginWindow_Closed(object sender, WindowEventArgs args) => Application.Current.Exit();
+
+    bool TrySetMicaBackdrop()
+    {
+        if (MicaController.IsSupported())
+        {
+            configurationSource = new SystemBackdropConfiguration();
+            this.Activated += Window_Activated;
+            this.Closed += Window_Closed;
+            ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
+            configurationSource.IsInputActive = true;
+            SetConfigurationSourceTheme();
+            micaController = new MicaController();
+            micaController.Kind = MicaKind.BaseAlt;
+            micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+            micaController.SetSystemBackdropConfiguration(configurationSource);
+
+            return true;
+        }
+        return false;
+    }
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (configurationSource != null)
+            configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        micaController?.Dispose();
+        micaController = null;
+        configurationSource = null;
+        this.Activated -= Window_Activated;
+    }
+
+    private void Window_ThemeChanged(FrameworkElement sender, object args)
+    {
+        if (configurationSource != null)
+            SetConfigurationSourceTheme();
+    }
+
+    private void SetConfigurationSourceTheme()
+    {
+        if (configurationSource == null) return;
+
+        switch (((FrameworkElement)this.Content).ActualTheme)
+        {
+            case ElementTheme.Dark:
+                configurationSource.Theme = SystemBackdropTheme.Dark;
+                break;
+            case ElementTheme.Light:
+                configurationSource.Theme = SystemBackdropTheme.Light;
+                break;
+            case ElementTheme.Default:
+                configurationSource.Theme = SystemBackdropTheme.Default;
+                break;
+        }
+    }
 }

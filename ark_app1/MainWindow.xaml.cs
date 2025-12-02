@@ -19,6 +19,9 @@ namespace ark_app1
         private string _infoBarTitle = string.Empty;
         private string _infoBarMessage = string.Empty;
         private InfoBarSeverity _infoBarSeverity = InfoBarSeverity.Informational;
+        MicaController? micaController;
+        DesktopAcrylicController? acrylicController;
+        SystemBackdropConfiguration? configurationSource;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -46,9 +49,6 @@ namespace ark_app1
             set => SetProperty(ref _infoBarSeverity, value);
         }
 
-        DesktopAcrylicController? acrylicController;
-        SystemBackdropConfiguration? configurationSource;
-
         public MainWindow()
         {
             this.InitializeComponent();
@@ -56,7 +56,7 @@ namespace ark_app1
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
             AppWindow.Resize(new SizeInt32(900, 900));
             CenterWindow();
-            TrySetAcrylicBackdrop();
+            TrySetMicaBackdrop();
         }
 
         private void CenterWindow()
@@ -132,23 +132,25 @@ namespace ark_app1
             return true;
         }
 
-        bool TrySetAcrylicBackdrop()
+        bool TrySetMicaBackdrop(bool useBaseAlt = true)
         {
-            if (DesktopAcrylicController.IsSupported())
+            if (MicaController.IsSupported())
             {
                 configurationSource = new SystemBackdropConfiguration();
                 this.Activated += Window_Activated;
                 this.Closed += Window_Closed;
                 ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
+
                 configurationSource.IsInputActive = true;
                 SetConfigurationSourceTheme();
-                acrylicController = new DesktopAcrylicController();
-                acrylicController.Kind = DesktopAcrylicKind.Base;
-                acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
-                acrylicController.SetSystemBackdropConfiguration(configurationSource);
+
+                micaController = new MicaController();
+                micaController.Kind = useBaseAlt ? MicaKind.BaseAlt : MicaKind.Base;
+                micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+                micaController.SetSystemBackdropConfiguration(configurationSource);
+
                 return true;
             }
-
             return false;
         }
 
@@ -162,11 +164,8 @@ namespace ark_app1
 
         private void Window_Closed(object sender, WindowEventArgs args)
         {
-            if (acrylicController != null)
-            {
-                acrylicController.Dispose();
-                acrylicController = null;
-            }
+            micaController?.Dispose();
+            micaController = null;
             this.Activated -= Window_Activated;
             configurationSource = null;
         }
