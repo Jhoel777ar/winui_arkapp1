@@ -12,27 +12,49 @@
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15" MinWidth="300">
         <TextBlock Text="Login" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
-
         <InfoBar x:Name="LoginInfoBar" IsOpen="False" Margin="0,0,0,10"/>
 
-        <!-- Login Fields -->
+        <!-- Login Panel -->
         <StackPanel x:Name="LoginStackPanel" Spacing="15">
             <TextBox Header="Correo o CI" x:Name="LoginCredentialTextBox"/>
             <PasswordBox Header="Password" x:Name="LoginPasswordBox"/>
-            <Button Content="Login" x:Name="LoginButton" Click="LoginButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
-            <Button Content="No tienes cuenta? Regístrate" x:Name="ShowRegisterButton" Click="ShowRegisterButton_Click" HorizontalAlignment="Center" Style="{ThemeResource HyperlinkButtonStyle}"/>
+            <Button Content="Login" 
+                    x:Name="LoginButton" 
+                    Click="LoginButton_Click" 
+                    Style="{ThemeResource AccentButtonStyle}" 
+                    HorizontalAlignment="Stretch" 
+                    Margin="0,10,0,0"/>
+            <Button Content="No tienes cuenta? Regístrate"
+                    x:Name="ShowRegisterButton"
+                    Click="ShowRegisterButton_Click"
+                    HorizontalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Foreground="{ThemeResource SystemAccentColor}"/>
         </StackPanel>
 
-        <!-- Registration Fields (Initially hidden) -->
+        <!-- Register Panel -->
         <StackPanel x:Name="RegisterStackPanel" Visibility="Collapsed" Spacing="15">
             <TextBox Header="Nombre Completo" x:Name="FullNameTextBox"/>
             <TextBox Header="Teléfono" x:Name="PhoneTextBox"/>
             <TextBox Header="CI" x:Name="CiTextBox"/>
             <TextBox Header="Correo" x:Name="EmailTextBox"/>
             <PasswordBox Header="Password" x:Name="RegisterPasswordBox"/>
-            <Button Content="Registrar" x:Name="RegisterButton" Click="RegisterButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,10,0,0"/>
-            <Button Content="Ya tienes cuenta? Inicia Sesión" x:Name="ShowLoginButton" Click="ShowLoginButton_Click" HorizontalAlignment="Center" Style="{ThemeResource HyperlinkButtonStyle}"/>
+
+            <Button Content="Registrar" 
+                    x:Name="RegisterButton" 
+                    Click="RegisterButton_Click" 
+                    Style="{ThemeResource AccentButtonStyle}" 
+                    HorizontalAlignment="Stretch" 
+                    Margin="0,10,0,0"/>
+
+            <Button Content="Ya tienes cuenta? Inicia Sesión"
+                    x:Name="ShowLoginButton"
+                    Click="ShowLoginButton_Click"
+                    HorizontalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Foreground="{ThemeResource SystemAccentColor}"/>
         </StackPanel>
-        
     </StackPanel>
 </Window>

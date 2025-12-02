@@ -12,8 +12,8 @@ public sealed partial class LoginWindow : Window
         this.InitializeComponent();
         AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-
-        // Center the window on the screen.
+        CenterWindow();
+        AppWindow.Resize(new SizeInt32(700, 950));
         CenterWindow();
         this.Closed += LoginWindow_Closed;
     }
@@ -32,15 +32,11 @@ public sealed partial class LoginWindow : Window
 
     private void LoginButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Add your login logic here. 
-        // For now, we'll just show an informational message.
         ShowInfoBar("Login exitoso", "Bienvenido!", InfoBarSeverity.Success);
     }
 
     private void RegisterButton_Click(object sender, RoutedEventArgs e)
     {
-        // TODO: Add your registration logic here.
-        // For now, we'll just show an informational message.
         ShowInfoBar("Registro exitoso", "Ahora puedes iniciar sesion.", InfoBarSeverity.Success);
         ShowLogin();
     }
