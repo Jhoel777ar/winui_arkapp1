@@ -2,15 +2,22 @@ using Microsoft.Data.SqlClient;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
+using Windows.Data.Xml.Dom;
+using Windows.UI.Notifications;
 
 namespace ark_app1
 {
     public sealed partial class ProfilePage : Page
     {
+        private static uint _badgeCount = 0;
+
         public ProfilePage()
         {
             this.InitializeComponent();
             LoadUserProfile();
+            UpdateBadge();
         }
 
         private void LoadUserProfile()
@@ -59,6 +66,7 @@ namespace ark_app1
                 ShowInfoBar("Error", "Las contraseñas no coinciden.", InfoBarSeverity.Error);
                 return;
             }
+
             if (string.IsNullOrWhiteSpace(NewPasswordBox.Password))
             {
                 ShowInfoBar("Error", "La contraseña no puede estar vacía.", InfoBarSeverity.Error);
@@ -71,14 +79,44 @@ namespace ark_app1
             try
             {
                 DatabaseManager.UpdateUserPassword(user.Id, NewPasswordBox.Password);
+
                 NewPasswordBox.Password = string.Empty;
                 ConfirmNewPasswordBox.Password = string.Empty;
+
                 ShowInfoBar("Éxito", "Contraseña cambiada correctamente.", InfoBarSeverity.Success);
+
+                _badgeCount++;
+                UpdateBadge();
+                ShowPasswordChangeNotification();
             }
             catch (Exception ex)
             {
                 ShowInfoBar("Error", $"Error al cambiar contraseña: {ex.Message}", InfoBarSeverity.Error);
             }
+        }
+
+        private void UpdateBadge()
+        {
+            var badgeXml = BadgeUpdateManager.GetTemplateContent(BadgeTemplateType.BadgeNumber);
+            var badgeElement = badgeXml.SelectSingleNode("/badge") as XmlElement;
+            if (badgeElement != null)
+            {
+                badgeElement.SetAttribute("value", _badgeCount == 0 ? "" : _badgeCount.ToString());
+            }
+
+            var badgeNotification = new BadgeNotification(badgeXml);
+            BadgeUpdateManager.CreateBadgeUpdaterForApplication().Update(badgeNotification);
+        }
+
+        private void ShowPasswordChangeNotification()
+        {
+            var notification = new AppNotificationBuilder()
+                .AddText("Contraseña cambiada")
+                .AddText("Tu contraseña ha sido actualizada con éxito.")
+                .SetAppLogoOverride(new Uri("ms-appx:///Assets/Tiles/GalleryIcon.ico"), AppNotificationImageCrop.Circle)
+                .BuildNotification();
+
+            AppNotificationManager.Default.Show(notification);
         }
 
         private void ShowInfoBar(string title, string message, InfoBarSeverity severity)
