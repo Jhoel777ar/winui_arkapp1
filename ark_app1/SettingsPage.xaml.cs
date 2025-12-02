@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Xaml;
 using WinRT;
+using Microsoft.UI.Xaml.Media; // Agregado para corregir el error
 
 namespace ark_app1
 {
@@ -35,8 +36,7 @@ namespace ark_app1
                 {
                     window.SystemBackdrop = new DesktopAcrylicBackdrop();
                 }
-                // Note: ThinAcrylic is not a direct option in SystemBackdrop, it's managed by a controller.
-                // This is a simplified example. For full control, we would need to refactor the backdrop management.
+                // Note: ThinAcrylic is not a direct option in SystemBackdrop. A controller is needed for that.
             }
         }
     }
@@ -45,8 +45,6 @@ namespace ark_app1
     {
         public static Window GetActiveWindow()
         {
-            // This is a simplified way to get the main window.
-            // In a real app, you might want a more robust solution.
             return App.Window;
         }
     }
