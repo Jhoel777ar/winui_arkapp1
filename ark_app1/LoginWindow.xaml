@@ -6,19 +6,18 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <Window.SystemBackdrop>
         <MicaBackdrop/>
     </Window.SystemBackdrop>
 
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="15" MinWidth="300">
+        <StackPanel.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries>
+                    <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                </ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary>
+        </StackPanel.Resources>
         <TextBlock Text="Login" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
 
         <InfoBar x:Name="LoginInfoBar" IsOpen="False" Margin="0,0,0,10"/>
