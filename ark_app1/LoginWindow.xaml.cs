@@ -19,7 +19,14 @@ public sealed partial class LoginWindow : Window
     {
         this.InitializeComponent();
         AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
-        AppWindow.Resize(new SizeInt32(700, 950));
+        var presenter = AppWindow.Presenter as OverlappedPresenter;
+        if (presenter != null)
+        {
+            presenter.IsResizable = false;
+            presenter.IsMaximizable = false;
+        }
+        AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+        AppWindow.Resize(new SizeInt32(750, 1004));
         CenterWindow();
         EnsureCorrectDatabase();
         this.Closed += LoginWindow_Closed;
@@ -183,6 +190,7 @@ public sealed partial class LoginWindow : Window
     {
         LoginStackPanel.Visibility = Visibility.Collapsed;
         RegisterStackPanel.Visibility = Visibility.Visible;
+        TitleTextBlock.Text = "Crear Cuenta";
         LoginInfoBar.IsOpen = false;
     }
 
@@ -190,6 +198,7 @@ public sealed partial class LoginWindow : Window
     {
         RegisterStackPanel.Visibility = Visibility.Collapsed;
         LoginStackPanel.Visibility = Visibility.Visible;
+        TitleTextBlock.Text = "Iniciar Sesión";
         LoginInfoBar.IsOpen = false;
     }
     private void LoginWindow_Closed(object sender, WindowEventArgs args) => Application.Current.Exit();

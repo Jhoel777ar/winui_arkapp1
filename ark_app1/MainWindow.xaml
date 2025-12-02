@@ -8,56 +8,71 @@
     mc:Ignorable="d"
     Title="SQL Server Login">
 
-    <Grid Margin="20">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <StackPanel 
-                HorizontalAlignment="Center" 
-                VerticalAlignment="Center" 
-                Spacing="15" 
-                Width="500">
+        <ScrollViewer Grid.Row="0" 
+                      VerticalScrollBarVisibility="Auto" 
+                      HorizontalScrollBarVisibility="Disabled"
+                      Padding="20,20,20,10">
 
-                <TextBlock Text="Conectar al servidor" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
-
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="15"
+                        Width="500">
+                <TextBlock Text="Conectar al servidor" 
+                           Style="{ThemeResource TitleTextBlockStyle}" 
+                           TextAlignment="Center" 
+                           Margin="0,0,0,20"/>
                 <TextBox Header="Nombre del servidor" x:Name="ServerNameTextBox" />
-
-                <ComboBox Header="Autenticación" x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationComboBox_SelectionChanged">
+                <ComboBox Header="Autenticación" 
+                          x:Name="AuthenticationComboBox" 
+                          SelectionChanged="AuthenticationComboBox_SelectionChanged">
                     <ComboBoxItem Content="Windows Authentication" IsSelected="True"/>
                     <ComboBoxItem Content="SQL Server Authentication"/>
                 </ComboBox>
-
                 <StackPanel x:Name="SqlAuthenticationStackPanel" Visibility="Collapsed" Spacing="15">
                     <TextBox Header="Username" x:Name="UsernameTextBox" />
                     <PasswordBox Header="Password" x:Name="PasswordBox" />
                 </StackPanel>
-
-                <Button Content="Conectar" x:Name="ConnectButton" Click="ConnectButton_Click" Style="{ThemeResource AccentButtonStyle}" HorizontalAlignment="Stretch" Margin="0,20,0,0"/>
-
-                <InfoBar 
-                    IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
-                    Title="{x:Bind InfoBarTitle, Mode=OneWay}"
-                    Message="{x:Bind InfoBarMessage, Mode=OneWay}"
-                    Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
-                    IsClosable="True"
-                    IsIconVisible="True"
-                    Margin="0,20,0,0"/>
+                <Button Content="Conectar" 
+                        x:Name="ConnectButton" 
+                        Click="ConnectButton_Click" 
+                        Style="{ThemeResource AccentButtonStyle}" 
+                        HorizontalAlignment="Stretch" 
+                        Margin="0,20,0,0"/>
+                <InfoBar IsOpen="{x:Bind IsInfoBarOpen, Mode=OneWay}"
+                         Title="{x:Bind InfoBarTitle, Mode=OneWay}"
+                         Message="{x:Bind InfoBarMessage, Mode=OneWay}"
+                         Severity="{x:Bind InfoBarSeverity, Mode=OneWay}"
+                         IsClosable="True"
+                         IsIconVisible="True"
+                         Margin="0,20,0,0"/>
             </StackPanel>
         </ScrollViewer>
 
-        <StackPanel 
-            Grid.Row="1" 
-            Orientation="Horizontal" 
-            HorizontalAlignment="Center" 
-            VerticalAlignment="Bottom" 
-            Spacing="12" 
-            Margin="0,20,0,0">
+        <Border Grid.Row="1"
+                Background="{ThemeResource LayerFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,12">
 
-            <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png" Width="32" Height="32" />
-            <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA" VerticalAlignment="Center" Style="{ThemeResource CaptionTextBlockStyle}"/>
-        </StackPanel>
+            <HyperlinkButton NavigateUri="https://www.ark-dev.org/ark_dev_system"
+                             HorizontalAlignment="Center"
+                             Padding="0">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png"
+                           Width="36" Height="36"/>
+                    <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA"
+                               FontWeight="SemiBold"
+                               FontSize="13"
+                               VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                </StackPanel>
+            </HyperlinkButton>
+        </Border>
     </Grid>
 </Window>
