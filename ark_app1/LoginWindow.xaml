@@ -14,7 +14,6 @@
         <TextBlock Text="Login" Style="{ThemeResource TitleTextBlockStyle}" TextAlignment="Center" Margin="0,0,0,20"/>
         <InfoBar x:Name="LoginInfoBar" IsOpen="False" Margin="0,0,0,10"/>
 
-        <!-- Login Panel -->
         <StackPanel x:Name="LoginStackPanel" Spacing="15">
             <TextBox Header="Correo o CI" x:Name="LoginCredentialTextBox"/>
             <PasswordBox Header="Password" x:Name="LoginPasswordBox"/>
@@ -33,7 +32,6 @@
                     Foreground="{ThemeResource SystemAccentColor}"/>
         </StackPanel>
 
-        <!-- Register Panel -->
         <StackPanel x:Name="RegisterStackPanel" Visibility="Collapsed" Spacing="15">
             <TextBox Header="Nombre Completo" x:Name="FullNameTextBox"/>
             <TextBox Header="Teléfono" x:Name="PhoneTextBox"/>
