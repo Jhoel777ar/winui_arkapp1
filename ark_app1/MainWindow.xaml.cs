@@ -11,7 +11,6 @@ using WinRT;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 
-
 namespace ark_app1
 {
     public sealed partial class MainWindow : Window, INotifyPropertyChanged
@@ -55,9 +54,7 @@ namespace ark_app1
             this.InitializeComponent();
             AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-
             AppWindow.Resize(new SizeInt32(700, 800));
-
             CenterWindow();
             TrySetAcrylicBackdrop();
         }
@@ -104,11 +101,14 @@ namespace ark_app1
                 {
                     await connection.OpenAsync();
                     DatabaseManager.ConnectionString = connectionString;
-                    
+
+                    // *** NEW LOGIC BASED ON YOUR SUGGESTION ***
+                    // 1. Hide this window first.
+                    this.AppWindow.Hide();
+
+                    // 2. Then, create and activate the new window.
                     var loginWindow = new LoginWindow();
                     loginWindow.Activate();
-                    this.AppWindow.Hide(); // Hide the main window instead of closing it
-
                 }
                 catch (Exception ex)
                 {
@@ -116,6 +116,12 @@ namespace ark_app1
                     InfoBarMessage = $"No se pudo establecer la conexión con el servidor SQL. Error: {ex.Message}";
                     InfoBarSeverity = InfoBarSeverity.Error;
                     IsInfoBarOpen = true;
+
+                    // If connection fails, make sure the main window is visible again if it was hidden
+                    if (!this.AppWindow.IsVisible)
+                    {
+                        this.AppWindow.Show();
+                    }
                 }
             }
         }
@@ -147,7 +153,7 @@ namespace ark_app1
                 acrylicController.Kind = DesktopAcrylicKind.Base;
                 acrylicController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
                 acrylicController.SetSystemBackdropConfiguration(configurationSource);
-                return true; 
+                return true;
             }
 
             return false;
