@@ -34,13 +34,18 @@
             </TitleBar.RightHeader>
         </TitleBar>
 
-        <NavigationView Grid.Row="1" x:Name="NavView" PaneDisplayMode="Left" SelectionChanged="NavView_SelectionChanged" Header="Home">
+        <NavigationView Grid.Row="1" 
+                x:Name="NavView" 
+                PaneDisplayMode="Left" 
+                SelectionChanged="NavView_SelectionChanged" 
+                Header="Home"
+                IsSettingsVisible="False">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Home" Icon="Home" Tag="Home" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
-                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />
-                 <NavigationViewItem Content="Acerca de ARK DEV" Icon="Help" Tag="AboutArkDev" />
+                <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />
+                <NavigationViewItem Content="Acerca de ARK DEV" Icon="Help" Tag="AboutArkDev" />
             </NavigationView.FooterMenuItems>
             <Frame x:Name="ContentFrame" />
         </NavigationView>
