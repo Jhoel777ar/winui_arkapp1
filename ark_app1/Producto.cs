@@ -16,8 +16,6 @@ namespace ark_app1
         public string UnidadMedida { get; set; }
         public decimal StockMinimo { get; set; }
         public DateTime FechaRegistro { get; set; }
-
-        // Propiedad adicional para mostrar el nombre de la categoría en la UI
         public string CategoriaNombre { get; set; }
 
         public void CopyFrom(Producto other)
