@@ -1,205 +1,192 @@
-using Microsoft.Data.SqlClient;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.SqlClient;
+using System.Text.Json;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace ark_app1
 {
-    public class ItemCompra
+    public sealed partial class AddProductDialogContent : Window
     {
-        public int? ProductoId { get; set; }
-        public string Codigo { get; set; } = "";
-        public string Nombre { get; set; } = "";
-        public int? CategoriaId { get; set; }
-        public string Talla { get; set; } = "";
-        public string Color { get; set; } = "";
-        public decimal PrecioCompra { get; set; }
-        public decimal PrecioVenta { get; set; }
-        public decimal Cantidad { get; set; } = 1;
-        public string UnidadMedida { get; set; } = "Unidad";
-        public decimal StockMinimo { get; set; } = 5;
-        public string DisplayText => ProductoId.HasValue ? $"ID {ProductoId} - {Nombre} x{Cantidad} (P.Venta: {PrecioVenta})" : $"{Codigo} - {Nombre} x{Cantidad} (P.Venta: {PrecioVenta})";
-    }
-
-    public sealed partial class AddProductDialogContent : Page
-    {
-        public readonly ObservableCollection<ItemCompra> productos = new();
-        private bool isEditionMode = false;
+        private ObservableCollection<Producto> _productosEnCompra;
+        private bool _isEditMode = false;
+        private int? _compraIdToEdit = null;
 
         public AddProductDialogContent()
         {
             this.InitializeComponent();
-            ProductosItemsControl.ItemsSource = productos;
+            _productosEnCompra = new ObservableCollection<Producto>();
+            ProductosListView.ItemsSource = _productosEnCompra;
+            LoadCategorias();
         }
 
-        public void SetCategorias(object itemsSource)
+        public AddProductDialogContent(int compraId) : this()
         {
-            CategoriaComboBox.ItemsSource = itemsSource;
-            CategoriaComboBox.DisplayMemberPath = "Nombre";
-            CategoriaComboBox.SelectedValuePath = "Id";
+            _isEditMode = true;
+            _compraIdToEdit = compraId;
+            Title = "Editar Compra";
+            SaveCompraButton.Content = "Guardar Cambios";
+            // TODO: Load existing compra data
         }
 
-        public void SetProveedores(object itemsSource)
-        {
-            ProveedorComboBox.ItemsSource = itemsSource;
-            ProveedorComboBox.DisplayMemberPath = "Nombre";
-            ProveedorComboBox.SelectedValuePath = "Id";
-        }
-
-        public void ConfigureForCreation()
-        {
-            isEditionMode = false;
-            CodigoTextBox.Visibility = Visibility.Visible;
-            ClearForm();
-        }
-
-        public void ConfigureForEdition()
-        {
-            isEditionMode = true;
-            CodigoTextBox.Visibility = Visibility.Collapsed;
-            ClearForm();
-        }
-
-        public void ConfigureForProductEdition(Producto p)
-        {
-            isEditionMode = true;
-            ProveedorComboBox.Visibility = Visibility.Collapsed;
-            CantidadNumberBox.Visibility = Visibility.Collapsed;
-            ProductosItemsControl.Visibility = Visibility.Collapsed;
-            CodigoTextBox.Text = p.Codigo;
-            NombreTextBox.Text = p.Nombre;
-            CategoriaComboBox.SelectedValue = p.CategoriaId;
-            TallaTextBox.Text = p.Talla ?? "";
-            ColorTextBox.Text = p.Color ?? "";
-            PrecioCompraNumberBox.Value = (double)p.PrecioCompra;
-            PrecioVentaNumberBox.Value = (double)p.PrecioVenta;
-            UnidadMedidaTextBox.Text = p.UnidadMedida ?? "Unidad";
-            StockMinimoNumberBox.Value = (double)p.StockMinimo;
-        }
-
-        public async Task LoadCompraData(int compraId)
+        private async void LoadCategorias()
         {
             try
             {
-                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
-                await conn.OpenAsync();
-                var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT ProveedorId FROM Compras WHERE Id = @id";
-                cmd.Parameters.AddWithValue("@id", compraId);
-                var provId = await cmd.ExecuteScalarAsync() as int?;
-                ProveedorComboBox.SelectedValue = provId;
-
-                cmd.CommandText = @"SELECT p.Id AS ProductoId, p.Nombre, p.CategoriaId, p.Talla, p.Color, cd.PrecioUnitario AS PrecioCompra, p.PrecioVenta, cd.Cantidad, p.UnidadMedida, p.StockMinimo
-                                    FROM ComprasDetalle cd INNER JOIN Productos p ON cd.ProductoId = p.Id WHERE cd.CompraId = @id";
-                cmd.Parameters.Clear();
-                cmd.Parameters.AddWithValue("@id", compraId);
-                using var r = await cmd.ExecuteReaderAsync();
-                while (await r.ReadAsync())
-                {
-                    productos.Add(new ItemCompra
-                    {
-                        ProductoId = r.GetInt32(0),
-                        Nombre = r.GetString(1),
-                        CategoriaId = r.IsDBNull(2) ? null : r.GetInt32(2),
-                        Talla = r.IsDBNull(3) ? "" : r.GetString(3),
-                        Color = r.IsDBNull(4) ? "" : r.GetString(4),
-                        PrecioCompra = r.GetDecimal(5),
-                        PrecioVenta = r.GetDecimal(6),
-                        Cantidad = r.GetDecimal(7),
-                        UnidadMedida = r.GetString(8),
-                        StockMinimo = r.GetDecimal(9)
-                    });
-                }
+                var categorias = await DatabaseManager.Instance.GetCategoriasAsync();
+                CategoriaComboBox.ItemsSource = categorias;
+                CategoriaComboBox.DisplayMemberPath = "Nombre";
+                CategoriaComboBox.SelectedValuePath = "Id";
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                ShowMessage("Error", "No se pudieron cargar las categorías: " + ex.Message, InfoBarSeverity.Error);
+            }
         }
 
-        public void ClearForm()
+        private void AddProductToListButton_Click(object sender, RoutedEventArgs e)
         {
-            CodigoTextBox.Text = "";
-            NombreTextBox.Text = "";
+            if (!ValidateProductForm()) return;
+
+            var producto = new Producto
+            {
+                Codigo = CodigoTextBox.Text,
+                Nombre = NombreTextBox.Text,
+                CategoriaId = (int?)CategoriaComboBox.SelectedValue,
+                Talla = TallaTextBox.Text,
+                Color = ColorTextBox.Text,
+                PrecioCompra = (decimal)PrecioCompraNumberBox.Value,
+                PrecioVenta = (decimal)PrecioVentaNumberBox.Value,
+                Cantidad = (decimal)CantidadNumberBox.Value,
+                UnidadMedida = UnidadMedidaTextBox.Text,
+                StockMinimo = (decimal)StockMinimoNumberBox.Value
+            };
+
+            _productosEnCompra.Add(producto);
+            ClearProductForm();
+        }
+
+        private async void SaveCompraButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_productosEnCompra.Count == 0)
+            {
+                ShowMessage("Error", "Debe agregar al menos un producto a la compra.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            string jsonProductos = JsonSerializer.Serialize(_productosEnCompra.Select(p => new {
+                p.ProductoId, p.Codigo, p.Nombre, p.CategoriaId, p.Talla, p.Color,
+                p.PrecioCompra, p.PrecioVenta, p.Cantidad, p.UnidadMedida, p.StockMinimo
+            }));
+
+            try
+            {
+                using (var conn = await DatabaseManager.Instance.GetOpenConnectionAsync())
+                {
+                    var cmd = new SqlCommand(_isEditMode ? "sp_EditarCompra" : "sp_RegistrarCompra", conn);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+                    if (_isEditMode)
+                    {
+                        cmd.Parameters.AddWithValue("@CompraId", _compraIdToEdit.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@UsuarioId", 1); // Replace with actual user ID
+                        cmd.Parameters.AddWithValue("@ProveedorId", DBNull.Value); // Add supplier selection if needed
+                    }
+
+                    cmd.Parameters.AddWithValue("@Productos", jsonProductos);
+
+                    var resultadoParam = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit) { Direction = System.Data.ParameterDirection.Output };
+                    var mensajeParam = new SqlParameter("@Mensaje", System.Data.SqlDbType.NVarChar, 500) { Direction = System.Data.ParameterDirection.Output };
+                    cmd.Parameters.Add(resultadoParam);
+                    cmd.Parameters.Add(mensajeParam);
+
+                    if (!_isEditMode)
+                    {
+                        var compraIdParam = new SqlParameter("@CompraId", System.Data.SqlDbType.Int) { Direction = System.Data.ParameterDirection.Output };
+                        cmd.Parameters.Add(compraIdParam);
+                    }
+
+                    await cmd.ExecuteNonQueryAsync();
+
+                    bool success = (bool)resultadoParam.Value;
+                    string message = (string)mensajeParam.Value;
+
+                    if (success)
+                    {
+                        ShowMessage("Éxito", message, InfoBarSeverity.Success);
+                        await Task.Delay(2000);
+                        this.Close();
+                    }
+                    else
+                    {
+                        ShowMessage("Error al guardar", message, InfoBarSeverity.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error de Conexión", "No se pudo conectar a la base de datos: " + ex.Message, InfoBarSeverity.Error);
+            }
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private bool ValidateProductForm()
+        {
+            if (string.IsNullOrWhiteSpace(CodigoTextBox.Text))
+            {
+                ShowMessage("Campo Requerido", "El código del producto es obligatorio.", InfoBarSeverity.Warning);
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(NombreTextBox.Text))
+            {
+                ShowMessage("Campo Requerido", "El nombre del producto es obligatorio.", InfoBarSeverity.Warning);
+                return false;
+            }
+            if (PrecioVentaNumberBox.Value <= 0)
+            {
+                ShowMessage("Valor Inválido", "El precio de venta debe ser mayor que cero.", InfoBarSeverity.Warning);
+                return false;
+            }
+            if (CantidadNumberBox.Value <= 0)
+            {
+                ShowMessage("Valor Inválido", "La cantidad debe ser mayor que cero.", InfoBarSeverity.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private void ClearProductForm()
+        {
+            CodigoTextBox.Text = string.Empty;
+            NombreTextBox.Text = string.Empty;
             CategoriaComboBox.SelectedIndex = -1;
-            TallaTextBox.Text = "";
-            ColorTextBox.Text = "";
+            TallaTextBox.Text = string.Empty;
+            ColorTextBox.Text = string.Empty;
             PrecioCompraNumberBox.Value = 0;
             PrecioVentaNumberBox.Value = 0;
             CantidadNumberBox.Value = 1;
             UnidadMedidaTextBox.Text = "Unidad";
             StockMinimoNumberBox.Value = 5;
+            CodigoTextBox.Focus(FocusState.Programmatic);
         }
-
-        private void AddProduct_Click(object sender, RoutedEventArgs e)
+        
+        private void ShowMessage(string title, string message, InfoBarSeverity severity)
         {
-            if (string.IsNullOrWhiteSpace(isEditionMode ? "" : CodigoTextBox.Text) ||
-                string.IsNullOrWhiteSpace(NombreTextBox.Text) ||
-                PrecioVentaNumberBox.Value <= 0 ||
-                CantidadNumberBox.Value <= 0)
-                return;
-
-            productos.Add(new ItemCompra
-            {
-                ProductoId = isEditionMode ? (int?)0 : null,
-                Codigo = isEditionMode ? "" : CodigoTextBox.Text.Trim(),
-                Nombre = NombreTextBox.Text.Trim(),
-                CategoriaId = CategoriaComboBox.SelectedValue as int?,
-                Talla = TallaTextBox.Text.Trim(),
-                Color = ColorTextBox.Text.Trim(),
-                PrecioCompra = (decimal)PrecioCompraNumberBox.Value,
-                PrecioVenta = (decimal)PrecioVentaNumberBox.Value,
-                Cantidad = (decimal)CantidadNumberBox.Value,
-                UnidadMedida = UnidadMedidaTextBox.Text.Trim(),
-                StockMinimo = (decimal)StockMinimoNumberBox.Value
-            });
-
-            ClearForm();
-        }
-
-        private void RemoveProduct_Click(object sender, RoutedEventArgs e)
-        {
-            if ((sender as Button)?.Tag is ItemCompra item)
-                productos.Remove(item);
-        }
-
-        public (int? proveedorId, string json) GetCompraData()
-        {
-            var proveedorId = ProveedorComboBox.SelectedValue as int?;
-
-            var json = JsonConvert.SerializeObject(productos.Select(p => new
-            {
-                Codigo = p.Codigo,
-                p.Nombre,
-                p.CategoriaId,
-                Talla = p.Talla ?? (string)null,
-                Color = p.Color ?? (string)null,
-                p.PrecioCompra,
-                p.PrecioVenta,
-                p.Cantidad,
-                p.UnidadMedida,
-                p.StockMinimo
-            }));
-
-            return (proveedorId, json);
-        }
-
-        public Producto GetProductData()
-        {
-            return new Producto
-            {
-                Codigo = CodigoTextBox.Text,
-                Nombre = NombreTextBox.Text,
-                CategoriaId = CategoriaComboBox.SelectedValue as int?,
-                Talla = TallaTextBox.Text,
-                Color = ColorTextBox.Text,
-                PrecioCompra = (decimal)PrecioCompraNumberBox.Value,
-                PrecioVenta = (decimal)PrecioVentaNumberBox.Value,
-                UnidadMedida = UnidadMedidaTextBox.Text,
-                StockMinimo = (decimal)StockMinimoNumberBox.Value
-            };
+            NotificationBar.Title = title;
+            NotificationBar.Message = message;
+            NotificationBar.Severity = severity;
+            NotificationBar.IsOpen = true;
         }
     }
 }
