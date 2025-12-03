@@ -5,7 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    x:Name="InventoryPage">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -30,11 +31,21 @@
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
                 <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" />
-                <controls:DataGridComboBoxColumn Header="Categoría" 
-                                               Binding="{Binding CategoriaId, Mode=TwoWay}" 
-                                               ItemsSource="{Binding ElementName=InventoryPage, Path=Categorias}"
-                                               DisplayMemberPath="Item2"
-                                               SelectedValuePath="Item1" />
+                <controls:DataGridTemplateColumn Header="Categoría">
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding CategoriaNombre}" Margin="6,0,6,0" VerticalAlignment="Center" />
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                    <controls:DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <ComboBox ItemsSource="{Binding ElementName=InventoryPage, Path=Categorias}"
+                                      DisplayMemberPath="Item2"
+                                      SelectedValuePath="Item1"
+                                      SelectedValue="{Binding CategoriaId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellEditingTemplate>
+                </controls:DataGridTemplateColumn>
                 <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta, Mode=TwoWay}" />
                 <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock, Mode=TwoWay}" />
                 <controls:DataGridTemplateColumn Header="Acciones">
