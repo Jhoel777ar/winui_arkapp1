@@ -32,8 +32,8 @@
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
                 <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" />
                 <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
-                <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta, Converter={StaticResource DecimalToStringConverter}}" />
-                <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock, Converter={StaticResource DecimalToStringConverter}}" />
+                <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta}" />
+                <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}" />
                 <controls:DataGridTemplateColumn Header="Acciones">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
