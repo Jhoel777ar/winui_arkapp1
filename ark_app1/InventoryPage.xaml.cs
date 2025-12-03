@@ -34,10 +34,9 @@ namespace ark_app1
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = @"SELECT p.Id, p.Codigo, p.Nombre, p.CategoriaId, c.Nombre as CategoriaNombre, p.Talla, p.Color, 
+                cmd.CommandText = @"SELECT p.Id, p.Codigo, p.Nombre, p.CategoriaId, c.Nombre as CategoriaNombre, p.Talla, p.Color,
                                           p.PrecioCompra, p.PrecioVenta, p.Stock, p.UnidadMedida, p.StockMinimo, p.FechaRegistro
                                    FROM Productos p LEFT JOIN Categorias c ON p.CategoriaId = c.Id";
-
                 if (!string.IsNullOrWhiteSpace(filter))
                 {
                     cmd.CommandText += " WHERE p.Nombre LIKE @f OR p.Codigo LIKE @f";
@@ -102,30 +101,23 @@ namespace ark_app1
 
         private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
-            var addCompraWindow = new AddProductDialogContent();
-            addCompraWindow.CompraSaved += OnCompraSaved;
-            addCompraWindow.Activate();
+            var dialog = new AddCompraDialog();
+            dialog.Activate();
+            dialog.Closed += async (s, args) => await LoadCompras();
         }
 
         private void EditCompraButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button { Tag: Compra compra }) return;
 
-            var editCompraWindow = new AddProductDialogContent(compra.Id);
-            editCompraWindow.CompraSaved += OnCompraSaved;
-            editCompraWindow.Activate();
+            var dialog = new AddCompraDialog(compra.Id);
+            dialog.Activate();
+            dialog.Closed += async (s, args) => await LoadCompras();
         }
 
         private void EditProductButton_Click(object sender, RoutedEventArgs e)
         {
-            // Lógica para editar el producto aquí
-        }
-
-        private async void OnCompraSaved(object sender, EventArgs e)
-        {
-            if(sender is Window w) w.Close();
-            ShowInfoBar("Operación exitosa", "Los datos se han guardado.", InfoBarSeverity.Success);
-            await LoadInitialData();
+            // Implementar edición de producto si quieres
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
