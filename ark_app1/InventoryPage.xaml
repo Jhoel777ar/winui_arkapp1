@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
-    x:Name="InventoryPage">
+    x:Name="root">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -39,7 +39,7 @@
                     </controls:DataGridTemplateColumn.CellTemplate>
                     <controls:DataGridTemplateColumn.CellEditingTemplate>
                         <DataTemplate>
-                            <ComboBox ItemsSource="{Binding ElementName=InventoryPage, Path=Categorias}"
+                            <ComboBox ItemsSource="{Binding ElementName=root, Path=Categorias}"
                                       DisplayMemberPath="Item2"
                                       SelectedValuePath="Item1"
                                       SelectedValue="{Binding CategoriaId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
