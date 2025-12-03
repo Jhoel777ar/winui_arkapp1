@@ -42,6 +42,7 @@
                 IsSettingsVisible="False">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Home" Icon="Home" Tag="Home" />
+                <NavigationViewItem Content="Inventario" Icon="Shop" Tag="Inventory" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />

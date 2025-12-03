@@ -32,7 +32,7 @@ public sealed partial class MainPage : Window
             string selectedItemTag = ((string)selectedItem.Tag);
 
             // Navigate only if a valid page exists
-            if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev")
+            if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev" || selectedItemTag == "Inventory")
             {
                 NavView.Header = selectedItem.Content.ToString();
                 string pageName = "ark_app1." + selectedItemTag + "Page";
