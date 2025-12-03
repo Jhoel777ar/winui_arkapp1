@@ -136,4 +136,14 @@ namespace ark_app1
             InfoBar.IsOpen = true;
         }
     }
+
+    public class Compra
+    {
+        public int Id { get; set; }
+        public DateTime Fecha { get; set; }
+        public string Proveedor { get; set; }
+        public decimal Total { get; set; }
+        public string Usuario { get; set; }
+        public string Estado { get; set; }
+    }
 }
