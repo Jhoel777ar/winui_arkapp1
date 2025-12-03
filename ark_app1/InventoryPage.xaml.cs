@@ -31,11 +31,37 @@ namespace ark_app1
             _productos.Clear();
             try
             {
-                // Asumiendo una funciÃ³n que obtiene productos de la DB
-                var productList = await DatabaseManager.Instance.GetProductsAsync(filter);
-                foreach (var p in productList)
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = @"SELECT p.Id, p.Codigo, p.Nombre, p.CategoriaId, c.Nombre as CategoriaNombre, p.Talla, p.Color, 
+                                          p.PrecioCompra, p.PrecioVenta, p.Stock, p.UnidadMedida, p.StockMinimo, p.FechaRegistro
+                                   FROM Productos p LEFT JOIN Categorias c ON p.CategoriaId = c.Id";
+
+                if (!string.IsNullOrWhiteSpace(filter))
                 {
-                    _productos.Add(p);
+                    cmd.CommandText += " WHERE p.Nombre LIKE @f OR p.Codigo LIKE @f";
+                    cmd.Parameters.AddWithValue("@f", $"%{filter}%");
+                }
+                using var r = await cmd.ExecuteReaderAsync();
+                while (await r.ReadAsync())
+                {
+                    _productos.Add(new Producto
+                    {
+                        Id = r.GetInt32(0),
+                        Codigo = r.GetString(1),
+                        Nombre = r.GetString(2),
+                        CategoriaId = r.IsDBNull(3) ? null : r.GetInt32(3),
+                        CategoriaNombre = r.IsDBNull(4) ? "Sin Categoría" : r.GetString(4),
+                        Talla = r.IsDBNull(5) ? "" : r.GetString(5),
+                        Color = r.IsDBNull(6) ? "" : r.GetString(6),
+                        PrecioCompra = r.GetDecimal(7),
+                        PrecioVenta = r.GetDecimal(8),
+                        Stock = r.GetDecimal(9),
+                        UnidadMedida = r.GetString(10),
+                        StockMinimo = r.GetDecimal(11),
+                        FechaRegistro = r.GetDateTime(12)
+                    });
                 }
             }
             catch (Exception ex)
@@ -77,8 +103,8 @@ namespace ark_app1
         private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
             var addCompraWindow = new AddProductDialogContent();
-            addCompraWindow.CompraSaved += OnCompraSaved; 
-            addCompraWindow.Activate(); // Muestra la ventana
+            addCompraWindow.CompraSaved += OnCompraSaved;
+            addCompraWindow.Activate();
         }
 
         private void EditCompraButton_Click(object sender, RoutedEventArgs e)
@@ -87,21 +113,14 @@ namespace ark_app1
 
             var editCompraWindow = new AddProductDialogContent(compra.Id);
             editCompraWindow.CompraSaved += OnCompraSaved;
-            editCompraWindow.Activate(); // Muestra la ventana
+            editCompraWindow.Activate();
         }
 
         private async void OnCompraSaved(object sender, EventArgs e)
         {
-            if(sender is Window w) w.Close(); // Cierra la ventana de compra
-
-            ShowInfoBar("Operación exitosa", "Los datos se han guardado correctamente.", InfoBarSeverity.Success);
-            await LoadInitialData(); // Recarga los datos
-        }
-
-        private async void EditProductButton_Click(object sender, RoutedEventArgs e)
-        {
-            ShowInfoBar("Función no disponible", "La edición de un producto individual aún no está implementada con el nuevo diseño.", InfoBarSeverity.Informational);
-            await Task.CompletedTask;
+            if(sender is Window w) w.Close();
+            ShowInfoBar("Operación exitosa", "Los datos se han guardado.", InfoBarSeverity.Success);
+            await LoadInitialData();
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -116,5 +135,16 @@ namespace ark_app1
             InfoBar.Severity = severity;
             InfoBar.IsOpen = true;
         }
+    }
+
+    // CLASE RESTAURADA EN SU LUGAR ORIGINAL
+    public class Compra
+    {
+        public int Id { get; set; }
+        public DateTime Fecha { get; set; }
+        public string Proveedor { get; set; }
+        public decimal Total { get; set; }
+        public string Usuario { get; set; }
+        public string Estado { get; set; }
     }
 }
