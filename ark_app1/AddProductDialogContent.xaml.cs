@@ -22,7 +22,7 @@ namespace ark_app1
         public AddProductDialogContent()
         {
             this.InitializeComponent();
-            this.Title = "Registrar Nueva Compra";
+            this.AppWindow.Title = "Registrar Nueva Compra"; // CORRECCIÃ“N CLAVE AQUÃ
 
             ProductosListView.ItemsSource = _productosEnCompra;
             SaveCompraButton.Click += SaveCompraButton_Click;
@@ -36,7 +36,7 @@ namespace ark_app1
         {
             _isEditMode = true;
             _compraIdToEdit = compraId;
-            this.Title = $"Editar Compra ID: {compraId}";
+            this.AppWindow.Title = $"Editar Compra ID: {compraId}"; // CORRECCIÃ“N CLAVE AQUÃ
             TitleTextBlock.Text = $"Editar Compra ID: {compraId}";
             SaveCompraButton.Content = "Guardar Cambios";
             // AquÃ­ se deberÃ­an cargar los datos de la compra existente para la ediciÃ³n.
@@ -46,6 +46,7 @@ namespace ark_app1
         {
             try
             {
+                // Asumiendo que DatabaseManager tiene un mÃ©todo asÃ­ncrono para obtener categorÃ­as
                 var categorias = await DatabaseManager.Instance.GetCategoriasAsync();
                 CategoriaComboBox.ItemsSource = categorias;
                 CategoriaComboBox.DisplayMemberPath = "Nombre";
@@ -131,9 +132,7 @@ namespace ark_app1
                 if (success)
                 {
                     CompraSaved?.Invoke(this, EventArgs.Empty);
-                    ShowMessage("Éxito", message, InfoBarSeverity.Success);
-                    await Task.Delay(2000);
-                    this.Close();
+                    this.Close(); // Cerrar la ventana en caso de Ã©xito.
                 }
                 else
                 {

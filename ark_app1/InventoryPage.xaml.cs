@@ -31,6 +31,7 @@ namespace ark_app1
             _productos.Clear();
             try
             {
+                // Asumiendo una funciÃ³n que obtiene productos de la DB
                 var productList = await DatabaseManager.Instance.GetProductsAsync(filter);
                 foreach (var p in productList)
                 {
@@ -76,7 +77,7 @@ namespace ark_app1
         private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
             var addCompraWindow = new AddProductDialogContent();
-            addCompraWindow.CompraSaved += OnCompraSaved;
+            addCompraWindow.CompraSaved += OnCompraSaved; 
             addCompraWindow.Activate(); // Muestra la ventana
         }
 
@@ -91,7 +92,8 @@ namespace ark_app1
 
         private async void OnCompraSaved(object sender, EventArgs e)
         {
-            (sender as Window)?.Close(); // Cierra la ventana de compra
+            if(sender is Window w) w.Close(); // Cierra la ventana de compra
+
             ShowInfoBar("Operación exitosa", "Los datos se han guardado correctamente.", InfoBarSeverity.Success);
             await LoadInitialData(); // Recarga los datos
         }
