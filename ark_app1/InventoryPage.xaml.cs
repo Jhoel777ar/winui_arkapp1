@@ -123,7 +123,7 @@ namespace ark_app1
                 
                 cmd.Parameters.AddWithValue("@codigo", product.Codigo);
                 cmd.Parameters.AddWithValue("@nombre", product.Nombre);
-                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId.HasValue ? (object)product.CategoriaId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@talla", string.IsNullOrEmpty(product.Talla) ? DBNull.Value : product.Talla);
                 cmd.Parameters.AddWithValue("@color", string.IsNullOrEmpty(product.Color) ? DBNull.Value : product.Color);
                 cmd.Parameters.AddWithValue("@precioCompra", product.PrecioCompra);
@@ -160,7 +160,6 @@ namespace ark_app1
             }
             else if (e.EditAction == DataGridEditAction.Cancel)
             {
-                // Restaurar el producto original si se cancela la edición
                 var productInView = e.Row.DataContext as Producto;
                 productInView.CopyFrom(_originalProduct);
             }
@@ -177,7 +176,7 @@ namespace ark_app1
                 
                 cmd.Parameters.AddWithValue("@id", product.Id);
                 cmd.Parameters.AddWithValue("@nombre", product.Nombre);
-                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId.HasValue ? (object)product.CategoriaId.Value : DBNull.Value);
                 cmd.Parameters.AddWithValue("@precioVenta", product.PrecioVenta);
                 cmd.Parameters.AddWithValue("@stock", product.Stock);
 
@@ -222,8 +221,8 @@ namespace ark_app1
             InfoBar.Title = title;
             InfoBar.Message = message;
             InfoBar.Severity = severity;
-            Info.IsOpen = true;
-            Info.IsClosable = true;
+            InfoBar.IsOpen = true;
+            InfoBar.IsClosable = true;
         }
     }
 }

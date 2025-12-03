@@ -19,5 +19,22 @@ namespace ark_app1
 
         // Propiedad adicional para mostrar el nombre de la categoría en la UI
         public string CategoriaNombre { get; set; }
+
+        public void CopyFrom(Producto other)
+        {
+            this.Id = other.Id;
+            this.Codigo = other.Codigo;
+            this.Nombre = other.Nombre;
+            this.CategoriaId = other.CategoriaId;
+            this.Talla = other.Talla;
+            this.Color = other.Color;
+            this.PrecioCompra = other.PrecioCompra;
+            this.PrecioVenta = other.PrecioVenta;
+            this.Stock = other.Stock;
+            this.UnidadMedida = other.UnidadMedida;
+            this.StockMinimo = other.StockMinimo;
+            this.FechaRegistro = other.FechaRegistro;
+            this.CategoriaNombre = other.CategoriaNombre;
+        }
     }
 }
