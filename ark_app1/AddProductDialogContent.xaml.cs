@@ -19,39 +19,34 @@ namespace ark_app1
 
         public event EventHandler<EventArgs> CompraSaved;
 
-        // Constructor para Nueva Compra
         public AddProductDialogContent()
         {
             this.InitializeComponent();
+            this.Title = "Registrar Nueva Compra";
+
             ProductosListView.ItemsSource = _productosEnCompra;
             SaveCompraButton.Click += SaveCompraButton_Click;
+            CancelButton.Click += CancelButton_Click;
+            AddProductToListButton.Click += AddProductToListButton_Click;
+            
             LoadCategorias();
         }
 
-        // Constructor para Editar Compra
         public AddProductDialogContent(int compraId) : this()
         {
             _isEditMode = true;
             _compraIdToEdit = compraId;
+            this.Title = $"Editar Compra ID: {compraId}";
             TitleTextBlock.Text = $"Editar Compra ID: {compraId}";
             SaveCompraButton.Content = "Guardar Cambios";
-            // AquÃ­ deberÃ­as cargar los datos de la compra existente
+            // AquÃ­ se deberÃ­an cargar los datos de la compra existente para la ediciÃ³n.
         }
 
         private async void LoadCategorias()
         {
             try
             {
-                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
-                await conn.OpenAsync();
-                using var cmd = new SqlCommand("SELECT Id, Nombre FROM Categorias ORDER BY Nombre", conn);
-                using var reader = await cmd.ExecuteReaderAsync();
-
-                var categorias = new List<object>();
-                while (await reader.ReadAsync())
-                {
-                    categorias.Add(new { Id = reader.GetInt32(0), Nombre = reader.GetString(1) });
-                }
+                var categorias = await DatabaseManager.Instance.GetCategoriasAsync();
                 CategoriaComboBox.ItemsSource = categorias;
                 CategoriaComboBox.DisplayMemberPath = "Nombre";
                 CategoriaComboBox.SelectedValuePath = "Id";
@@ -92,19 +87,9 @@ namespace ark_app1
                 return;
             }
 
-            // Mapeo correcto: La clase Producto tiene 'Id', pero el SP espera 'ProductoId'
             var productosParaJson = _productosEnCompra.Select(p => new {
-                ProductoId = p.Id, // Mapeo de Id a ProductoId
-                p.Codigo,
-                p.Nombre,
-                p.CategoriaId,
-                p.Talla,
-                p.Color,
-                p.PrecioCompra,
-                p.PrecioVenta,
-                p.Cantidad,
-                p.UnidadMedida,
-                p.StockMinimo
+                ProductoId = p.Id, p.Codigo, p.Nombre, p.CategoriaId, p.Talla, p.Color,
+                p.PrecioCompra, p.PrecioVenta, p.Cantidad, p.UnidadMedida, p.StockMinimo
             });
             string jsonProductos = JsonSerializer.Serialize(productosParaJson);
 
@@ -122,7 +107,7 @@ namespace ark_app1
                 {
                     var userId = (Application.Current as App)?.CurrentUser?.Id ?? 0;
                     cmd.Parameters.AddWithValue("@UsuarioId", userId);
-                    cmd.Parameters.AddWithValue("@ProveedorId", DBNull.Value); // Implementar selecciÃ³n de proveedor si es necesario
+                    cmd.Parameters.AddWithValue("@ProveedorId", DBNull.Value);
                 }
 
                 cmd.Parameters.AddWithValue("@Productos", jsonProductos);
@@ -145,10 +130,9 @@ namespace ark_app1
 
                 if (success)
                 {
-                    // Lanzar el evento para notificar a la pÃ¡gina de inventario que debe recargar
                     CompraSaved?.Invoke(this, EventArgs.Empty);
                     ShowMessage("Éxito", message, InfoBarSeverity.Success);
-                    await Task.Delay(2000); // Dar tiempo al usuario para leer el mensaje
+                    await Task.Delay(2000);
                     this.Close();
                 }
                 else
@@ -158,7 +142,7 @@ namespace ark_app1
             }
             catch (Exception ex)
             {
-                ShowMessage("Error de Conexión", "No se pudo conectar a la base de datos: " + ex.Message, InfoBarSeverity.Error);
+                ShowMessage("Error de Conexión", "No se pudo conectar: " + ex.Message, InfoBarSeverity.Error);
             }
         }
 
@@ -169,26 +153,10 @@ namespace ark_app1
 
         private bool ValidateProductForm()
         {
-            if (string.IsNullOrWhiteSpace(CodigoTextBox.Text))
-            {
-                ShowMessage("Campo Requerido", "El código del producto es obligatorio.", InfoBarSeverity.Warning);
-                return false;
-            }
-            if (string.IsNullOrWhiteSpace(NombreTextBox.Text))
-            {
-                ShowMessage("Campo Requerido", "El nombre del producto es obligatorio.", InfoBarSeverity.Warning);
-                return false;
-            }
-            if (PrecioVentaNumberBox.Value <= 0)
-            {
-                ShowMessage("Valor Inválido", "El precio de venta debe ser mayor que cero.", InfoBarSeverity.Warning);
-                return false;
-            }
-            if (CantidadNumberBox.Value <= 0)
-            {
-                ShowMessage("Valor Inválido", "La cantidad debe ser mayor que cero.", InfoBarSeverity.Warning);
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(CodigoTextBox.Text)) { ShowMessage("Campo Requerido", "El código del producto es obligatorio.", InfoBarSeverity.Warning); return false; }
+            if (string.IsNullOrWhiteSpace(NombreTextBox.Text)) { ShowMessage("Campo Requerido", "El nombre del producto es obligatorio.", InfoBarSeverity.Warning); return false; }
+            if (PrecioVentaNumberBox.Value <= 0) { ShowMessage("Valor Inválido", "El precio de venta debe ser mayor que cero.", InfoBarSeverity.Warning); return false; }
+            if (CantidadNumberBox.Value <= 0) { ShowMessage("Valor Inválido", "La cantidad debe ser mayor que cero.", InfoBarSeverity.Warning); return false; }
             return true;
         }
 
