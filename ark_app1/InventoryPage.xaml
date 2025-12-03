@@ -22,36 +22,23 @@
             </AppBarElementContainer>
         </CommandBar>
 
-        <controls:DataGrid x:Name="ProductsDataGrid" Grid.Row="1" Margin="10" AutoGenerateColumns="False"
+        <controls:DataGrid x:Name="ProductsDataGrid" 
+                           Grid.Row="1" Margin="10" 
+                           AutoGenerateColumns="False"
                            CanUserSortColumns="True"
                            CanUserResizeColumns="True"
-                           IsReadOnly="False"
-                           BeginningEdit="ProductsDataGrid_BeginningEdit"
-                           CellEditEnding="ProductsDataGrid_CellEditEnding">
+                           IsReadOnly="True">
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
+                <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
                 <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" />
-                <controls:DataGridTemplateColumn Header="Categoría">
-                    <controls:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding CategoriaNombre}" Margin="6,0,6,0" VerticalAlignment="Center" />
-                        </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellTemplate>
-                    <controls:DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox ItemsSource="{Binding ElementName=root, Path=Categorias}"
-                                      DisplayMemberPath="Item2"
-                                      SelectedValuePath="Item1"
-                                      SelectedValue="{Binding CategoriaId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellEditingTemplate>
-                </controls:DataGridTemplateColumn>
-                <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta, Mode=TwoWay}" />
-                <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock, Mode=TwoWay}" />
+                <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
+                <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta, Converter={StaticResource DecimalToStringConverter}}" />
+                <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock, Converter={StaticResource DecimalToStringConverter}}" />
                 <controls:DataGridTemplateColumn Header="Acciones">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
+                                <Button Content="Editar" Click="EditButton_Click" Tag="{Binding}" Margin="5,0,5,0"/>
                                 <Button Content="Eliminar" Click="DeleteButton_Click" Tag="{Binding Id}" Margin="5,0,0,0"/>
                             </StackPanel>
                         </DataTemplate>

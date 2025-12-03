@@ -6,16 +6,37 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="10" MinWidth="300" Margin="10">
-        <TextBox x:Name="CodigoTextBox" Header="Código"/>
-        <TextBox x:Name="NombreTextBox" Header="Nombre"/>
-        <ComboBox x:Name="CategoriaComboBox" Header="Categoría"/>
-        <TextBox x:Name="TallaTextBox" Header="Talla"/>
-        <TextBox x:Name="ColorTextBox" Header="Color"/>
-        <NumberBox x:Name="PrecioCompraNumberBox" Header="Precio de Compra" SpinButtonPlacementMode="Compact"/>
-        <NumberBox x:Name="PrecioVentaNumberBox" Header="Precio de Venta" SpinButtonPlacementMode="Compact"/>
-        <NumberBox x:Name="StockNumberBox" Header="Stock" SpinButtonPlacementMode="Compact"/>
-        <TextBox x:Name="UnidadMedidaTextBox" Header="Unidad de Medida"/>
-        <NumberBox x:Name="StockMinimoNumberBox" Header="Stock Mínimo" SpinButtonPlacementMode="Compact"/>
-    </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" MinWidth="600">
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBox x:Name="CodigoTextBox" Header="Código" Grid.Row="0" Grid.Column="0" Margin="0,0,0,10"/>
+            <TextBox x:Name="NombreTextBox" Header="Nombre" Grid.Row="0" Grid.Column="2" Margin="0,0,0,10"/>
+
+            <ComboBox x:Name="CategoriaComboBox" Header="Categoría" Grid.Row="1" Grid.Column="0" Margin="0,0,0,10"/>
+            <TextBox x:Name="TallaTextBox" Header="Talla" Grid.Row="1" Grid.Column="2" Margin="0,0,0,10"/>
+
+            <TextBox x:Name="ColorTextBox" Header="Color" Grid.Row="2" Grid.Column="0" Margin="0,0,0,10"/>
+            <TextBox x:Name="UnidadMedidaTextBox" Header="Unidad de Medida" Grid.Row="2" Grid.Column="2" Margin="0,0,0,10"/>
+
+            <NumberBox x:Name="PrecioCompraNumberBox" Header="Precio de Compra" SpinButtonPlacementMode="Compact" Grid.Row="3" Grid.Column="0" Margin="0,0,0,10"/>
+            <NumberBox x:Name="PrecioVentaNumberBox" Header="Precio de Venta" SpinButtonPlacementMode="Compact" Grid.Row="3" Grid.Column="2" Margin="0,0,0,10"/>
+
+            <NumberBox x:Name="StockNumberBox" Header="Stock" SpinButtonPlacementMode="Compact" Grid.Row="4" Grid.Column="0" Margin="0,0,0,10"/>
+            <NumberBox x:Name="StockMinimoNumberBox" Header="Stock Mínimo" SpinButtonPlacementMode="Compact" Grid.Row="4" Grid.Column="2" Margin="0,0,0,10"/>
+            
+        </Grid>
+    </ScrollViewer>
 </Page>
