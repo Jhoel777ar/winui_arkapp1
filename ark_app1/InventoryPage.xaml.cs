@@ -12,7 +12,8 @@ namespace ark_app1
     public sealed partial class InventoryPage : Page
     {
         private readonly ObservableCollection<Producto> _productos = new ObservableCollection<Producto>();
-        private Producto _editingProduct;
+        public List<Tuple<int, string>> Categorias { get; set; }
+        private Producto _originalProduct;
 
         public InventoryPage()
         {
@@ -24,6 +25,7 @@ namespace ark_app1
 
         private void LoadCategorias()
         {
+            Categorias = new List<Tuple<int, string>>();
             try
             {
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
@@ -31,14 +33,10 @@ namespace ark_app1
                 var cmd = conn.CreateCommand();
                 cmd.CommandText = "SELECT Id, Nombre FROM Categorias";
                 using var reader = cmd.ExecuteReader();
-                var categorias = new List<Tuple<int, string>>();
                 while (reader.Read())
                 {
-                    categorias.Add(new Tuple<int, string>(reader.GetInt32(0), reader.GetString(1)));
+                    Categorias.Add(new Tuple<int, string>(reader.GetInt32(0), reader.GetString(1)));
                 }
-                CategoriaComboBox.ItemsSource = categorias;
-                CategoriaComboBox.DisplayMemberPath = "Item2";
-                CategoriaComboBox.SelectedValuePath = "Item1";
             }
             catch (Exception ex)
             {
@@ -91,48 +89,51 @@ namespace ark_app1
             }
         }
 
-        private void AddProductButton_Click(object sender, RoutedEventArgs e)
+        private async void AddProductButton_Click(object sender, RoutedEventArgs e)
         {
-            _editingProduct = null;
-            ClearForm();
-            (sender as Button).Flyout.ShowAt(sender as Button);
+            var content = new AddProductDialogContent();
+            content.SetCategorias(Categorias);
+
+            var dialog = new ContentDialog();
+            dialog.XamlRoot = this.XamlRoot;
+            dialog.Style = Application.Current.Resources["DefaultContentDialogStyle"] as Style;
+            dialog.Title = "Agregar Nuevo Producto";
+            dialog.PrimaryButtonText = "Guardar";
+            dialog.CloseButtonText = "Cancelar";
+            dialog.DefaultButton = ContentDialogButton.Primary;
+            dialog.Content = content;
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                var newProduct = content.GetProduct();
+                SaveNewProduct(newProduct);
+            }
         }
 
-        private void SaveProduct_Click(object sender, RoutedEventArgs e)
+        private void SaveNewProduct(Producto product)
         {
             try
             {
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 conn.Open();
                 var cmd = conn.CreateCommand();
-
-                bool isNewProduct = _editingProduct == null;
-
-                if (isNewProduct)
-                {
-                    cmd.CommandText = "INSERT INTO Productos (Codigo, Nombre, CategoriaId, Talla, Color, PrecioCompra, PrecioVenta, Stock, UnidadMedida, StockMinimo) VALUES (@codigo, @nombre, @categoriaId, @talla, @color, @precioCompra, @precioVenta, @stock, @unidadMedida, @stockMinimo)";
-                }
-                else
-                {
-                    cmd.CommandText = "UPDATE Productos SET Codigo = @codigo, Nombre = @nombre, CategoriaId = @categoriaId, Talla = @talla, Color = @color, PrecioCompra = @precioCompra, PrecioVenta = @precioVenta, Stock = @stock, UnidadMedida = @unidadMedida, StockMinimo = @stockMinimo WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", _editingProduct.Id);
-                }
-
-                cmd.Parameters.AddWithValue("@codigo", CodigoTextBox.Text);
-                cmd.Parameters.AddWithValue("@nombre", NombreTextBox.Text);
-                cmd.Parameters.AddWithValue("@categoriaId", CategoriaComboBox.SelectedValue ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@talla", string.IsNullOrEmpty(TallaTextBox.Text) ? DBNull.Value : TallaTextBox.Text);
-                cmd.Parameters.AddWithValue("@color", string.IsNullOrEmpty(ColorTextBox.Text) ? DBNull.Value : ColorTextBox.Text);
-                cmd.Parameters.AddWithValue("@precioCompra", PrecioCompraNumberBox.Value);
-                cmd.Parameters.AddWithValue("@precioVenta", PrecioVentaNumberBox.Value);
-                cmd.Parameters.AddWithValue("@stock", StockNumberBox.Value);
-                cmd.Parameters.AddWithValue("@unidadMedida", UnidadMedidaTextBox.Text);
-                cmd.Parameters.AddWithValue("@stockMinimo", StockMinimoNumberBox.Value);
+                cmd.CommandText = "INSERT INTO Productos (Codigo, Nombre, CategoriaId, Talla, Color, PrecioCompra, PrecioVenta, Stock, UnidadMedida, StockMinimo) VALUES (@codigo, @nombre, @categoriaId, @talla, @color, @precioCompra, @precioVenta, @stock, @unidadMedida, @stockMinimo)";
+                
+                cmd.Parameters.AddWithValue("@codigo", product.Codigo);
+                cmd.Parameters.AddWithValue("@nombre", product.Nombre);
+                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@talla", string.IsNullOrEmpty(product.Talla) ? DBNull.Value : product.Talla);
+                cmd.Parameters.AddWithValue("@color", string.IsNullOrEmpty(product.Color) ? DBNull.Value : product.Color);
+                cmd.Parameters.AddWithValue("@precioCompra", product.PrecioCompra);
+                cmd.Parameters.AddWithValue("@precioVenta", product.PrecioVenta);
+                cmd.Parameters.AddWithValue("@stock", product.Stock);
+                cmd.Parameters.AddWithValue("@unidadMedida", product.UnidadMedida);
+                cmd.Parameters.AddWithValue("@stockMinimo", product.StockMinimo);
 
                 cmd.ExecuteNonQuery();
                 LoadProductos(SearchTextBox.Text);
-                ClearForm();
-                AddProductButton.Flyout.Hide();
                 ShowInfoBar("Éxito", "Producto guardado correctamente.", InfoBarSeverity.Success);
 
             }
@@ -142,28 +143,54 @@ namespace ark_app1
             }
         }
 
-        private void EditButton_Click(object sender, RoutedEventArgs e)
+        private void ProductsDataGrid_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            var button = sender as Button;
-            var productId = (int)button.Tag;
-            _editingProduct = _productos.FirstOrDefault(p => p.Id == productId);
-            if (_editingProduct != null)
+            _originalProduct = e.Row.DataContext as Producto;
+        }
+
+        private void ProductsDataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Commit)
             {
-                CodigoTextBox.Text = _editingProduct.Codigo;
-                NombreTextBox.Text = _editingProduct.Nombre;
-                CategoriaComboBox.SelectedValue = _editingProduct.CategoriaId;
-                TallaTextBox.Text = _editingProduct.Talla;
-                ColorTextBox.Text = _editingProduct.Color;
-                PrecioCompraNumberBox.Value = (double)_editingProduct.PrecioCompra;
-                PrecioVentaNumberBox.Value = (double)_editingProduct.PrecioVenta;
-                StockNumberBox.Value = (double)_editingProduct.Stock;
-                UnidadMedidaTextBox.Text = _editingProduct.UnidadMedida;
-                StockMinimoNumberBox.Value = (double)_editingProduct.StockMinimo;
-                
-                AddProductButton.Flyout.ShowAt(AddProductButton);
+                var editedProduct = e.Row.DataContext as Producto;
+                if (!editedProduct.Equals(_originalProduct))
+                {
+                    UpdateProduct(editedProduct);
+                }
+            }
+            else if (e.EditAction == DataGridEditAction.Cancel)
+            {
+                // Restaurar el producto original si se cancela la edición
+                var productInView = e.Row.DataContext as Producto;
+                productInView.CopyFrom(_originalProduct);
             }
         }
 
+        private void UpdateProduct(Producto product)
+        {
+            try
+            {
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                conn.Open();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = "UPDATE Productos SET Nombre = @nombre, CategoriaId = @categoriaId, PrecioVenta = @precioVenta, Stock = @stock WHERE Id = @id";
+                
+                cmd.Parameters.AddWithValue("@id", product.Id);
+                cmd.Parameters.AddWithValue("@nombre", product.Nombre);
+                cmd.Parameters.AddWithValue("@categoriaId", product.CategoriaId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@precioVenta", product.PrecioVenta);
+                cmd.Parameters.AddWithValue("@stock", product.Stock);
+
+                cmd.ExecuteNonQuery();
+                ShowInfoBar("Éxito", "Producto actualizado correctamente.", InfoBarSeverity.Success);
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("Error", $"Error al actualizar producto: {ex.Message}", InfoBarSeverity.Error);
+                 LoadProductos(SearchTextBox.Text); // Recargar para deshacer cambios fallidos
+            }
+        }
+        
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -190,29 +217,13 @@ namespace ark_app1
             LoadProductos(SearchTextBox.Text);
         }
 
-        private void ClearForm()
-        {
-            CodigoTextBox.Text = string.Empty;
-            NombreTextBox.Text = string.Empty;
-            CategoriaComboBox.SelectedIndex = -1;
-            TallaTextBox.Text = string.Empty;
-            ColorTextBox.Text = string.Empty;
-            PrecioCompraNumberBox.Value = 0;
-            PrecioVentaNumberBox.Value = 0;
-            StockNumberBox.Value = 0;
-            UnidadMedidaTextBox.Text = "Unidad";
-            StockMinimoNumberBox.Value = 5;
-            ProductsDataGrid.SelectedItem = null;
-            _editingProduct = null;
-        }
-
         private void ShowInfoBar(string title, string message, InfoBarSeverity severity)
         {
             InfoBar.Title = title;
             InfoBar.Message = message;
             InfoBar.Severity = severity;
-            InfoBar.IsOpen = true;
-            InfoBar.IsClosable = true;
+            Info.IsOpen = true;
+            Info.IsClosable = true;
         }
     }
 }
