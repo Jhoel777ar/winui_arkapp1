@@ -116,6 +116,11 @@ namespace ark_app1
             editCompraWindow.Activate();
         }
 
+        private void EditProductButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Lógica para editar el producto aquí
+        }
+
         private async void OnCompraSaved(object sender, EventArgs e)
         {
             if(sender is Window w) w.Close();
