@@ -18,6 +18,10 @@ namespace ark_app1
         public DateTime FechaRegistro { get; set; }
         public string CategoriaNombre { get; set; }
 
+        // Propiedades para la ventana de compras
+        public decimal Cantidad { get; set; }
+        public decimal Subtotal => Cantidad * PrecioCompra;
+
         public void CopyFrom(Producto other)
         {
             this.Id = other.Id;

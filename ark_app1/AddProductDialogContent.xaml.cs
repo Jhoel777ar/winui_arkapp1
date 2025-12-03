@@ -1,50 +1,64 @@
-
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Collections.ObjectModel;
-using System.Data.SqlClient;
+using System.Data;
+using Microsoft.Data.SqlClient;
 using System.Text.Json;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ark_app1
 {
     public sealed partial class AddProductDialogContent : Window
     {
-        private ObservableCollection<Producto> _productosEnCompra;
+        private readonly ObservableCollection<Producto> _productosEnCompra = new();
         private bool _isEditMode = false;
         private int? _compraIdToEdit = null;
 
+        public event EventHandler<EventArgs> CompraSaved;
+
+        // Constructor para Nueva Compra
         public AddProductDialogContent()
         {
             this.InitializeComponent();
-            _productosEnCompra = new ObservableCollection<Producto>();
             ProductosListView.ItemsSource = _productosEnCompra;
+            SaveCompraButton.Click += SaveCompraButton_Click;
             LoadCategorias();
         }
 
+        // Constructor para Editar Compra
         public AddProductDialogContent(int compraId) : this()
         {
             _isEditMode = true;
             _compraIdToEdit = compraId;
-            Title = "Editar Compra";
+            TitleTextBlock.Text = $"Editar Compra ID: {compraId}";
             SaveCompraButton.Content = "Guardar Cambios";
-            // TODO: Load existing compra data
+            // AquÃ­ deberÃ­as cargar los datos de la compra existente
         }
 
         private async void LoadCategorias()
         {
             try
             {
-                var categorias = await DatabaseManager.Instance.GetCategoriasAsync();
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                using var cmd = new SqlCommand("SELECT Id, Nombre FROM Categorias ORDER BY Nombre", conn);
+                using var reader = await cmd.ExecuteReaderAsync();
+
+                var categorias = new List<object>();
+                while (await reader.ReadAsync())
+                {
+                    categorias.Add(new { Id = reader.GetInt32(0), Nombre = reader.GetString(1) });
+                }
                 CategoriaComboBox.ItemsSource = categorias;
                 CategoriaComboBox.DisplayMemberPath = "Nombre";
                 CategoriaComboBox.SelectedValuePath = "Id";
             }
             catch (Exception ex)
             {
-                ShowMessage("Error", "No se pudieron cargar las categorías: " + ex.Message, InfoBarSeverity.Error);
+                ShowMessage("Error al cargar categorías", ex.Message, InfoBarSeverity.Error);
             }
         }
 
@@ -74,60 +88,72 @@ namespace ark_app1
         {
             if (_productosEnCompra.Count == 0)
             {
-                ShowMessage("Error", "Debe agregar al menos un producto a la compra.", InfoBarSeverity.Warning);
+                ShowMessage("Validación", "Debe agregar al menos un producto a la compra.", InfoBarSeverity.Warning);
                 return;
             }
 
-            string jsonProductos = JsonSerializer.Serialize(_productosEnCompra.Select(p => new {
-                p.ProductoId, p.Codigo, p.Nombre, p.CategoriaId, p.Talla, p.Color,
-                p.PrecioCompra, p.PrecioVenta, p.Cantidad, p.UnidadMedida, p.StockMinimo
-            }));
+            // Mapeo correcto: La clase Producto tiene 'Id', pero el SP espera 'ProductoId'
+            var productosParaJson = _productosEnCompra.Select(p => new {
+                ProductoId = p.Id, // Mapeo de Id a ProductoId
+                p.Codigo,
+                p.Nombre,
+                p.CategoriaId,
+                p.Talla,
+                p.Color,
+                p.PrecioCompra,
+                p.PrecioVenta,
+                p.Cantidad,
+                p.UnidadMedida,
+                p.StockMinimo
+            });
+            string jsonProductos = JsonSerializer.Serialize(productosParaJson);
 
             try
             {
-                using (var conn = await DatabaseManager.Instance.GetOpenConnectionAsync())
+                using var conn = await DatabaseManager.Instance.GetOpenConnectionAsync();
+                var cmd = new SqlCommand(_isEditMode ? "sp_EditarCompra" : "sp_RegistrarCompra", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                if (_isEditMode)
                 {
-                    var cmd = new SqlCommand(_isEditMode ? "sp_EditarCompra" : "sp_RegistrarCompra", conn);
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@CompraId", _compraIdToEdit.Value);
+                }
+                else
+                {
+                    var userId = (Application.Current as App)?.CurrentUser?.Id ?? 0;
+                    cmd.Parameters.AddWithValue("@UsuarioId", userId);
+                    cmd.Parameters.AddWithValue("@ProveedorId", DBNull.Value); // Implementar selecciÃ³n de proveedor si es necesario
+                }
 
-                    if (_isEditMode)
-                    {
-                        cmd.Parameters.AddWithValue("@CompraId", _compraIdToEdit.Value);
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("@UsuarioId", 1); // Replace with actual user ID
-                        cmd.Parameters.AddWithValue("@ProveedorId", DBNull.Value); // Add supplier selection if needed
-                    }
+                cmd.Parameters.AddWithValue("@Productos", jsonProductos);
 
-                    cmd.Parameters.AddWithValue("@Productos", jsonProductos);
+                var resultadoParam = new SqlParameter("@Resultado", SqlDbType.Bit) { Direction = ParameterDirection.Output };
+                var mensajeParam = new SqlParameter("@Mensaje", SqlDbType.NVarChar, 500) { Direction = ParameterDirection.Output };
+                cmd.Parameters.Add(resultadoParam);
+                cmd.Parameters.Add(mensajeParam);
 
-                    var resultadoParam = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit) { Direction = System.Data.ParameterDirection.Output };
-                    var mensajeParam = new SqlParameter("@Mensaje", System.Data.SqlDbType.NVarChar, 500) { Direction = System.Data.ParameterDirection.Output };
-                    cmd.Parameters.Add(resultadoParam);
-                    cmd.Parameters.Add(mensajeParam);
+                if (!_isEditMode)
+                {
+                    var compraIdParam = new SqlParameter("@CompraId", SqlDbType.Int) { Direction = ParameterDirection.Output };
+                    cmd.Parameters.Add(compraIdParam);
+                }
 
-                    if (!_isEditMode)
-                    {
-                        var compraIdParam = new SqlParameter("@CompraId", System.Data.SqlDbType.Int) { Direction = System.Data.ParameterDirection.Output };
-                        cmd.Parameters.Add(compraIdParam);
-                    }
+                await cmd.ExecuteNonQueryAsync();
 
-                    await cmd.ExecuteNonQueryAsync();
+                bool success = (bool)resultadoParam.Value;
+                string message = (string)mensajeParam.Value;
 
-                    bool success = (bool)resultadoParam.Value;
-                    string message = (string)mensajeParam.Value;
-
-                    if (success)
-                    {
-                        ShowMessage("Éxito", message, InfoBarSeverity.Success);
-                        await Task.Delay(2000);
-                        this.Close();
-                    }
-                    else
-                    {
-                        ShowMessage("Error al guardar", message, InfoBarSeverity.Error);
-                    }
+                if (success)
+                {
+                    // Lanzar el evento para notificar a la pÃ¡gina de inventario que debe recargar
+                    CompraSaved?.Invoke(this, EventArgs.Empty);
+                    ShowMessage("Éxito", message, InfoBarSeverity.Success);
+                    await Task.Delay(2000); // Dar tiempo al usuario para leer el mensaje
+                    this.Close();
+                }
+                else
+                {
+                    ShowMessage("Error al guardar", message, InfoBarSeverity.Error);
                 }
             }
             catch (Exception ex)
@@ -180,7 +206,7 @@ namespace ark_app1
             StockMinimoNumberBox.Value = 5;
             CodigoTextBox.Focus(FocusState.Programmatic);
         }
-        
+
         private void ShowMessage(string title, string message, InfoBarSeverity severity)
         {
             NotificationBar.Title = title;
