@@ -1,3 +1,4 @@
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.Data.SqlClient;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -10,14 +11,15 @@ namespace ark_app1
 {
     public sealed partial class InventoryPage : Page
     {
-        private ObservableCollection<Producto> _productos = new ObservableCollection<Producto>();
+        private readonly ObservableCollection<Producto> _productos = new ObservableCollection<Producto>();
+        private Producto _editingProduct;
 
         public InventoryPage()
         {
             this.InitializeComponent();
             LoadCategorias();
             LoadProductos();
-            ProductsListView.ItemsSource = _productos;
+            ProductsDataGrid.ItemsSource = _productos;
         }
 
         private void LoadCategorias()
@@ -89,6 +91,13 @@ namespace ark_app1
             }
         }
 
+        private void AddProductButton_Click(object sender, RoutedEventArgs e)
+        {
+            _editingProduct = null;
+            ClearForm();
+            (sender as Button).Flyout.ShowAt(sender as Button);
+        }
+
         private void SaveProduct_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -96,9 +105,8 @@ namespace ark_app1
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 conn.Open();
                 var cmd = conn.CreateCommand();
-                
-                // Asumiendo que un producto nuevo no tiene Id o su Id es 0
-                bool isNewProduct = ProductsListView.SelectedItem == null || ((Producto)ProductsListView.SelectedItem).Id == 0;
+
+                bool isNewProduct = _editingProduct == null;
 
                 if (isNewProduct)
                 {
@@ -107,7 +115,7 @@ namespace ark_app1
                 else
                 {
                     cmd.CommandText = "UPDATE Productos SET Codigo = @codigo, Nombre = @nombre, CategoriaId = @categoriaId, Talla = @talla, Color = @color, PrecioCompra = @precioCompra, PrecioVenta = @precioVenta, Stock = @stock, UnidadMedida = @unidadMedida, StockMinimo = @stockMinimo WHERE Id = @id";
-                    cmd.Parameters.AddWithValue("@id", ((Producto)ProductsListView.SelectedItem).Id);
+                    cmd.Parameters.AddWithValue("@id", _editingProduct.Id);
                 }
 
                 cmd.Parameters.AddWithValue("@codigo", CodigoTextBox.Text);
@@ -122,8 +130,9 @@ namespace ark_app1
                 cmd.Parameters.AddWithValue("@stockMinimo", StockMinimoNumberBox.Value);
 
                 cmd.ExecuteNonQuery();
-                LoadProductos();
+                LoadProductos(SearchTextBox.Text);
                 ClearForm();
+                AddProductButton.Flyout.Hide();
                 ShowInfoBar("Éxito", "Producto guardado correctamente.", InfoBarSeverity.Success);
 
             }
@@ -137,20 +146,21 @@ namespace ark_app1
         {
             var button = sender as Button;
             var productId = (int)button.Tag;
-            var producto = _productos.FirstOrDefault(p => p.Id == productId);
-            if (producto != null)
+            _editingProduct = _productos.FirstOrDefault(p => p.Id == productId);
+            if (_editingProduct != null)
             {
-                CodigoTextBox.Text = producto.Codigo;
-                NombreTextBox.Text = producto.Nombre;
-                CategoriaComboBox.SelectedValue = producto.CategoriaId;
-                TallaTextBox.Text = producto.Talla;
-                ColorTextBox.Text = producto.Color;
-                PrecioCompraNumberBox.Value = (double)producto.PrecioCompra;
-                PrecioVentaNumberBox.Value = (double)producto.PrecioVenta;
-                StockNumberBox.Value = (double)producto.Stock;
-                UnidadMedidaTextBox.Text = producto.UnidadMedida;
-                StockMinimoNumberBox.Value = (double)producto.StockMinimo;
-                ProductsListView.SelectedItem = producto;
+                CodigoTextBox.Text = _editingProduct.Codigo;
+                NombreTextBox.Text = _editingProduct.Nombre;
+                CategoriaComboBox.SelectedValue = _editingProduct.CategoriaId;
+                TallaTextBox.Text = _editingProduct.Talla;
+                ColorTextBox.Text = _editingProduct.Color;
+                PrecioCompraNumberBox.Value = (double)_editingProduct.PrecioCompra;
+                PrecioVentaNumberBox.Value = (double)_editingProduct.PrecioVenta;
+                StockNumberBox.Value = (double)_editingProduct.Stock;
+                UnidadMedidaTextBox.Text = _editingProduct.UnidadMedida;
+                StockMinimoNumberBox.Value = (double)_editingProduct.StockMinimo;
+                
+                AddProductButton.Flyout.ShowAt(AddProductButton);
             }
         }
 
@@ -166,7 +176,7 @@ namespace ark_app1
                 cmd.CommandText = "DELETE FROM Productos WHERE Id = @id";
                 cmd.Parameters.AddWithValue("@id", productId);
                 cmd.ExecuteNonQuery();
-                LoadProductos();
+                LoadProductos(SearchTextBox.Text);
                 ShowInfoBar("Éxito", "Producto eliminado correctamente.", InfoBarSeverity.Success);
             }
             catch (Exception ex)
@@ -192,15 +202,17 @@ namespace ark_app1
             StockNumberBox.Value = 0;
             UnidadMedidaTextBox.Text = "Unidad";
             StockMinimoNumberBox.Value = 5;
-            ProductsListView.SelectedItem = null;
+            ProductsDataGrid.SelectedItem = null;
+            _editingProduct = null;
         }
 
         private void ShowInfoBar(string title, string message, InfoBarSeverity severity)
-        { 
+        {
             InfoBar.Title = title;
             InfoBar.Message = message;
             InfoBar.Severity = severity;
             InfoBar.IsOpen = true;
+            InfoBar.IsClosable = true;
         }
     }
 }
