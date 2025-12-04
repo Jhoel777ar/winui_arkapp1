@@ -151,7 +151,7 @@ namespace ark_app1
         private void CalculateTotal()
         {
             decimal total = _cart.Sum(x => x.Subtotal);
-            TotalText.Text = $"${total:N2}";
+            TotalText.Text = $"Bs. {total:N2}";
             CalculateChange();
         }
 
@@ -174,12 +174,12 @@ namespace ark_app1
 
                 if (efectivo >= total && total > 0)
                 {
-                    CambioText.Text = $"Cambio: ${(efectivo - total):N2}";
+                    CambioText.Text = $"Cambio: Bs. {(efectivo - total):N2}";
                     CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
                 }
                 else
                 {
-                    CambioText.Text = "Cambio: $0.00";
+                    CambioText.Text = "Cambio: Bs. 0.00";
                     CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray);
                 }
             }

@@ -32,6 +32,7 @@ namespace ark_app1
             if (_compraIdToEdit.HasValue)
             {
                 this.Title = "Editar Compra";
+                HeaderTextBlock.Text = "Editar Compra";
                 _ = InitializeEditAsync();
             }
             else
@@ -183,7 +184,7 @@ namespace ark_app1
         private void UpdateTotal()
         {
             decimal total = _productosCompra.Sum(p => p.Subtotal);
-            TotalTextBlock.Text = $"Total: {total:C2}";
+            TotalTextBlock.Text = $"Total: Bs. {total:N2}";
         }
 
         private async void SaveButton_Click(object sender, RoutedEventArgs e)
