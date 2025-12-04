@@ -5,8 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Ajuste de Inventario"
-    Width="500" Height="450">
+    Title="Ajuste de Inventario">
 
     <StackPanel Padding="24" Spacing="16">
         <TextBlock Text="Registrar Ajuste de Stock" Style="{StaticResource TitleTextBlockStyle}"/>
