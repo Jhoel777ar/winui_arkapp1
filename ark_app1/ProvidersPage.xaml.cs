@@ -175,7 +175,7 @@ namespace ark_app1
                         ShowInfo("Eliminado", "Proveedor eliminado.", InfoBarSeverity.Success);
                         await LoadProviders();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                          ShowInfo("Error", "No se puede eliminar (probablemente tiene compras asociadas).", InfoBarSeverity.Error);
                     }

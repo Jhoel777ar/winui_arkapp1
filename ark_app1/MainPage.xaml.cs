@@ -27,14 +27,14 @@ public sealed partial class MainPage : Window
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         var selectedItem = (NavigationViewItem)args.SelectedItem;
-        if (selectedItem != null)
+        if (selectedItem != null && selectedItem.Tag != null)
         {
-            string selectedItemTag = ((string)selectedItem.Tag);
+            string selectedItemTag = selectedItem.Tag.ToString()!;
 
             // Navigate only if a valid page exists
             if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev" || selectedItemTag == "Inventory" || selectedItemTag == "Sales" || selectedItemTag == "Providers" || selectedItemTag == "Clients")
             {
-                NavView.Header = selectedItem.Content.ToString();
+                NavView.Header = selectedItem.Content?.ToString() ?? string.Empty;
                 string pageName = "ark_app1." + selectedItemTag + "Page";
                 Type pageType = Type.GetType(pageName);
                 ContentFrame.Navigate(pageType);

@@ -50,6 +50,8 @@ namespace ark_app1
         {
             try
             {
+                if (_compraIdToEdit == null) return;
+
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
 
@@ -259,7 +261,7 @@ namespace ark_app1
         private void ShowInfoBar(string title, string message, InfoBarSeverity severity)
         {
             ResultInfoBar.Title = title;
-            ResultInfoBar.Message = message;
+            ResultInfoBar.Message = message ?? string.Empty;
             ResultInfoBar.Severity = severity;
             ResultInfoBar.IsOpen = true;
         }
@@ -268,8 +270,8 @@ namespace ark_app1
     public class ProductoCompra
     {
         public int? ProductoId { get; set; } // Needed for edits
-        public string Codigo { get; set; }
-        public string Nombre { get; set; }
+        public required string Codigo { get; set; }
+        public required string Nombre { get; set; }
         public int? CategoriaId { get; set; }
         public string Talla { get; set; }
         public string Color { get; set; }

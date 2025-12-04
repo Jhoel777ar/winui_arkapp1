@@ -6,8 +6,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="10" Width="400">
-        <TextBox x:Name="CodigoTextBox" Header="Código" PlaceholderText="Ej: PROD001"/>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="10" Width="400" Padding="0,0,12,0">
+            <TextBox x:Name="CodigoTextBox" Header="Código" PlaceholderText="Ej: PROD001"/>
         <TextBox x:Name="NombreTextBox" Header="Nombre" PlaceholderText="Ej: Coca Cola 3L"/>
 
         <ComboBox x:Name="CategoriaComboBox" Header="Categoría" DisplayMemberPath="Nombre" SelectedValuePath="Id" HorizontalAlignment="Stretch"/>
@@ -42,5 +43,6 @@
         <NumberBox x:Name="StockMinimoBox" Header="Stock Mínimo" Minimum="0" Value="5" SpinButtonPlacementMode="Compact"/>
 
         <TextBlock x:Name="ErrorTextBlock" Foreground="Red" TextWrapping="Wrap" Visibility="Collapsed"/>
-    </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
 </Page>

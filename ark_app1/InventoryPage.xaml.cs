@@ -99,18 +99,32 @@ namespace ark_app1
             }
         }
 
+        private bool _isDialogOpen = false;
+
         private void RegistrarCompraButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_isDialogOpen) return;
+            _isDialogOpen = true;
             var dialog = new AddCompraDialog();
             dialog.Activate();
-            dialog.Closed += async (s, args) => await LoadInitialData();
+            dialog.Closed += async (s, args) =>
+            {
+                _isDialogOpen = false;
+                await LoadInitialData();
+            };
         }
 
         private void AjusteButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_isDialogOpen) return;
+            _isDialogOpen = true;
             var dialog = new AdjustmentDialog();
             dialog.Activate();
-            dialog.Closed += async (s, args) => await LoadProductos();
+            dialog.Closed += async (s, args) =>
+            {
+                _isDialogOpen = false;
+                await LoadProductos();
+            };
         }
 
         private void CategoriesButton_Click(object sender, RoutedEventArgs e)
@@ -120,11 +134,17 @@ namespace ark_app1
 
         private void EditCompraButton_Click(object sender, RoutedEventArgs e)
         {
+            if (_isDialogOpen) return;
             if (sender is not Button { Tag: Compra compra }) return;
 
+            _isDialogOpen = true;
             var dialog = new AddCompraDialog(compra.Id);
             dialog.Activate();
-            dialog.Closed += async (s, args) => await LoadCompras();
+            dialog.Closed += async (s, args) =>
+            {
+                _isDialogOpen = false;
+                await LoadCompras();
+            };
         }
 
         private void EditProductButton_Click(object sender, RoutedEventArgs e)

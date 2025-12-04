@@ -112,7 +112,13 @@ namespace ark_app1
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => _ = LoadCats(SearchBox.Text);
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
+        private void ShowInfo(string title, string msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg ?? string.Empty; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.Frame.CanGoBack) this.Frame.GoBack();
+            else this.Frame.Navigate(typeof(InventoryPage));
+        }
     }
 
     public class CategoriaEntity { public int Id { get; set; } public string Nombre { get; set; } }

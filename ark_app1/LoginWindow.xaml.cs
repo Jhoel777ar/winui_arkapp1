@@ -39,7 +39,7 @@ public sealed partial class LoginWindow : Window
 
     private void EnsureCorrectDatabase()
     {
-        if (DatabaseManager.ConnectionString?.Contains("Database=master") == true)
+        if (DatabaseManager.ConnectionString != null && DatabaseManager.ConnectionString.Contains("Database=master"))
             DatabaseManager.ConnectionString = DatabaseManager.ConnectionString.Replace("Database=master", "Database=arkdbsisventas");
     }
 
