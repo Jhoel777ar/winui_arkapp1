@@ -32,16 +32,18 @@ namespace ark_app1
             if (_compraIdToEdit.HasValue)
             {
                 Title = "Editar Compra";
-                Loaded += async (s, e) =>
-                {
-                    await LoadProveedores();
-                    await LoadCompraData();
-                };
+                _ = InitializeEditAsync();
             }
             else
             {
-                Loaded += async (s, e) => await LoadProveedores();
+                _ = LoadProveedores();
             }
+        }
+
+        private async Task InitializeEditAsync()
+        {
+            await LoadProveedores();
+            await LoadCompraData();
         }
 
         private async Task LoadCompraData()

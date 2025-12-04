@@ -20,7 +20,7 @@ namespace ark_app1
             this.InitializeComponent();
             AppWindow.Resize(new SizeInt32(500, 500));
             CenterWindow();
-            Loaded += async (s, e) => await LoadProducts();
+            _ = LoadProducts();
         }
 
         private void CenterWindow()
