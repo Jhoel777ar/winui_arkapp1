@@ -147,7 +147,7 @@ namespace ark_app1
                     using var r = await cmd.ExecuteReaderAsync();
                     while(await r.ReadAsync())
                     {
-                        detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x {r.GetDecimal(2):C2} = {r.GetDecimal(3):C2}");
+                        detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x Bs.{r.GetDecimal(2):F2} = Bs.{r.GetDecimal(3):F2}");
                     }
                 }
                 catch { detailsList.AppendLine("Error al cargar detalles."); }
