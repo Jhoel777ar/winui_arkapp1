@@ -20,7 +20,7 @@
         </StackPanel>
 
         <!-- Products List -->
-        <controls:DataGrid x:Name="ProductosDataGrid" Grid.Row="2" AutoGenerateColumns="False" CanUserAddRows="False">
+        <controls:DataGrid x:Name="ProductosDataGrid" Grid.Row="2" AutoGenerateColumns="False">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
                 <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}"/>
