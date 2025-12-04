@@ -22,7 +22,7 @@
         <!-- Products List -->
         <controls:DataGrid x:Name="ProductosDataGrid" Grid.Row="2" AutoGenerateColumns="False">
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
+                <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
                 <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}"/>
                 <controls:DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}"/>
                 <controls:DataGridTextColumn Header="P. Compra" Binding="{Binding PrecioCompra}"/>

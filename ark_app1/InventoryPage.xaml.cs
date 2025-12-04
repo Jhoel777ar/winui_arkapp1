@@ -213,7 +213,7 @@ namespace ark_app1
             _isDialogOpen = true;
 
             var dialogContent = new AddProductDialogContent();
-            dialogContent.LoadProduct(producto, isInventoryEdit: true);
+            await dialogContent.LoadProductAsync(producto, isInventoryEdit: true);
 
             var dialog = new ContentDialog
             {

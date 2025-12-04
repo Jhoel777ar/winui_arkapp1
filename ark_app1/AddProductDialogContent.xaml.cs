@@ -11,11 +11,12 @@ namespace ark_app1
     {
         private int? _existingProductId = null;
         private bool _isEditMode = false;
+        private Task _loadCategoriasTask;
 
         public AddProductDialogContent()
         {
             this.InitializeComponent();
-            _ = LoadCategorias();
+            _loadCategoriasTask = LoadCategorias();
         }
 
         private async Task LoadCategorias()
@@ -36,8 +37,10 @@ namespace ark_app1
             catch { /* Ignore for now */ }
         }
 
-        public void LoadProduct(Producto p, bool isInventoryEdit = false)
+        public async Task LoadProductAsync(Producto p, bool isInventoryEdit = false)
         {
+            await _loadCategoriasTask;
+
             _existingProductId = p.Id;
             _isEditMode = true;
 
@@ -76,10 +79,29 @@ namespace ark_app1
 
         public Producto GetProducto()
         {
+            ErrorTextBlock.Visibility = Visibility.Collapsed;
+
             if (string.IsNullOrWhiteSpace(CodigoTextBox.Text) || string.IsNullOrWhiteSpace(NombreTextBox.Text))
             {
-                ErrorTextBlock.Text = "Código y Nombre son obligatorios.";
-                ErrorTextBlock.Visibility = Visibility.Visible;
+                ShowError("Código y Nombre son obligatorios.");
+                return null;
+            }
+
+            if (PrecioVentaBox.Value < 0)
+            {
+                ShowError("El Precio de Venta no puede ser negativo.");
+                return null;
+            }
+
+            if (PrecioCompraBox.Value < 0)
+            {
+                ShowError("El Precio de Compra no puede ser negativo.");
+                return null;
+            }
+
+            if (CantidadBox.Value < 0)
+            {
+                ShowError("La Cantidad/Stock no puede ser negativa.");
                 return null;
             }
 
@@ -97,6 +119,12 @@ namespace ark_app1
                 UnidadMedida = UnidadTextBox.Text,
                 StockMinimo = (decimal)StockMinimoBox.Value
             };
+        }
+
+        private void ShowError(string message)
+        {
+            ErrorTextBlock.Text = message;
+            ErrorTextBlock.Visibility = Visibility.Visible;
         }
     }
 }
