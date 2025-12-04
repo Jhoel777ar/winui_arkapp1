@@ -304,38 +304,3 @@ namespace ark_app1
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
-        {
-            CartInfoBar.Title = title;
-            CartInfoBar.Message = msg;
-            CartInfoBar.Severity = severity;
-            CartInfoBar.IsOpen = true;
-        }
-    }
-
-    public class CartItem : INotifyPropertyChanged
-    {
-        public int ProductoId { get; set; }
-        public string Nombre { get; set; }
-        public decimal PrecioUnitario { get; set; }
-
-        private decimal _cantidad;
-        public decimal Cantidad
-        {
-            get => _cantidad;
-            set
-            {
-                _cantidad = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Subtotal));
-            }
-        }
-
-        public decimal StockMax { get; set; }
-
-        public decimal Subtotal => PrecioUnitario * Cantidad;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
-}
