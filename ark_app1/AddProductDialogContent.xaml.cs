@@ -181,8 +181,9 @@ namespace ark_app1
             UnidadMedidaTextBox.Text = "";
             PrecioCompraNumberBox.Value = 0;
             PrecioVentaNumberBox.Value = 0;
+            PrecioVentaNumberBox.Text = "";
             CantidadNumberBox.Value = 1;
-            StockMinimoNumberBox.Value = 5;
+            StockMinimoNumberBox.Value = 1;
             CategoriaComboBox.SelectedIndex = -1;
             CodigoTextBox.Focus(FocusState.Programmatic);
         }
