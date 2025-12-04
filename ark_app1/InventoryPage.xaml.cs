@@ -205,9 +205,81 @@ namespace ark_app1
             };
         }
 
-        private void EditProductButton_Click(object sender, RoutedEventArgs e)
+        private async void EditProductButton_Click(object sender, RoutedEventArgs e)
         {
-            // Implementar edición de producto si quieres
+            if (_isDialogOpen) return;
+            if (sender is not Button { Tag: Producto producto }) return;
+
+            _isDialogOpen = true;
+
+            var dialogContent = new AddProductDialogContent();
+            dialogContent.LoadProduct(producto, isInventoryEdit: true);
+
+            var dialog = new ContentDialog
+            {
+                XamlRoot = this.Content.XamlRoot,
+                Title = "Editar Producto",
+                PrimaryButtonText = "Guardar",
+                CloseButtonText = "Cancelar",
+                DefaultButton = ContentDialogButton.Primary,
+                Content = dialogContent
+            };
+
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                var updatedProducto = dialogContent.GetProducto();
+                if (updatedProducto != null)
+                {
+                    await UpdateProductAsync(updatedProducto);
+                    await LoadProductos();
+                }
+            }
+            _isDialogOpen = false;
+        }
+
+        private async Task UpdateProductAsync(Producto p)
+        {
+            try
+            {
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = conn.CreateCommand();
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.CommandText = "sp_GestionarProducto";
+
+                cmd.Parameters.AddWithValue("@Id", p.Id);
+                cmd.Parameters.AddWithValue("@Codigo", p.Codigo);
+                cmd.Parameters.AddWithValue("@Nombre", p.Nombre);
+                cmd.Parameters.AddWithValue("@CategoriaId", (object)p.CategoriaId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Talla", (object)p.Talla ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Color", (object)p.Color ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@PrecioCompra", p.PrecioCompra);
+                cmd.Parameters.AddWithValue("@PrecioVenta", p.PrecioVenta);
+                cmd.Parameters.AddWithValue("@UnidadMedida", (object)p.UnidadMedida ?? "Unidad");
+                cmd.Parameters.AddWithValue("@StockMinimo", p.StockMinimo);
+
+                var pResultado = new SqlParameter("@Resultado", System.Data.SqlDbType.Bit) { Direction = System.Data.ParameterDirection.Output };
+                var pMensaje = new SqlParameter("@Mensaje", System.Data.SqlDbType.NVarChar, 500) { Direction = System.Data.ParameterDirection.Output };
+
+                cmd.Parameters.Add(pResultado);
+                cmd.Parameters.Add(pMensaje);
+
+                await cmd.ExecuteNonQueryAsync();
+
+                if (!(bool)pResultado.Value)
+                {
+                    ShowInfoBar("Error al actualizar", pMensaje.Value.ToString(), InfoBarSeverity.Error);
+                }
+                else
+                {
+                    ShowInfoBar("Éxito", "Producto actualizado.", InfoBarSeverity.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowInfoBar("Error", ex.Message, InfoBarSeverity.Error);
+            }
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)

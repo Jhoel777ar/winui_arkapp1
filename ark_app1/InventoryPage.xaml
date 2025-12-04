@@ -73,6 +73,13 @@
                         <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
                         <controls:DataGridTextColumn Header="Precio Venta" Binding="{Binding PrecioVenta}" />
                         <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}" />
+                        <controls:DataGridTemplateColumn Header="Acciones">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Editar" Click="EditProductButton_Click" Tag="{Binding}"/>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
                     </controls:DataGrid.Columns>
                 </controls:DataGrid>
             </PivotItem>
