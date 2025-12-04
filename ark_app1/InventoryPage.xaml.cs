@@ -38,10 +38,11 @@ namespace ark_app1
                 var cmd = conn.CreateCommand();
                 cmd.CommandText = @"SELECT p.Id, p.Codigo, p.Nombre, p.CategoriaId, c.Nombre as CategoriaNombre, p.Talla, p.Color,
                                           p.PrecioCompra, p.PrecioVenta, p.Stock, p.UnidadMedida, p.StockMinimo, p.FechaRegistro
-                                   FROM Productos p LEFT JOIN Categorias c ON p.CategoriaId = c.Id";
+                                   FROM Productos p LEFT JOIN Categorias c ON p.CategoriaId = c.Id
+                                   WHERE p.Activo = 1";
                 if (!string.IsNullOrWhiteSpace(filter))
                 {
-                    cmd.CommandText += " WHERE p.Nombre LIKE @f OR p.Codigo LIKE @f";
+                    cmd.CommandText += " AND (p.Nombre LIKE @f OR p.Codigo LIKE @f)";
                     cmd.Parameters.AddWithValue("@f", $"%{filter}%");
                 }
                 using var r = await cmd.ExecuteReaderAsync();
@@ -147,7 +148,7 @@ namespace ark_app1
                     using var r = await cmd.ExecuteReaderAsync();
                     while(await r.ReadAsync())
                     {
-                        detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x Bs.{r.GetDecimal(2):F2} = Bs.{r.GetDecimal(3):F2}");
+                        detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x {r.GetDecimal(2):C2} = {r.GetDecimal(3):C2}");
                     }
                 }
                 catch { detailsList.AppendLine("Error al cargar detalles."); }

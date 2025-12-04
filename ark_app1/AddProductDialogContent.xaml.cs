@@ -79,7 +79,7 @@ namespace ark_app1
 
         public Producto GetProducto()
         {
-            ErrorTextBlock.Visibility = Visibility.Collapsed;
+            ResultInfoBar.IsOpen = false;
 
             if (string.IsNullOrWhiteSpace(CodigoTextBox.Text) || string.IsNullOrWhiteSpace(NombreTextBox.Text))
             {
@@ -123,8 +123,9 @@ namespace ark_app1
 
         private void ShowError(string message)
         {
-            ErrorTextBlock.Text = message;
-            ErrorTextBlock.Visibility = Visibility.Visible;
+            ResultInfoBar.Message = message;
+            ResultInfoBar.Severity = InfoBarSeverity.Warning;
+            ResultInfoBar.IsOpen = true;
         }
     }
 }

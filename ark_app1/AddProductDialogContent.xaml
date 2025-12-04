@@ -8,41 +8,40 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Spacing="10" Width="400" Padding="0,0,12,0">
-            <TextBox x:Name="CodigoTextBox" Header="Código" PlaceholderText="Ej: PROD001"/>
-        <TextBox x:Name="NombreTextBox" Header="Nombre" PlaceholderText="Ej: Coca Cola 3L"/>
+            <InfoBar x:Name="ResultInfoBar" IsOpen="False" Message="" Title="Atención" Severity="Warning" Margin="0,0,0,10"/>
+            <TextBox x:Name="CodigoTextBox" Header="Código" PlaceholderText="Ej: PROD001" MaxLength="50"/>
+            <TextBox x:Name="NombreTextBox" Header="Nombre" PlaceholderText="Ej: Coca Cola 3L" MaxLength="150"/>
 
-        <ComboBox x:Name="CategoriaComboBox" Header="Categoría" DisplayMemberPath="Nombre" SelectedValuePath="Id" HorizontalAlignment="Stretch"/>
+            <ComboBox x:Name="CategoriaComboBox" Header="Categoría" DisplayMemberPath="Nombre" SelectedValuePath="Id" HorizontalAlignment="Stretch"/>
 
-        <Grid ColumnSpacing="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" x:Name="TallaTextBox" Header="Talla (Opcional)"/>
-            <TextBox Grid.Column="1" x:Name="ColorTextBox" Header="Color (Opcional)"/>
-        </Grid>
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" x:Name="TallaTextBox" Header="Talla (Opcional)" MaxLength="20"/>
+                <TextBox Grid.Column="1" x:Name="ColorTextBox" Header="Color (Opcional)" MaxLength="30"/>
+            </Grid>
 
-        <Grid ColumnSpacing="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <NumberBox Grid.Column="0" x:Name="PrecioCompraBox" Header="Precio Compra" Minimum="0" SpinButtonPlacementMode="Compact"/>
-            <NumberBox Grid.Column="1" x:Name="PrecioVentaBox" Header="Precio Venta" Minimum="0" SpinButtonPlacementMode="Compact"/>
-        </Grid>
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <NumberBox Grid.Column="0" x:Name="PrecioCompraBox" Header="Precio Compra" Minimum="0" SpinButtonPlacementMode="Compact"/>
+                <NumberBox Grid.Column="1" x:Name="PrecioVentaBox" Header="Precio Venta" Minimum="0" SpinButtonPlacementMode="Compact"/>
+            </Grid>
 
-        <Grid ColumnSpacing="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <NumberBox Grid.Column="0" x:Name="CantidadBox" Header="Cantidad" Minimum="1" Value="1" SpinButtonPlacementMode="Compact"/>
-            <TextBox Grid.Column="1" x:Name="UnidadTextBox" Header="Unidad Medida" Text="Unidad"/>
-        </Grid>
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <NumberBox Grid.Column="0" x:Name="CantidadBox" Header="Cantidad" Minimum="1" Value="1" SpinButtonPlacementMode="Compact"/>
+                <TextBox Grid.Column="1" x:Name="UnidadTextBox" Header="Unidad Medida" Text="Unidad" MaxLength="20"/>
+            </Grid>
 
-        <NumberBox x:Name="StockMinimoBox" Header="Stock Mínimo" Minimum="0" Value="5" SpinButtonPlacementMode="Compact"/>
-
-        <TextBlock x:Name="ErrorTextBlock" Foreground="Red" TextWrapping="Wrap" Visibility="Collapsed"/>
+            <NumberBox x:Name="StockMinimoBox" Header="Stock Mínimo" Minimum="0" Value="5" SpinButtonPlacementMode="Compact"/>
         </StackPanel>
     </ScrollViewer>
 </Page>
