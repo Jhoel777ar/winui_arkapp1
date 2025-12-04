@@ -81,11 +81,11 @@ namespace ark_app1
             };
 
             var stack = new StackPanel { Spacing = 10, Width = 350 };
-            var txtNombre = new TextBox { Header = "Nombre", Text = p?.Nombre ?? "" };
-            var txtRuc = new TextBox { Header = "RUC", Text = p?.RUC ?? "" };
-            var txtTel = new TextBox { Header = "Teléfono", Text = p?.Telefono ?? "" };
-            var txtEmail = new TextBox { Header = "Email", Text = p?.Email ?? "" };
-            var txtContacto = new TextBox { Header = "Contacto", Text = p?.Contacto ?? "" };
+            var txtNombre = new TextBox { Header = "Nombre *", PlaceholderText = "Obligatorio", Text = p?.Nombre ?? "", MaxLength = 100 };
+            var txtRuc = new TextBox { Header = "RUC (Opcional)", Text = p?.RUC ?? "", MaxLength = 20 };
+            var txtTel = new TextBox { Header = "Teléfono (Opcional)", Text = p?.Telefono ?? "", MaxLength = 20 };
+            var txtEmail = new TextBox { Header = "Email (Opcional)", Text = p?.Email ?? "", MaxLength = 100 };
+            var txtContacto = new TextBox { Header = "Contacto (Opcional)", Text = p?.Contacto ?? "", MaxLength = 100 };
 
             stack.Children.Add(txtNombre);
             stack.Children.Add(txtRuc);

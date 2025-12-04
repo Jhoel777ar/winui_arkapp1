@@ -31,7 +31,7 @@ namespace ark_app1
 
             if (_compraIdToEdit.HasValue)
             {
-                Title = "Editar Compra";
+                this.Title = "Editar Compra";
                 _ = InitializeEditAsync();
             }
             else
@@ -216,6 +216,7 @@ namespace ark_app1
                 {
                     cmd.CommandText = "sp_ModificarCompra";
                     cmd.Parameters.AddWithValue("@CompraId", _compraIdToEdit.Value);
+                    cmd.Parameters.AddWithValue("@UsuarioId", usuarioId);
                 }
                 else
                 {
@@ -273,8 +274,8 @@ namespace ark_app1
         public required string Codigo { get; set; }
         public required string Nombre { get; set; }
         public int? CategoriaId { get; set; }
-        public string Talla { get; set; }
-        public string Color { get; set; }
+        public string? Talla { get; set; }
+        public string? Color { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public decimal Cantidad { get; set; }

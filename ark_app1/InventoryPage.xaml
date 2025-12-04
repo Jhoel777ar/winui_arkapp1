@@ -33,15 +33,6 @@
                 <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
                 <controls:DataGridTextColumn Header="Precio de Venta" Binding="{Binding PrecioVenta}" />
                 <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}" />
-                <controls:DataGridTemplateColumn Header="Acciones">
-                    <controls:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Content="Editar Producto" Click="EditProductButton_Click" Tag="{Binding}" Margin="5,0,5,0"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
         <controls:DataGrid x:Name="ComprasDataGrid"

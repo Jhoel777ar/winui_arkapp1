@@ -49,7 +49,7 @@ namespace ark_app1
                 ClientComboBox.ItemsSource = clients;
                 ClientComboBox.SelectedIndex = 0;
             }
-            catch (Exception ex) { ShowInfo("Error", "Error al cargar clientes", InfoBarSeverity.Error); }
+            catch (Exception) { ShowInfo("Error", "Error al cargar clientes", InfoBarSeverity.Error); }
         }
 
         private void NewClientButton_Click(object sender, RoutedEventArgs e)
@@ -162,17 +162,30 @@ namespace ark_app1
 
         private void CalculateChange()
         {
-            decimal total = _cart.Sum(x => x.Subtotal);
-            decimal efectivo = (decimal)EfectivoBox.Value;
-            if (efectivo >= total && total > 0)
+            try
             {
-                CambioText.Text = $"Cambio: ${(efectivo - total):N2}";
-                CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
+                decimal total = _cart.Sum(x => x.Subtotal);
+                decimal efectivo = 0;
+
+                if (double.IsFinite(EfectivoBox.Value) && EfectivoBox.Value < (double)decimal.MaxValue)
+                {
+                    efectivo = (decimal)EfectivoBox.Value;
+                }
+
+                if (efectivo >= total && total > 0)
+                {
+                    CambioText.Text = $"Cambio: ${(efectivo - total):N2}";
+                    CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
+                }
+                else
+                {
+                    CambioText.Text = "Cambio: $0.00";
+                    CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray);
+                }
             }
-            else
+            catch
             {
-                CambioText.Text = "Cambio: $0.00";
-                CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray);
+                CambioText.Text = "Error";
             }
         }
 
@@ -256,6 +269,41 @@ namespace ark_app1
         }
 
         private void ShowInfo(string title, string msg, InfoBarSeverity severity)
+        {
+            CartInfoBar.Title = title;
+            CartInfoBar.Message = msg ?? string.Empty;
+            CartInfoBar.Severity = severity;
+            CartInfoBar.IsOpen = true;
+        }
+    }
+
+    public class CartItem : INotifyPropertyChanged
+    {
+        public int ProductoId { get; set; }
+        public required string Nombre { get; set; }
+        public decimal PrecioUnitario { get; set; }
+
+        private decimal _cantidad;
+        public decimal Cantidad
+        {
+            get => _cantidad;
+            set
+            {
+                _cantidad = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Subtotal));
+            }
+        }
+
+        public decimal StockMax { get; set; }
+
+        public decimal Subtotal => PrecioUnitario * Cantidad;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+}
         {
             CartInfoBar.Title = title;
             CartInfoBar.Message = msg;

@@ -14,7 +14,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Gestión de Clientes" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,20"/>
+        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,20">
+            <Button Content="🡠" Click="BackButton_Click" ToolTipService.ToolTip="Volver"/>
+            <TextBlock Text="Gestión de Clientes" Style="{StaticResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+        </StackPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,0,0,20">
             <TextBox x:Name="SearchBox" PlaceholderText="Buscar cliente..." Width="300" TextChanged="SearchBox_TextChanged"/>
