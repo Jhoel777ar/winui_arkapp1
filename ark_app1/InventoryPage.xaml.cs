@@ -11,6 +11,8 @@ namespace ark_app1
     {
         private readonly ObservableCollection<Producto> _productos = new();
         private readonly ObservableCollection<Compra> _compras = new();
+        private int _currentPage = 1;
+        private int _pageSize = 20;
 
         public InventoryPage()
         {
@@ -76,9 +78,15 @@ namespace ark_app1
             {
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
+                var offset = (_currentPage - 1) * _pageSize;
                 var cmd = new SqlCommand(@"SELECT c.Id, c.Fecha, p.Nombre as Proveedor, c.Total, u.NombreCompleto as Usuario, c.Estado
                                            FROM Compras c LEFT JOIN Proveedores p ON c.ProveedorId = p.Id
-                                           LEFT JOIN Usuarios u ON c.UsuarioId = u.Id ORDER BY c.Fecha DESC", conn);
+                                           LEFT JOIN Usuarios u ON c.UsuarioId = u.Id
+                                           ORDER BY c.Fecha DESC
+                                           OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY", conn);
+                cmd.Parameters.AddWithValue("@Offset", offset);
+                cmd.Parameters.AddWithValue("@Limit", _pageSize);
+
                 using var r = await cmd.ExecuteReaderAsync();
                 while (await r.ReadAsync())
                 {
@@ -92,10 +100,60 @@ namespace ark_app1
                         Estado = r.GetString(5)
                     });
                 }
+                PageInfoText.Text = $"Página {_currentPage}";
             }
             catch (Exception ex)
             {
                 ShowInfoBar("Error al cargar compras", ex.Message, InfoBarSeverity.Error);
+            }
+        }
+
+        private async void PrevPage_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentPage > 1)
+            {
+                _currentPage--;
+                await LoadCompras();
+            }
+        }
+
+        private async void NextPage_Click(object sender, RoutedEventArgs e)
+        {
+            _currentPage++;
+            await LoadCompras();
+        }
+
+        private async void ViewDetails_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: Compra compra })
+            {
+                var dialog = new ContentDialog
+                {
+                    XamlRoot = this.Content.XamlRoot,
+                    Title = $"Detalle Compra #{compra.Id}",
+                    CloseButtonText = "Cerrar",
+                    DefaultButton = ContentDialogButton.Close
+                };
+
+                var detailsList = new System.Text.StringBuilder();
+                try
+                {
+                    using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                    await conn.OpenAsync();
+                    var cmd = new SqlCommand(@"SELECT p.Nombre, cd.Cantidad, cd.PrecioUnitario, cd.Subtotal
+                                               FROM ComprasDetalle cd JOIN Productos p ON cd.ProductoId = p.Id
+                                               WHERE cd.CompraId = @Id", conn);
+                    cmd.Parameters.AddWithValue("@Id", compra.Id);
+                    using var r = await cmd.ExecuteReaderAsync();
+                    while(await r.ReadAsync())
+                    {
+                        detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x {r.GetDecimal(2):C2} = {r.GetDecimal(3):C2}");
+                    }
+                }
+                catch { detailsList.AppendLine("Error al cargar detalles."); }
+
+                dialog.Content = new ScrollViewer { Content = new TextBlock { Text = detailsList.ToString(), TextWrapping = TextWrapping.Wrap } };
+                await dialog.ShowAsync();
             }
         }
 
