@@ -28,8 +28,33 @@ namespace ark_app1
 
         private async void SalesPage_Loaded(object sender, RoutedEventArgs e)
         {
+            await LoadClients();
             await LoadProducts();
             ProductSearchBox.Focus(FocusState.Programmatic);
+        }
+
+        private async Task LoadClients()
+        {
+            try
+            {
+                var clients = new ObservableCollection<object> { new { Id = (int?)null, Nombre = "Cliente Ocasional" } };
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("SELECT Id, Nombre FROM Clientes ORDER BY Nombre", conn);
+                using var r = await cmd.ExecuteReaderAsync();
+                while (await r.ReadAsync())
+                {
+                    clients.Add(new { Id = r.GetInt32(0), Nombre = r.GetString(1) });
+                }
+                ClientComboBox.ItemsSource = clients;
+                ClientComboBox.SelectedIndex = 0;
+            }
+            catch (Exception ex) { ShowInfo("Error", "Error al cargar clientes", InfoBarSeverity.Error); }
+        }
+
+        private void NewClientButton_Click(object sender, RoutedEventArgs e)
+        {
+             this.Frame.Navigate(typeof(ClientsPage));
         }
 
         private async Task LoadProducts(string filter = "")
@@ -197,7 +222,7 @@ namespace ark_app1
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@UsuarioId", userId);
-                cmd.Parameters.AddWithValue("@ClienteId", DBNull.Value); // Implement Cliente selection later if needed
+                cmd.Parameters.AddWithValue("@ClienteId", ClientComboBox.SelectedValue ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
                 cmd.Parameters.AddWithValue("@EfectivoRecibido", (decimal)EfectivoBox.Value);
                 cmd.Parameters.AddWithValue("@TipoPago", "Efectivo");

@@ -14,6 +14,8 @@
         </Grid.RowDefinitions>
         <CommandBar Grid.Row="0">
             <AppBarButton Icon="Add" Label="Registrar Compra" Click="RegistrarCompraButton_Click"/>
+            <AppBarButton Icon="Edit" Label="Ajustar Stock" Click="AjusteButton_Click"/>
+            <AppBarButton Icon="List" Label="Categorías" Click="CategoriesButton_Click"/>
             <AppBarSeparator/>
             <AppBarElementContainer>
                 <TextBox x:Name="SearchTextBox" PlaceholderText="Buscar Producto" TextChanged="SearchTextBox_TextChanged" Width="300"/>

@@ -42,9 +42,10 @@
                 IsSettingsVisible="False">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="Home" Icon="Home" Tag="Home" />
-                <NavigationViewItem Content="Inventario" Icon="Shop" Tag="Inventory" />
-                <NavigationViewItem Content="Ventas (POS)" Icon="Contact" Tag="Sales" />
-                <NavigationViewItem Content="Proveedores" Icon="People" Tag="Providers" />
+                <NavigationViewItem Content="Ventas (POS)" Icon="Shop" Tag="Sales" />
+                <NavigationViewItem Content="Inventario" Icon="Library" Tag="Inventory" />
+                <NavigationViewItem Content="Clientes" Icon="People" Tag="Clients" />
+                <NavigationViewItem Content="Proveedores" Icon="Contact" Tag="Providers" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />

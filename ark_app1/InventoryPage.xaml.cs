@@ -103,7 +103,19 @@ namespace ark_app1
         {
             var dialog = new AddCompraDialog();
             dialog.Activate();
-            dialog.Closed += async (s, args) => await LoadCompras();
+            dialog.Closed += async (s, args) => await LoadInitialData();
+        }
+
+        private void AjusteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new AdjustmentDialog();
+            dialog.Activate();
+            dialog.Closed += async (s, args) => await LoadProductos();
+        }
+
+        private void CategoriesButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(CategoriesPage));
         }
 
         private void EditCompraButton_Click(object sender, RoutedEventArgs e)

@@ -210,7 +210,7 @@ namespace ark_app1
 
                 if (_compraIdToEdit.HasValue)
                 {
-                    cmd.CommandText = "sp_EditarCompra";
+                    cmd.CommandText = "sp_ModificarCompra";
                     cmd.Parameters.AddWithValue("@CompraId", _compraIdToEdit.Value);
                 }
                 else

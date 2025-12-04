@@ -17,6 +17,14 @@
         <Grid Grid.Column="0" Margin="0,0,20,0" RowDefinitions="Auto, *">
             <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,10">
                 <TextBlock Text="Punto de Venta" Style="{StaticResource TitleTextBlockStyle}"/>
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox x:Name="ClientComboBox" Header="Cliente" PlaceholderText="Seleccionar Cliente" DisplayMemberPath="Nombre" SelectedValuePath="Id" HorizontalAlignment="Stretch"/>
+                    <Button Content="Nuevo" Click="NewClientButton_Click" VerticalAlignment="Bottom" Grid.Column="1"/>
+                </Grid>
                 <TextBox x:Name="ProductSearchBox" PlaceholderText="Buscar producto por nombre o código..." TextChanged="ProductSearchBox_TextChanged"/>
             </StackPanel>
 
