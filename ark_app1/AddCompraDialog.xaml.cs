@@ -25,8 +25,8 @@ namespace ark_app1
             _compraIdToEdit = compraId;
             ProductosDataGrid.ItemsSource = _productosCompra;
 
-            // Set window size and center
-            AppWindow.Resize(new SizeInt32(900, 700));
+            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
+            AppWindow.Resize(new SizeInt32(1100, 900));
             CenterWindow();
 
             if (_compraIdToEdit.HasValue)

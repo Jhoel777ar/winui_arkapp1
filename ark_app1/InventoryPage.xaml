@@ -54,7 +54,7 @@
                         </controls:DataGrid.Columns>
                     </controls:DataGrid>
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="10">
-                        <Button Content="< Anterior" Click="PrevPage_Click"/>
+                        <Button Content="Anterior" Click="PrevPage_Click"/>
                         <TextBlock x:Name="PageInfoText" Text="Página 1" VerticalAlignment="Center"/>
                         <Button Content="Siguiente >" Click="NextPage_Click"/>
                     </StackPanel>
