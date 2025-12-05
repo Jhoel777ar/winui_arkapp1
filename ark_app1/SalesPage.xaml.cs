@@ -9,6 +9,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Data;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI;
 
 namespace ark_app1
 {
@@ -184,7 +186,6 @@ namespace ark_app1
                 double val = args.NewValue;
                 if (double.IsNaN(val) || val < 1) val = 1;
 
-                // Validation against max stock
                 if (val > (double)item.StockMax)
                 {
                     sender.Value = (double)item.StockMax;
@@ -199,42 +200,16 @@ namespace ark_app1
             }
         }
 
-        private void Discount_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
-        {
-            CalculateTotal();
-        }
-
         private void CalculateTotal()
         {
-            if (SubtotalText == null) return;
-
+            if (TotalText == null) return;
             decimal subtotal = _cart.Sum(x => x.Subtotal);
-
-            double dPercent = DiscountPercentBox.Value;
-            decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
-
-            double dAmount = DiscountAmountBox.Value;
-            decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
-
-            decimal totalDiscount = 0;
-
-            decimal tempTotal = subtotal;
-            if (discountAmount > 0) tempTotal -= discountAmount;
-            if (discountPercent > 0) tempTotal -= (tempTotal * discountPercent / 100);
-
-            totalDiscount = subtotal - tempTotal;
-            if (totalDiscount < 0) totalDiscount = 0;
-
-            SubtotalText.Text = $"Bs. {subtotal:N2}";
-            DiscountText.Text = $"- Bs. {totalDiscount:N2}";
-            TotalText.Text = $"Bs. {tempTotal:N2}";
+            TotalText.Text = $"Bs. {subtotal:N2}"; // Just the subtotal on main screen
         }
 
         private void ClearCart_Click(object sender, RoutedEventArgs e)
         {
             _cart.Clear();
-            DiscountAmountBox.Value = 0;
-            DiscountPercentBox.Value = 0;
             CalculateTotal();
             ClientSearchBox.Text = "";
             _selectedClientId = null;
@@ -250,21 +225,9 @@ namespace ark_app1
                 return;
             }
 
-            decimal subtotal = _cart.Sum(x => x.Subtotal);
+            decimal cartSubtotal = _cart.Sum(x => x.Subtotal);
 
-            double dPercent = DiscountPercentBox.Value;
-            decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
-
-            double dAmount = DiscountAmountBox.Value;
-            decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
-
-            decimal totalToPay = subtotal;
-            if (discountAmount > 0) totalToPay -= discountAmount;
-            if (discountPercent > 0) totalToPay -= (totalToPay * discountPercent / 100);
-            if (totalToPay < 0) totalToPay = 0;
-
-            string paymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Efectivo";
-
+            // Create Dialog Controls
             var dialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
@@ -275,57 +238,117 @@ namespace ark_app1
             };
 
             var stack = new StackPanel { Spacing = 10 };
-            stack.Children.Add(new TextBlock { Text = $"Total a Pagar: Bs. {totalToPay:N2}", FontSize = 24, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
-            stack.Children.Add(new TextBlock { Text = $"Método: {paymentMethod}", FontSize = 16, HorizontalAlignment = HorizontalAlignment.Center });
 
+            // Subtotal Display
+            stack.Children.Add(new TextBlock { Text = $"Subtotal: Bs. {cartSubtotal:N2}", Foreground = new SolidColorBrush(Colors.Gray) });
+
+            // Payment Method
+            var payMethodCombo = new ComboBox { Header = "Método de Pago", HorizontalAlignment = HorizontalAlignment.Stretch, SelectedIndex = 0 };
+            payMethodCombo.Items.Add(new ComboBoxItem { Content = "Efectivo" });
+            payMethodCombo.Items.Add(new ComboBoxItem { Content = "Tarjeta" });
+            payMethodCombo.Items.Add(new ComboBoxItem { Content = "QR" });
+            payMethodCombo.Items.Add(new ComboBoxItem { Content = "Transferencia" });
+            stack.Children.Add(payMethodCombo);
+
+            // Discounts
+            var gridDisc = new Grid { ColumnSpacing = 10 };
+            gridDisc.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            gridDisc.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var discPercentBox = new NumberBox { Header = "Desc. Global (%)", Minimum = 0, Maximum = 100, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact };
+            var discAmountBox = new NumberBox { Header = "Desc. Global (Monto)", Minimum = 0, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact };
+
+            Grid.SetColumn(discPercentBox, 0);
+            Grid.SetColumn(discAmountBox, 1);
+            gridDisc.Children.Add(discPercentBox);
+            gridDisc.Children.Add(discAmountBox);
+            stack.Children.Add(gridDisc);
+
+            // Separator
+            stack.Children.Add(new Border { Height = 1, Background = new SolidColorBrush(Colors.LightGray), Margin = new Thickness(0, 5, 0, 5) });
+
+            // Total to Pay
+            var totalBlock = new TextBlock { Text = $"Total a Pagar: Bs. {cartSubtotal:N2}", FontWeight = Microsoft.UI.Text.FontWeights.Bold, FontSize = 24, HorizontalAlignment = HorizontalAlignment.Center };
+            stack.Children.Add(totalBlock);
+
+            // Cash Received
             var cashBox = new NumberBox
             {
                 Header = "Efectivo/Monto Recibido (Bs.)",
                 PlaceholderText = "Ingrese monto",
                 Minimum = 0,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
-                Value = (double)totalToPay
+                Value = (double)cartSubtotal
             };
+            stack.Children.Add(cashBox);
 
-            var changeText = new TextBlock { Text = "Cambio: Bs. 0.00", FontSize = 18, Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray) };
+            // Change
+            var changeText = new TextBlock { Text = "Cambio: Bs. 0.00", FontSize = 18, Foreground = new SolidColorBrush(Colors.Gray), HorizontalAlignment = HorizontalAlignment.Right };
+            stack.Children.Add(changeText);
 
-            cashBox.ValueChanged += (s, args) =>
+            // Logic
+            decimal currentTotalToPay = cartSubtotal;
+
+            void Recalculate()
             {
-                double val = args.NewValue;
-                if (double.IsNaN(val)) val = 0;
+                double dp = discPercentBox.Value;
+                decimal p = double.IsNaN(dp) ? 0 : (decimal)dp;
 
-                if (val >= (double)totalToPay)
+                double da = discAmountBox.Value;
+                decimal a = double.IsNaN(da) ? 0 : (decimal)da;
+
+                decimal t = cartSubtotal;
+                if (a > 0) t -= a;
+                if (p > 0) t -= (t * p / 100);
+                if (t < 0) t = 0;
+
+                currentTotalToPay = t;
+                totalBlock.Text = $"Total a Pagar: Bs. {t:N2}";
+
+                double c = cashBox.Value;
+                decimal cash = double.IsNaN(c) ? 0 : (decimal)c;
+
+                if (cash >= t)
                 {
-                    changeText.Text = $"Cambio: Bs. {(val - (double)totalToPay):N2}";
-                    changeText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
+                    changeText.Text = $"Cambio: Bs. {(cash - t):N2}";
+                    changeText.Foreground = new SolidColorBrush(Colors.Green);
                     dialog.IsPrimaryButtonEnabled = true;
                 }
                 else
                 {
                     changeText.Text = "Monto insuficiente";
-                    changeText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
+                    changeText.Foreground = new SolidColorBrush(Colors.Red);
                     dialog.IsPrimaryButtonEnabled = false;
                 }
-            };
+            }
 
-            stack.Children.Add(cashBox);
-            stack.Children.Add(changeText);
+            discPercentBox.ValueChanged += (s, a) => Recalculate();
+            discAmountBox.ValueChanged += (s, a) => Recalculate();
+            cashBox.ValueChanged += (s, a) => Recalculate();
+
             dialog.Content = stack;
 
             var result = await dialog.ShowAsync();
 
             if (result == ContentDialogResult.Primary)
             {
-                await ProcessSale((decimal)cashBox.Value, totalToPay, paymentMethod);
+                string method = (payMethodCombo.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Efectivo";
+                double dp = discPercentBox.Value;
+                double da = discAmountBox.Value;
+                decimal p = double.IsNaN(dp) ? 0 : (decimal)dp;
+                decimal a = double.IsNaN(da) ? 0 : (decimal)da;
+                decimal cash = double.IsNaN(cashBox.Value) ? 0 : (decimal)cashBox.Value;
+
+                await ProcessSale(cash, currentTotalToPay, method, p, a);
             }
         }
 
-        private async Task ProcessSale(decimal efectivoRecibido, decimal totalEsperado, string tipoPago)
+        private async Task ProcessSale(decimal efectivoRecibido, decimal totalEsperado, string tipoPago, decimal discP, decimal discA)
         {
             var json = JsonSerializer.Serialize(_cart.Select(c => new
             {
                 c.ProductoId,
-                Cantidad = (decimal)c.Cantidad, // Cast double to decimal for JSON
+                Cantidad = (decimal)c.Cantidad,
                 c.PrecioUnitario,
                 DescuentoPorcentaje = 0,
                 DescuentoMonto = 0
@@ -340,19 +363,13 @@ namespace ark_app1
                 var cmd = new SqlCommand("sp_RegistrarVenta_v2", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                double dPercent = DiscountPercentBox.Value;
-                decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
-
-                double dAmount = DiscountAmountBox.Value;
-                decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
-
                 cmd.Parameters.AddWithValue("@UsuarioId", userId);
                 cmd.Parameters.AddWithValue("@ClienteId", (object)_selectedClientId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
                 cmd.Parameters.AddWithValue("@EfectivoRecibido", efectivoRecibido);
                 cmd.Parameters.AddWithValue("@TipoPago", tipoPago);
-                cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", discountPercent);
-                cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", discountAmount);
+                cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", discP);
+                cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", discA);
 
                 var pRes = cmd.Parameters.Add("@Resultado", SqlDbType.Bit); pRes.Direction = ParameterDirection.Output;
                 var pMsg = cmd.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsg.Direction = ParameterDirection.Output;

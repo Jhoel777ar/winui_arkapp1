@@ -79,44 +79,14 @@
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
 
-            <StackPanel Grid.Row="2" Spacing="10" Margin="0,15,0,0">
-                <!-- Discounts -->
-                <Grid ColumnSpacing="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <ComboBox x:Name="PaymentMethodComboBox" Header="Método de Pago" SelectedIndex="0" HorizontalAlignment="Stretch">
-                        <ComboBoxItem Content="Efectivo"/>
-                        <ComboBoxItem Content="Tarjeta"/>
-                        <ComboBoxItem Content="QR"/>
-                        <ComboBoxItem Content="Transferencia"/>
-                    </ComboBox>
-                    <NumberBox Grid.Column="1" x:Name="DiscountPercentBox" Header="Desc. Global (%)" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
-                    <NumberBox Grid.Column="2" x:Name="DiscountAmountBox" Header="Desc. Global (Monto)" Minimum="0" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
+            <StackPanel Grid.Row="2" Spacing="10" Margin="0,10,0,0">
+                <!-- Minimal Footer -->
+                <Grid>
+                    <TextBlock Text="Total Estimado:" FontWeight="Bold" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TotalText" Text="Bs. 0.00" FontWeight="Bold" FontSize="18" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
 
-                <MenuFlyoutSeparator/>
-
-                <!-- Totals -->
-                <Grid RowDefinitions="Auto,Auto,Auto">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Subtotal:" Foreground="Gray"/>
-                    <TextBlock Grid.Column="1" x:Name="SubtotalText" Text="Bs. 0.00"/>
-
-                    <TextBlock Grid.Row="1" Text="Descuento:" Foreground="Red"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="DiscountText" Text="- Bs. 0.00" Foreground="Red"/>
-
-                    <TextBlock Grid.Row="2" Text="TOTAL A PAGAR:" FontWeight="Bold" FontSize="20" Margin="0,5,0,0"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1" x:Name="TotalText" Text="Bs. 0.00" FontWeight="Bold" FontSize="20" HorizontalAlignment="Right" Margin="0,5,0,0"/>
-                </Grid>
-
-                <Button Content="Cobrar / Finalizar Venta" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" FontSize="16" Height="40" Click="CheckoutButton_Click" Margin="0,10,0,0"/>
+                <Button Content="Cobrar / Finalizar Venta" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" FontSize="16" Height="45" Click="CheckoutButton_Click"/>
                 <Button Content="Limpiar Carrito" HorizontalAlignment="Stretch" Click="ClearCart_Click"/>
 
                 <InfoBar x:Name="CartInfoBar" IsOpen="False"/>
