@@ -61,18 +61,19 @@ namespace ark_app1
             document.Info.Title = $"Ticket {data.SaleId}";
 
             PdfPage page = document.AddPage();
-            // 80mm width = approx 226 points.
-            // Height: Let's guess based on items, or just set long.
+            // 80mm width approx 226 points.
             double height = 300 + (data.Items.Count * 20);
             page.Width = XUnit.FromMillimeter(80);
             page.Height = XUnit.FromPoint(height);
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
 
-            // Fonts - PDFsharp uses system fonts by name.
-            // Relying on defaults if XFontStyle fails, but System.Drawing.Common should fix it.
+            // Fonts
+            // Note: PdfSharpCore requires a FontResolver to be set up usually,
+            // but on Windows it might fallback to basic fonts if available.
+            // XFontStyle.Regular is default.
             XFont fontTitle = new XFont("Arial", 10, XFontStyle.Bold);
-            XFont fontRegular = new XFont("Arial", 8); // Default style
+            XFont fontRegular = new XFont("Arial", 8);
             XFont fontBold = new XFont("Arial", 8, XFontStyle.Bold);
 
             double y = 10;
