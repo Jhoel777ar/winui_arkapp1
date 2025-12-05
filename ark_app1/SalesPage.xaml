@@ -10,7 +10,7 @@
     <Grid Padding="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="500"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <!-- Left: Product Selection -->
@@ -85,9 +85,16 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <NumberBox x:Name="DiscountPercentBox" Header="Desc. Global (%)" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
-                    <NumberBox x:Name="DiscountAmountBox" Header="Desc. Global (Monto)" Minimum="0" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
+                    <ComboBox x:Name="PaymentMethodComboBox" Header="Método de Pago" SelectedIndex="0" HorizontalAlignment="Stretch">
+                        <ComboBoxItem Content="Efectivo"/>
+                        <ComboBoxItem Content="Tarjeta"/>
+                        <ComboBoxItem Content="QR"/>
+                        <ComboBoxItem Content="Transferencia"/>
+                    </ComboBox>
+                    <NumberBox Grid.Column="1" x:Name="DiscountPercentBox" Header="Desc. Global (%)" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
+                    <NumberBox Grid.Column="2" x:Name="DiscountAmountBox" Header="Desc. Global (Monto)" Minimum="0" SpinButtonPlacementMode="Compact" ValueChanged="Discount_ValueChanged"/>
                 </Grid>
 
                 <MenuFlyoutSeparator/>

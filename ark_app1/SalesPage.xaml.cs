@@ -147,7 +147,7 @@ namespace ark_app1
                 var existing = _cart.FirstOrDefault(c => c.ProductoId == p.Id);
                 if (existing != null)
                 {
-                    if (existing.Cantidad + 1 > p.Stock)
+                    if ((decimal)existing.Cantidad + 1 > p.Stock)
                     {
                         ShowInfo("Stock", "No hay suficiente stock", InfoBarSeverity.Warning);
                         return;
@@ -182,7 +182,6 @@ namespace ark_app1
             if (sender.DataContext is CartItem item)
             {
                 double val = args.NewValue;
-                // Handle NaN or invalid
                 if (double.IsNaN(val) || val < 1) val = 1;
 
                 // Validation against max stock
@@ -190,11 +189,11 @@ namespace ark_app1
                 {
                     sender.Value = (double)item.StockMax;
                     ShowInfo("Stock", $"Stock máximo disponible: {item.StockMax}", InfoBarSeverity.Warning);
-                    item.Cantidad = item.StockMax;
+                    item.Cantidad = (double)item.StockMax;
                 }
                 else
                 {
-                    item.Cantidad = (decimal)val;
+                    item.Cantidad = val;
                     CalculateTotal();
                 }
             }
@@ -211,7 +210,6 @@ namespace ark_app1
 
             decimal subtotal = _cart.Sum(x => x.Subtotal);
 
-            // Safe casting
             double dPercent = DiscountPercentBox.Value;
             decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
 
@@ -265,6 +263,8 @@ namespace ark_app1
             if (discountPercent > 0) totalToPay -= (totalToPay * discountPercent / 100);
             if (totalToPay < 0) totalToPay = 0;
 
+            string paymentMethod = (PaymentMethodComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Efectivo";
+
             var dialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
@@ -276,10 +276,11 @@ namespace ark_app1
 
             var stack = new StackPanel { Spacing = 10 };
             stack.Children.Add(new TextBlock { Text = $"Total a Pagar: Bs. {totalToPay:N2}", FontSize = 24, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+            stack.Children.Add(new TextBlock { Text = $"Método: {paymentMethod}", FontSize = 16, HorizontalAlignment = HorizontalAlignment.Center });
 
             var cashBox = new NumberBox
             {
-                Header = "Efectivo Recibido (Bs.)",
+                Header = "Efectivo/Monto Recibido (Bs.)",
                 PlaceholderText = "Ingrese monto",
                 Minimum = 0,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
@@ -291,7 +292,6 @@ namespace ark_app1
             cashBox.ValueChanged += (s, args) =>
             {
                 double val = args.NewValue;
-                // Check NaN
                 if (double.IsNaN(val)) val = 0;
 
                 if (val >= (double)totalToPay)
@@ -316,16 +316,16 @@ namespace ark_app1
 
             if (result == ContentDialogResult.Primary)
             {
-                await ProcessSale((decimal)cashBox.Value, totalToPay);
+                await ProcessSale((decimal)cashBox.Value, totalToPay, paymentMethod);
             }
         }
 
-        private async Task ProcessSale(decimal efectivoRecibido, decimal totalEsperado)
+        private async Task ProcessSale(decimal efectivoRecibido, decimal totalEsperado, string tipoPago)
         {
             var json = JsonSerializer.Serialize(_cart.Select(c => new
             {
                 c.ProductoId,
-                c.Cantidad,
+                Cantidad = (decimal)c.Cantidad, // Cast double to decimal for JSON
                 c.PrecioUnitario,
                 DescuentoPorcentaje = 0,
                 DescuentoMonto = 0
@@ -350,7 +350,7 @@ namespace ark_app1
                 cmd.Parameters.AddWithValue("@ClienteId", (object)_selectedClientId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
                 cmd.Parameters.AddWithValue("@EfectivoRecibido", efectivoRecibido);
-                cmd.Parameters.AddWithValue("@TipoPago", "Efectivo");
+                cmd.Parameters.AddWithValue("@TipoPago", tipoPago);
                 cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", discountPercent);
                 cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", discountAmount);
 
@@ -395,8 +395,8 @@ namespace ark_app1
         public required string Nombre { get; set; }
         public decimal PrecioUnitario { get; set; }
 
-        private decimal _cantidad;
-        public decimal Cantidad
+        private double _cantidad;
+        public double Cantidad
         {
             get => _cantidad;
             set
@@ -413,7 +413,7 @@ namespace ark_app1
 
         public decimal StockMax { get; set; }
 
-        public decimal Subtotal => PrecioUnitario * Cantidad;
+        public decimal Subtotal => PrecioUnitario * (decimal)Cantidad;
         public string SubtotalDisplay => $"Bs. {Subtotal:N2}";
 
         public event PropertyChangedEventHandler? PropertyChanged;
