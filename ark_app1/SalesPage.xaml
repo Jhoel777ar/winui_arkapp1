@@ -64,7 +64,7 @@
                     <controls:DataGridTemplateColumn Header="Cant.">
                         <controls:DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <NumberBox Value="{Binding Cantidad, Mode=TwoWay}" Minimum="1" SpinButtonPlacementMode="Compact" Width="80" ValueChanged="CartQty_ValueChanged"/>
+                                <NumberBox Value="{Binding Cantidad, Mode=OneWay}" Minimum="1" SpinButtonPlacementMode="Compact" Width="80" ValueChanged="CartQty_ValueChanged"/>
                             </DataTemplate>
                         </controls:DataGridTemplateColumn.CellTemplate>
                     </controls:DataGridTemplateColumn>

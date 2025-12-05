@@ -75,7 +75,6 @@ namespace ark_app1
         {
             if (args.ChosenSuggestion == null)
             {
-                // Custom client or occasional
                 if (string.IsNullOrWhiteSpace(args.QueryText))
                 {
                     _selectedClientId = null;
@@ -83,9 +82,6 @@ namespace ark_app1
                 }
                 else
                 {
-                    // Could implement "Add new client" logic here, for now treat as occasional if not picked
-                    // Or show a warning. User said "AutoSuggest".
-                    // Let's assume Occasional if not picked from list.
                     _selectedClientId = null;
                     SelectedClientText.Text = "Cliente: Ocasional (No registrado)";
                 }
@@ -106,7 +102,6 @@ namespace ark_app1
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
                 var cmd = conn.CreateCommand();
-                // Filter: Active = 1 AND Stock > 0
                 cmd.CommandText = "SELECT Id, Codigo, Nombre, Stock, PrecioVenta FROM Productos WHERE Activo = 1 AND Stock > 0";
                 if (!string.IsNullOrWhiteSpace(filter))
                 {
@@ -186,18 +181,20 @@ namespace ark_app1
         {
             if (sender.DataContext is CartItem item)
             {
+                double val = args.NewValue;
+                // Handle NaN or invalid
+                if (double.IsNaN(val) || val < 1) val = 1;
+
                 // Validation against max stock
-                if (args.NewValue > (double)item.StockMax)
+                if (val > (double)item.StockMax)
                 {
-                    // Reset to max
                     sender.Value = (double)item.StockMax;
                     ShowInfo("Stock", $"Stock máximo disponible: {item.StockMax}", InfoBarSeverity.Warning);
+                    item.Cantidad = item.StockMax;
                 }
                 else
                 {
-                    // Because TwoWay binding might trigger this, or user typing
-                    // The property setter already notifies Subtotal change.
-                    // We just ensure recalculate total happens.
+                    item.Cantidad = (decimal)val;
                     CalculateTotal();
                 }
             }
@@ -210,25 +207,25 @@ namespace ark_app1
 
         private void CalculateTotal()
         {
-            if (SubtotalText == null) return; // UI not ready
+            if (SubtotalText == null) return;
 
             decimal subtotal = _cart.Sum(x => x.Subtotal);
-            decimal discountPercent = (decimal)DiscountPercentBox.Value;
-            decimal discountAmount = (decimal)DiscountAmountBox.Value;
+
+            // Safe casting
+            double dPercent = DiscountPercentBox.Value;
+            decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
+
+            double dAmount = DiscountAmountBox.Value;
+            decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
 
             decimal totalDiscount = 0;
 
-            // Apply amount first then percent? Or just sum?
-            // Usually: Subtotal - Amount - (Subtotal * %) or similar.
-            // SP Logic: Total - Amount - (Total * %)
-
-            // Let's match SP logic preview
             decimal tempTotal = subtotal;
             if (discountAmount > 0) tempTotal -= discountAmount;
             if (discountPercent > 0) tempTotal -= (tempTotal * discountPercent / 100);
 
             totalDiscount = subtotal - tempTotal;
-            if (totalDiscount < 0) totalDiscount = 0; // Should not happen unless negative discount?
+            if (totalDiscount < 0) totalDiscount = 0;
 
             SubtotalText.Text = $"Bs. {subtotal:N2}";
             DiscountText.Text = $"- Bs. {totalDiscount:N2}";
@@ -256,16 +253,18 @@ namespace ark_app1
             }
 
             decimal subtotal = _cart.Sum(x => x.Subtotal);
-            decimal discountPercent = (decimal)DiscountPercentBox.Value;
-            decimal discountAmount = (decimal)DiscountAmountBox.Value;
 
-            // Calc total logic same as above
+            double dPercent = DiscountPercentBox.Value;
+            decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
+
+            double dAmount = DiscountAmountBox.Value;
+            decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
+
             decimal totalToPay = subtotal;
             if (discountAmount > 0) totalToPay -= discountAmount;
             if (discountPercent > 0) totalToPay -= (totalToPay * discountPercent / 100);
             if (totalToPay < 0) totalToPay = 0;
 
-            // Open Payment Dialog
             var dialog = new ContentDialog
             {
                 XamlRoot = this.Content.XamlRoot,
@@ -284,7 +283,7 @@ namespace ark_app1
                 PlaceholderText = "Ingrese monto",
                 Minimum = 0,
                 SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
-                Value = (double)totalToPay // Default to exact amount
+                Value = (double)totalToPay
             };
 
             var changeText = new TextBlock { Text = "Cambio: Bs. 0.00", FontSize = 18, Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray) };
@@ -292,6 +291,9 @@ namespace ark_app1
             cashBox.ValueChanged += (s, args) =>
             {
                 double val = args.NewValue;
+                // Check NaN
+                if (double.IsNaN(val)) val = 0;
+
                 if (val >= (double)totalToPay)
                 {
                     changeText.Text = $"Cambio: Bs. {(val - (double)totalToPay):N2}";
@@ -325,7 +327,7 @@ namespace ark_app1
                 c.ProductoId,
                 c.Cantidad,
                 c.PrecioUnitario,
-                DescuentoPorcentaje = 0, // Line item discount logic could go here if UI supported it
+                DescuentoPorcentaje = 0,
                 DescuentoMonto = 0
             }));
 
@@ -335,16 +337,22 @@ namespace ark_app1
 
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
-                var cmd = new SqlCommand("sp_RegistrarVenta_v2", conn); // Using V2
+                var cmd = new SqlCommand("sp_RegistrarVenta_v2", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
+
+                double dPercent = DiscountPercentBox.Value;
+                decimal discountPercent = double.IsNaN(dPercent) ? 0 : (decimal)dPercent;
+
+                double dAmount = DiscountAmountBox.Value;
+                decimal discountAmount = double.IsNaN(dAmount) ? 0 : (decimal)dAmount;
 
                 cmd.Parameters.AddWithValue("@UsuarioId", userId);
                 cmd.Parameters.AddWithValue("@ClienteId", (object)_selectedClientId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
                 cmd.Parameters.AddWithValue("@EfectivoRecibido", efectivoRecibido);
                 cmd.Parameters.AddWithValue("@TipoPago", "Efectivo");
-                cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", (decimal)DiscountPercentBox.Value);
-                cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", (decimal)DiscountAmountBox.Value);
+                cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", discountPercent);
+                cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", discountAmount);
 
                 var pRes = cmd.Parameters.Add("@Resultado", SqlDbType.Bit); pRes.Direction = ParameterDirection.Output;
                 var pMsg = cmd.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsg.Direction = ParameterDirection.Output;
