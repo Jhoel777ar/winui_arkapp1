@@ -18,14 +18,7 @@ namespace ark_app1
         public AdjustmentDialog()
         {
             this.InitializeComponent();
-            var presenter = AppWindow.Presenter as OverlappedPresenter;
-            if (presenter != null)
-            {
-                presenter.IsResizable = false;
-                presenter.IsMaximizable = false;
-            }
-            AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-            AppWindow.Resize(new SizeInt32(700, 700));
+            AppWindow.Resize(new SizeInt32(500, 500));
             CenterWindow();
             _ = LoadProducts();
         }

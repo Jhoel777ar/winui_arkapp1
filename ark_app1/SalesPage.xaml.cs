@@ -16,40 +16,80 @@ namespace ark_app1
     {
         private ObservableCollection<Producto> _products = new();
         private ObservableCollection<CartItem> _cart = new();
+        private int? _selectedClientId = null;
 
         public SalesPage()
         {
             this.InitializeComponent();
             ProductsGrid.ItemsSource = _products;
-            CartList.ItemsSource = _cart;
+            CartGrid.ItemsSource = _cart;
             Loaded += SalesPage_Loaded;
             _cart.CollectionChanged += (s, e) => CalculateTotal();
         }
 
         private async void SalesPage_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadClients();
             await LoadProducts();
             ProductSearchBox.Focus(FocusState.Programmatic);
         }
 
-        private async Task LoadClients()
+        // --- Client Search Logic ---
+        private async void ClientSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            try
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
             {
-                var clients = new ObservableCollection<object> { new { Id = (int?)null, Nombre = "Cliente Ocasional" } };
-                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
-                await conn.OpenAsync();
-                var cmd = new SqlCommand("SELECT Id, Nombre FROM Clientes ORDER BY Nombre", conn);
-                using var r = await cmd.ExecuteReaderAsync();
-                while (await r.ReadAsync())
+                if (string.IsNullOrWhiteSpace(sender.Text))
                 {
-                    clients.Add(new { Id = r.GetInt32(0), Nombre = r.GetString(1) });
+                    sender.ItemsSource = null;
+                    return;
                 }
-                ClientComboBox.ItemsSource = clients;
-                ClientComboBox.SelectedIndex = 0;
+
+                try
+                {
+                    var suggestions = new ObservableCollection<ClientSearchResult>();
+                    using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                    await conn.OpenAsync();
+                    var cmd = new SqlCommand("SELECT TOP 10 Id, Nombre FROM Clientes WHERE Nombre LIKE @f ORDER BY Nombre", conn);
+                    cmd.Parameters.AddWithValue("@f", $"%{sender.Text}%");
+                    using var r = await cmd.ExecuteReaderAsync();
+                    while (await r.ReadAsync())
+                    {
+                        suggestions.Add(new ClientSearchResult { Id = r.GetInt32(0), Nombre = r.GetString(1) });
+                    }
+                    sender.ItemsSource = suggestions;
+                }
+                catch { /* Ignore */ }
             }
-            catch (Exception) { ShowInfo("Error", "Error al cargar clientes", InfoBarSeverity.Error); }
+        }
+
+        private void ClientSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+        {
+            if (args.SelectedItem is ClientSearchResult client)
+            {
+                _selectedClientId = client.Id;
+                SelectedClientText.Text = $"Cliente: {client.Nombre}";
+            }
+        }
+
+        private void ClientSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion == null)
+            {
+                // Custom client or occasional
+                if (string.IsNullOrWhiteSpace(args.QueryText))
+                {
+                    _selectedClientId = null;
+                    SelectedClientText.Text = "Cliente: Ocasional";
+                }
+                else
+                {
+                    // Could implement "Add new client" logic here, for now treat as occasional if not picked
+                    // Or show a warning. User said "AutoSuggest".
+                    // Let's assume Occasional if not picked from list.
+                    _selectedClientId = null;
+                    SelectedClientText.Text = "Cliente: Ocasional (No registrado)";
+                }
+            }
         }
 
         private void NewClientButton_Click(object sender, RoutedEventArgs e)
@@ -57,6 +97,7 @@ namespace ark_app1
              this.Frame.Navigate(typeof(ClientsPage));
         }
 
+        // --- Product Logic ---
         private async Task LoadProducts(string filter = "")
         {
             _products.Clear();
@@ -65,7 +106,8 @@ namespace ark_app1
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, Codigo, Nombre, Stock, PrecioVenta FROM Productos WHERE Activo = 1";
+                // Filter: Active = 1 AND Stock > 0
+                cmd.CommandText = "SELECT Id, Codigo, Nombre, Stock, PrecioVenta FROM Productos WHERE Activo = 1 AND Stock > 0";
                 if (!string.IsNullOrWhiteSpace(filter))
                 {
                     cmd.CommandText += " AND (Nombre LIKE @f OR Codigo LIKE @f)";
@@ -96,6 +138,7 @@ namespace ark_app1
             _ = LoadProducts(ProductSearchBox.Text);
         }
 
+        // --- Cart Logic ---
         private void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button { Tag: Producto p })
@@ -131,76 +174,79 @@ namespace ark_app1
             }
         }
 
+        private void RemoveFromCart_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: CartItem item })
+            {
+                _cart.Remove(item);
+            }
+        }
+
         private void CartQty_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
         {
             if (sender.DataContext is CartItem item)
             {
+                // Validation against max stock
                 if (args.NewValue > (double)item.StockMax)
                 {
-                    sender.Value = (double)item.StockMax; // Revert
-                    ShowInfo("Stock", $"Solo hay {item.StockMax} en stock", InfoBarSeverity.Warning);
+                    // Reset to max
+                    sender.Value = (double)item.StockMax;
+                    ShowInfo("Stock", $"Stock máximo disponible: {item.StockMax}", InfoBarSeverity.Warning);
                 }
                 else
                 {
-                    item.Cantidad = (decimal)args.NewValue;
+                    // Because TwoWay binding might trigger this, or user typing
+                    // The property setter already notifies Subtotal change.
+                    // We just ensure recalculate total happens.
                     CalculateTotal();
                 }
             }
         }
 
+        private void Discount_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
+        {
+            CalculateTotal();
+        }
+
         private void CalculateTotal()
         {
-            decimal total = _cart.Sum(x => x.Subtotal);
-            TotalText.Text = $"Bs. {total:N2}";
-            CalculateChange();
-        }
+            if (SubtotalText == null) return; // UI not ready
 
-        private void EfectivoBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
-        {
-            CalculateChange();
-        }
+            decimal subtotal = _cart.Sum(x => x.Subtotal);
+            decimal discountPercent = (decimal)DiscountPercentBox.Value;
+            decimal discountAmount = (decimal)DiscountAmountBox.Value;
 
-        private void CalculateChange()
-        {
-            try
-            {
-                decimal total = _cart.Sum(x => x.Subtotal);
-                decimal efectivo = 0;
+            decimal totalDiscount = 0;
 
-                if (double.IsFinite(EfectivoBox.Value) && EfectivoBox.Value < (double)decimal.MaxValue)
-                {
-                    efectivo = (decimal)EfectivoBox.Value;
-                }
+            // Apply amount first then percent? Or just sum?
+            // Usually: Subtotal - Amount - (Subtotal * %) or similar.
+            // SP Logic: Total - Amount - (Total * %)
 
-                if (efectivo >= total && total > 0)
-                {
-                    CambioText.Text = $"Cambio: Bs. {(efectivo - total):N2}";
-                    CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
-                }
-                else
-                {
-                    CambioText.Text = "Cambio: Bs. 0.00";
-                    CambioText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray);
-                }
-            }
-            catch
-            {
-                CambioText.Text = "Error";
-            }
-        }
+            // Let's match SP logic preview
+            decimal tempTotal = subtotal;
+            if (discountAmount > 0) tempTotal -= discountAmount;
+            if (discountPercent > 0) tempTotal -= (tempTotal * discountPercent / 100);
 
-        private void ProductsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            // Optional: Auto-add on selection or show details
+            totalDiscount = subtotal - tempTotal;
+            if (totalDiscount < 0) totalDiscount = 0; // Should not happen unless negative discount?
+
+            SubtotalText.Text = $"Bs. {subtotal:N2}";
+            DiscountText.Text = $"- Bs. {totalDiscount:N2}";
+            TotalText.Text = $"Bs. {tempTotal:N2}";
         }
 
         private void ClearCart_Click(object sender, RoutedEventArgs e)
         {
             _cart.Clear();
-            EfectivoBox.Value = 0;
+            DiscountAmountBox.Value = 0;
+            DiscountPercentBox.Value = 0;
             CalculateTotal();
+            ClientSearchBox.Text = "";
+            _selectedClientId = null;
+            SelectedClientText.Text = "Cliente: Ocasional";
         }
 
+        // --- Checkout Logic ---
         private async void CheckoutButton_Click(object sender, RoutedEventArgs e)
         {
             if (!_cart.Any())
@@ -209,19 +255,77 @@ namespace ark_app1
                 return;
             }
 
-            decimal total = _cart.Sum(x => x.Subtotal);
-            if (EfectivoBox.Value < (double)total)
-            {
-                ShowInfo("Pago insuficiente", "El efectivo recibido es menor al total", InfoBarSeverity.Error);
-                return;
-            }
+            decimal subtotal = _cart.Sum(x => x.Subtotal);
+            decimal discountPercent = (decimal)DiscountPercentBox.Value;
+            decimal discountAmount = (decimal)DiscountAmountBox.Value;
 
+            // Calc total logic same as above
+            decimal totalToPay = subtotal;
+            if (discountAmount > 0) totalToPay -= discountAmount;
+            if (discountPercent > 0) totalToPay -= (totalToPay * discountPercent / 100);
+            if (totalToPay < 0) totalToPay = 0;
+
+            // Open Payment Dialog
+            var dialog = new ContentDialog
+            {
+                XamlRoot = this.Content.XamlRoot,
+                Title = "Finalizar Venta",
+                PrimaryButtonText = "Confirmar Pago",
+                CloseButtonText = "Cancelar",
+                DefaultButton = ContentDialogButton.Primary
+            };
+
+            var stack = new StackPanel { Spacing = 10 };
+            stack.Children.Add(new TextBlock { Text = $"Total a Pagar: Bs. {totalToPay:N2}", FontSize = 24, FontWeight = Microsoft.UI.Text.FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Center });
+
+            var cashBox = new NumberBox
+            {
+                Header = "Efectivo Recibido (Bs.)",
+                PlaceholderText = "Ingrese monto",
+                Minimum = 0,
+                SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Compact,
+                Value = (double)totalToPay // Default to exact amount
+            };
+
+            var changeText = new TextBlock { Text = "Cambio: Bs. 0.00", FontSize = 18, Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Gray) };
+
+            cashBox.ValueChanged += (s, args) =>
+            {
+                double val = args.NewValue;
+                if (val >= (double)totalToPay)
+                {
+                    changeText.Text = $"Cambio: Bs. {(val - (double)totalToPay):N2}";
+                    changeText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Green);
+                    dialog.IsPrimaryButtonEnabled = true;
+                }
+                else
+                {
+                    changeText.Text = "Monto insuficiente";
+                    changeText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Red);
+                    dialog.IsPrimaryButtonEnabled = false;
+                }
+            };
+
+            stack.Children.Add(cashBox);
+            stack.Children.Add(changeText);
+            dialog.Content = stack;
+
+            var result = await dialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                await ProcessSale((decimal)cashBox.Value, totalToPay);
+            }
+        }
+
+        private async Task ProcessSale(decimal efectivoRecibido, decimal totalEsperado)
+        {
             var json = JsonSerializer.Serialize(_cart.Select(c => new
             {
                 c.ProductoId,
                 c.Cantidad,
                 c.PrecioUnitario,
-                DescuentoPorcentaje = 0,
+                DescuentoPorcentaje = 0, // Line item discount logic could go here if UI supported it
                 DescuentoMonto = 0
             }));
 
@@ -231,14 +335,16 @@ namespace ark_app1
 
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
-                var cmd = new SqlCommand("sp_RegistrarVenta", conn);
+                var cmd = new SqlCommand("sp_RegistrarVenta_v2", conn); // Using V2
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@UsuarioId", userId);
-                cmd.Parameters.AddWithValue("@ClienteId", ClientComboBox.SelectedValue ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ClienteId", (object)_selectedClientId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
-                cmd.Parameters.AddWithValue("@EfectivoRecibido", (decimal)EfectivoBox.Value);
+                cmd.Parameters.AddWithValue("@EfectivoRecibido", efectivoRecibido);
                 cmd.Parameters.AddWithValue("@TipoPago", "Efectivo");
+                cmd.Parameters.AddWithValue("@DescuentoGlobalPorcentaje", (decimal)DiscountPercentBox.Value);
+                cmd.Parameters.AddWithValue("@DescuentoGlobalMonto", (decimal)DiscountAmountBox.Value);
 
                 var pRes = cmd.Parameters.Add("@Resultado", SqlDbType.Bit); pRes.Direction = ParameterDirection.Output;
                 var pMsg = cmd.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsg.Direction = ParameterDirection.Output;
@@ -252,10 +358,8 @@ namespace ark_app1
                 if (success)
                 {
                     ShowInfo("Venta Exitosa", msg, InfoBarSeverity.Success);
-                    _cart.Clear();
-                    EfectivoBox.Value = 0;
-                    CalculateTotal();
-                    await LoadProducts(ProductSearchBox.Text); // Refresh stock
+                    ClearCart_Click(null, null);
+                    await LoadProducts(ProductSearchBox.Text);
                 }
                 else
                 {
@@ -289,18 +393,30 @@ namespace ark_app1
             get => _cantidad;
             set
             {
-                _cantidad = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Subtotal));
+                if (_cantidad != value)
+                {
+                    _cantidad = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Subtotal));
+                    OnPropertyChanged(nameof(SubtotalDisplay));
+                }
             }
         }
 
         public decimal StockMax { get; set; }
 
         public decimal Subtotal => PrecioUnitario * Cantidad;
+        public string SubtotalDisplay => $"Bs. {Subtotal:N2}";
 
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    public class ClientSearchResult
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; }
+        public override string ToString() => Nombre;
     }
 }
