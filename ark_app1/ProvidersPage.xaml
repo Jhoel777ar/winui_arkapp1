@@ -34,7 +34,7 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Spacing="5">
                                 <Button Content="Editar" Click="EditButton_Click" Tag="{Binding}"/>
-                                <Button Content="Eliminar" Click="DeleteButton_Click" Tag="{Binding}" Background="#FFD4D4"/>
+                                <Button Content="Eliminar" Click="DeleteButton_Click" Tag="{Binding}" Background="red"/>
                             </StackPanel>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
