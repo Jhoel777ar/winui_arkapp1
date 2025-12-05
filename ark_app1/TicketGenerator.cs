@@ -63,16 +63,16 @@ namespace ark_app1
             PdfPage page = document.AddPage();
             // 80mm width = approx 226 points.
             // Height: Let's guess based on items, or just set long.
-            // 1 item ~ 20 points. Header/Footer ~ 200 points.
             double height = 300 + (data.Items.Count * 20);
             page.Width = XUnit.FromMillimeter(80);
             page.Height = XUnit.FromPoint(height);
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
 
-            // Fonts - PDFsharp uses system fonts by name
+            // Fonts - PDFsharp uses system fonts by name.
+            // Relying on defaults if XFontStyle fails, but System.Drawing.Common should fix it.
             XFont fontTitle = new XFont("Arial", 10, XFontStyle.Bold);
-            XFont fontRegular = new XFont("Arial", 8, XFontStyle.Regular);
+            XFont fontRegular = new XFont("Arial", 8); // Default style
             XFont fontBold = new XFont("Arial", 8, XFontStyle.Bold);
 
             double y = 10;
@@ -100,7 +100,6 @@ namespace ark_app1
             gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 3;
 
             // 3. Grid Header
-            // Col widths: Name 50%, Qty 20%, Total 30%
             double col1 = contentWidth * 0.50;
             double col2 = contentWidth * 0.25;
             double col3 = contentWidth * 0.25;
@@ -115,15 +114,10 @@ namespace ark_app1
             // 4. Items
             foreach (var item in data.Items)
             {
-                // Name (Multiline if too long? For simplicity, truncate or wrap manually. PDFsharp doesn't auto wrap easily in DrawString without XTextFormatter)
-                // We'll just draw it.
                 gfx.DrawString(item.Name, fontRegular, XBrushes.Black, new XRect(x, y, col1, 20), XStringFormats.TopLeft);
-
                 gfx.DrawString($"{item.Quantity:#.##} x {item.Price:#.##}", fontRegular, XBrushes.Black, new XRect(x + col1, y, col2, 20), XStringFormats.TopLeft);
-
                 gfx.DrawString($"{item.Subtotal:N2}", fontRegular, XBrushes.Black, new XRect(x + col1 + col2, y, col3, 20), XStringFormats.TopRight);
-
-                y += 12; // Next row
+                y += 12;
             }
             y += 5;
             gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 5;
@@ -171,7 +165,6 @@ namespace ark_app1
         private static void DrawTotalLine(XGraphics gfx, string label, string value, XFont font, double pageWidth, double margin, ref double y)
         {
             gfx.DrawString(label, font, XBrushes.Black, new XPoint(margin, y));
-
             XSize sizeVal = gfx.MeasureString(value, font);
             gfx.DrawString(value, font, XBrushes.Black, new XPoint(pageWidth - margin - sizeVal.Width, y));
             y += sizeVal.Height + 2;
