@@ -1,5 +1,6 @@
-using PdfSharp.Pdf;
-using PdfSharp.Drawing;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -37,6 +38,9 @@ namespace ark_app1
     {
         public static async Task GenerateAndOpenAsync(TicketData data)
         {
+            // Configure License (Community is free for individuals/small companies)
+            QuestPDF.Settings.License = LicenseType.Community;
+
             string companyName = "Ticket Venta";
             string companyAddress = null;
             string companyPhone = null;
@@ -54,121 +58,95 @@ namespace ark_app1
                     if (!r.IsDBNull(2)) companyPhone = r.GetString(2);
                 }
             }
-            catch { /* Ignore, use default */ }
+            catch { /* Use defaults */ }
 
-            // Create Document
-            PdfDocument document = new PdfDocument();
-            document.Info.Title = $"Ticket {data.SaleId}";
-
-            PdfPage page = document.AddPage();
-            // 80mm width approx 226 points.
-            double height = 300 + (data.Items.Count * 20);
-            page.Width = XUnit.FromMillimeter(80);
-            page.Height = XUnit.FromPoint(height);
-
-            XGraphics gfx = XGraphics.FromPdfPage(page);
-
-            // Fonts
-            // Note: PdfSharpCore requires a FontResolver to be set up usually,
-            // but on Windows it might fallback to basic fonts if available.
-            // XFontStyle.Regular is default.
-            XFont fontTitle = new XFont("Arial", 10, XFontStyle.Bold);
-            XFont fontRegular = new XFont("Arial", 8);
-            XFont fontBold = new XFont("Arial", 8, XFontStyle.Bold);
-
-            double y = 10;
-            double width = page.Width.Point;
-            double margin = 5;
-            double contentWidth = width - (2 * margin);
-
-            // 1. Header
-            DrawCenterText(gfx, companyName, fontTitle, width, ref y);
-            if (!string.IsNullOrEmpty(companyAddress))
-                DrawCenterText(gfx, companyAddress, fontRegular, width, ref y);
-            if (!string.IsNullOrEmpty(companyPhone))
-                DrawCenterText(gfx, $"Tel: {companyPhone}", fontRegular, width, ref y);
-
-            y += 5;
-            DrawCenterText(gfx, "--------------------------------", fontRegular, width, ref y);
-            DrawCenterText(gfx, $"Venta #{data.SaleId}", fontBold, width, ref y);
-            DrawCenterText(gfx, $"{data.Date:dd/MM/yyyy HH:mm:ss}", fontRegular, width, ref y);
-            y += 5;
-
-            // 2. Info
-            gfx.DrawString($"Cliente: {data.ClientName}", fontRegular, XBrushes.Black, new XPoint(margin, y)); y += 12;
-            gfx.DrawString($"Atendido por: {data.UserName}", fontRegular, XBrushes.Black, new XPoint(margin, y)); y += 12;
-
-            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 3;
-
-            // 3. Grid Header
-            double col1 = contentWidth * 0.50;
-            double col2 = contentWidth * 0.25;
-            double col3 = contentWidth * 0.25;
-
-            double x = margin;
-            gfx.DrawString("PROD", fontBold, XBrushes.Black, new XPoint(x, y + 8));
-            gfx.DrawString("CANT x P", fontBold, XBrushes.Black, new XPoint(x + col1, y + 8));
-            gfx.DrawString("TOTAL", fontBold, XBrushes.Black, new XPoint(x + col1 + col2, y + 8));
-            y += 12;
-            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 3;
-
-            // 4. Items
-            foreach (var item in data.Items)
+            // Generate Document
+            var document = Document.Create(container =>
             {
-                gfx.DrawString(item.Name, fontRegular, XBrushes.Black, new XRect(x, y, col1, 20), XStringFormats.TopLeft);
-                gfx.DrawString($"{item.Quantity:#.##} x {item.Price:#.##}", fontRegular, XBrushes.Black, new XRect(x + col1, y, col2, 20), XStringFormats.TopLeft);
-                gfx.DrawString($"{item.Subtotal:N2}", fontRegular, XBrushes.Black, new XRect(x + col1 + col2, y, col3, 20), XStringFormats.TopRight);
-                y += 12;
-            }
-            y += 5;
-            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 5;
+                container.Page(page =>
+                {
+                    // Thermal printer width 80mm
+                    page.ContinuousSize(80, Unit.Millimeter);
+                    page.Margin(5, Unit.Millimeter);
+                    page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(8));
 
-            // 5. Totals
-            DrawTotalLine(gfx, "Subtotal:", $"{data.Subtotal:N2}", fontRegular, width, margin, ref y);
-            if(data.DiscountTotal > 0)
-                DrawTotalLine(gfx, "Descuento:", $"-{data.DiscountTotal:N2}", fontRegular, width, margin, ref y);
-            DrawTotalLine(gfx, "TOTAL:", $"{data.Total:N2}", fontBold, width, margin, ref y);
+                    // Header
+                    page.Header().Column(col =>
+                    {
+                        col.Item().AlignCenter().Text(companyName).Bold().FontSize(10);
+                        if (!string.IsNullOrEmpty(companyAddress))
+                            col.Item().AlignCenter().Text(companyAddress);
+                        if (!string.IsNullOrEmpty(companyPhone))
+                            col.Item().AlignCenter().Text($"Tel: {companyPhone}");
 
-            y += 5;
-            DrawTotalLine(gfx, $"Pago ({data.PaymentMethod}):", $"{data.Cash:N2}", fontRegular, width, margin, ref y);
-            DrawTotalLine(gfx, "Cambio:", $"{data.Change:N2}", fontRegular, width, margin, ref y);
+                        col.Item().PaddingVertical(5).LineHorizontal(1).LineColor(Colors.Black);
 
-            y += 15;
-            DrawCenterText(gfx, "¡Gracias por su compra!", fontBold, width, ref y);
+                        col.Item().AlignCenter().Text($"Venta #{data.SaleId}").Bold();
+                        col.Item().AlignCenter().Text($"{data.Date:dd/MM/yyyy HH:mm:ss}");
 
-            // Save
+                        col.Item().Text($"Cliente: {data.ClientName}");
+                        col.Item().Text($"Atendido: {data.UserName}");
+
+                        col.Item().PaddingVertical(2).LineHorizontal(1).LineColor(Colors.Black);
+                    });
+
+                    // Content (Items)
+                    page.Content().PaddingVertical(5).Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(3); // Product Name
+                            columns.RelativeColumn(2); // Qty x Price
+                            columns.RelativeColumn(2); // Total
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Text("PROD").Bold();
+                            header.Cell().Text("CANT").Bold();
+                            header.Cell().AlignRight().Text("TOT").Bold();
+                        });
+
+                        foreach (var item in data.Items)
+                        {
+                            table.Cell().Text(item.Name);
+                            table.Cell().Text($"{item.Quantity:0.##}x{item.Price:0.00}");
+                            table.Cell().AlignRight().Text($"{item.Subtotal:N2}");
+                        }
+                    });
+
+                    // Footer
+                    page.Footer().Column(col =>
+                    {
+                        col.Item().PaddingVertical(2).LineHorizontal(1).LineColor(Colors.Black);
+
+                        col.Item().AlignRight().Text($"Subtotal: {data.Subtotal:N2}");
+                        if (data.DiscountTotal > 0)
+                            col.Item().AlignRight().Text($"Descuento: -{data.DiscountTotal:N2}");
+
+                        col.Item().AlignRight().Text($"TOTAL: {data.Total:N2}").Bold().FontSize(10);
+
+                        col.Item().AlignRight().Text($"Pago ({data.PaymentMethod}): {data.Cash:N2}");
+                        col.Item().AlignRight().Text($"Cambio: {data.Change:N2}");
+
+                        col.Item().PaddingTop(10).AlignCenter().Text("¡Gracias por su compra!").Bold();
+                    });
+                });
+            });
+
+            // Save to Temp
             string fileName = $"Ticket_{data.SaleId}_{DateTime.Now.Ticks}.pdf";
             StorageFolder folder = ApplicationData.Current.TemporaryFolder;
             StorageFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
 
-            using (var stream = new MemoryStream())
+            // Write
+            using (var stream = await file.OpenStreamForWriteAsync())
             {
-                document.Save(stream, false);
-                using (var fileStream = await file.OpenStreamForWriteAsync())
-                {
-                    stream.Position = 0;
-                    await stream.CopyToAsync(fileStream);
-                }
+                document.GeneratePdf(stream);
             }
-            document.Close();
 
             // Open
             await Launcher.LaunchFileAsync(file);
-        }
-
-        private static void DrawCenterText(XGraphics gfx, string text, XFont font, double pageWidth, ref double y)
-        {
-            XSize size = gfx.MeasureString(text, font);
-            gfx.DrawString(text, font, XBrushes.Black, new XPoint((pageWidth - size.Width) / 2, y));
-            y += size.Height + 2;
-        }
-
-        private static void DrawTotalLine(XGraphics gfx, string label, string value, XFont font, double pageWidth, double margin, ref double y)
-        {
-            gfx.DrawString(label, font, XBrushes.Black, new XPoint(margin, y));
-            XSize sizeVal = gfx.MeasureString(value, font);
-            gfx.DrawString(value, font, XBrushes.Black, new XPoint(pageWidth - margin - sizeVal.Width, y));
-            y += sizeVal.Height + 2;
         }
     }
 }
