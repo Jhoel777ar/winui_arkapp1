@@ -1,13 +1,12 @@
-using Syncfusion.Pdf;
-using Syncfusion.Pdf.Graphics;
-using Syncfusion.Pdf.Grid;
-using Syncfusion.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
 using System;
+using Microsoft.Data.SqlClient;
 
 namespace ark_app1
 {
@@ -38,112 +37,144 @@ namespace ark_app1
     {
         public static async Task GenerateAndOpenAsync(TicketData data)
         {
-            // Create Document
-            using (PdfDocument doc = new PdfDocument())
+            string companyName = "Ticket Venta";
+            string companyAddress = null;
+            string companyPhone = null;
+
+            try
             {
-                // 80mm width approx 226 points. Margins 0 for max space.
-                doc.PageSettings.Margins.All = 0;
-                // Height is fixed in PDF usually, setting a long strip
-                doc.PageSettings.Size = new SizeF(226, 800);
-
-                PdfPage page = doc.Pages.Add();
-                PdfGraphics graphics = page.Graphics;
-
-                // Fonts
-                PdfFont fontTitle = new PdfStandardFont(PdfFontFamily.Helvetica, 10, PdfFontStyle.Bold);
-                PdfFont fontRegular = new PdfStandardFont(PdfFontFamily.Helvetica, 8);
-                PdfFont fontBold = new PdfStandardFont(PdfFontFamily.Helvetica, 8, PdfFontStyle.Bold);
-
-                float y = 10; // Start with some margin
-                float width = page.GetClientSize().Width;
-
-                // Header
-                DrawCenterText(graphics, "ARK SALES", fontTitle, width, ref y);
-                DrawCenterText(graphics, "Ticket de Venta", fontRegular, width, ref y);
-                DrawCenterText(graphics, $"#{data.SaleId} - {data.Date:dd/MM/yy HH:mm}", fontRegular, width, ref y);
-                y += 5;
-
-                // Info
-                graphics.DrawString($"Cliente: {data.ClientName}", fontRegular, PdfBrushes.Black, new PointF(5, y)); y += 10;
-                graphics.DrawString($"Atendido: {data.UserName}", fontRegular, PdfBrushes.Black, new PointF(5, y)); y += 15;
-
-                // Grid
-                PdfGrid grid = new PdfGrid();
-                grid.Columns.Add(3);
-                grid.Headers.Add(1);
-
-                PdfGridRow header = grid.Headers[0];
-                header.Cells[0].Value = "Prod";
-                header.Cells[1].Value = "Cant x P";
-                header.Cells[2].Value = "Tot";
-
-                // Adjust widths (Total 226)
-                grid.Columns[0].Width = 100;
-                grid.Columns[1].Width = 70;
-                grid.Columns[2].Width = 56;
-
-                // Style
-                grid.Style.Font = fontRegular;
-                grid.Style.CellPadding.All = 2;
-                grid.Headers.ApplyStyle(new PdfGridCellStyle { Font = fontBold, Borders = new PdfBorders { All = PdfPens.Transparent, Bottom = PdfPens.Black } });
-
-                foreach(var item in data.Items)
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("SELECT TOP 1 Nombre, Direccion, Telefono FROM Empresa", conn);
+                using var r = await cmd.ExecuteReaderAsync();
+                if (await r.ReadAsync())
                 {
-                    PdfGridRow row = grid.Rows.Add();
-                    row.Cells[0].Value = item.Name;
-                    row.Cells[1].Value = $"{item.Quantity:#.##} x {item.Price:#.##}";
-                    row.Cells[2].Value = $"{item.Subtotal:N2}";
-
-                    // Simple borders
-                    foreach(PdfGridCell cell in row.Cells)
-                    {
-                        cell.Style.Borders.All = PdfPens.Transparent;
-                    }
+                    if (!r.IsDBNull(0)) companyName = r.GetString(0);
+                    if (!r.IsDBNull(1)) companyAddress = r.GetString(1);
+                    if (!r.IsDBNull(2)) companyPhone = r.GetString(2);
                 }
-
-                PdfGridLayoutResult result = grid.Draw(page, new PointF(0, y));
-                y = result.Bounds.Bottom + 10;
-
-                // Totals
-                DrawRightText(graphics, $"Subtotal: {data.Subtotal:N2}", fontRegular, width, ref y);
-                if(data.DiscountTotal > 0)
-                    DrawRightText(graphics, $"Descuento: -{data.DiscountTotal:N2}", fontRegular, width, ref y);
-                DrawRightText(graphics, $"TOTAL: {data.Total:N2}", fontBold, width, ref y);
-
-                y += 5;
-                DrawRightText(graphics, $"Pago ({data.PaymentMethod}): {data.Cash:N2}", fontRegular, width, ref y);
-                DrawRightText(graphics, $"Cambio: {data.Change:N2}", fontRegular, width, ref y);
-
-                y += 15;
-                DrawCenterText(graphics, "¡Gracias por su compra!", fontBold, width, ref y);
-
-                // Save
-                string fileName = $"Ticket_{data.SaleId}_{DateTime.Now.Ticks}.pdf";
-                StorageFolder folder = ApplicationData.Current.TemporaryFolder;
-                StorageFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
-
-                using (var stream = await file.OpenStreamForWriteAsync())
-                {
-                    doc.Save(stream);
-                }
-
-                // Open
-                await Launcher.LaunchFileAsync(file);
             }
+            catch { /* Ignore, use default */ }
+
+            // Create Document
+            PdfDocument document = new PdfDocument();
+            document.Info.Title = $"Ticket {data.SaleId}";
+
+            PdfPage page = document.AddPage();
+            // 80mm width = approx 226 points.
+            // Height: Let's guess based on items, or just set long.
+            // 1 item ~ 20 points. Header/Footer ~ 200 points.
+            double height = 300 + (data.Items.Count * 20);
+            page.Width = XUnit.FromMillimeter(80);
+            page.Height = XUnit.FromPoint(height);
+
+            XGraphics gfx = XGraphics.FromPdfPage(page);
+
+            // Fonts - PDFsharp uses system fonts by name
+            XFont fontTitle = new XFont("Arial", 10, XFontStyle.Bold);
+            XFont fontRegular = new XFont("Arial", 8, XFontStyle.Regular);
+            XFont fontBold = new XFont("Arial", 8, XFontStyle.Bold);
+
+            double y = 10;
+            double width = page.Width.Point;
+            double margin = 5;
+            double contentWidth = width - (2 * margin);
+
+            // 1. Header
+            DrawCenterText(gfx, companyName, fontTitle, width, ref y);
+            if (!string.IsNullOrEmpty(companyAddress))
+                DrawCenterText(gfx, companyAddress, fontRegular, width, ref y);
+            if (!string.IsNullOrEmpty(companyPhone))
+                DrawCenterText(gfx, $"Tel: {companyPhone}", fontRegular, width, ref y);
+
+            y += 5;
+            DrawCenterText(gfx, "--------------------------------", fontRegular, width, ref y);
+            DrawCenterText(gfx, $"Venta #{data.SaleId}", fontBold, width, ref y);
+            DrawCenterText(gfx, $"{data.Date:dd/MM/yyyy HH:mm:ss}", fontRegular, width, ref y);
+            y += 5;
+
+            // 2. Info
+            gfx.DrawString($"Cliente: {data.ClientName}", fontRegular, XBrushes.Black, new XPoint(margin, y)); y += 12;
+            gfx.DrawString($"Atendido por: {data.UserName}", fontRegular, XBrushes.Black, new XPoint(margin, y)); y += 12;
+
+            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 3;
+
+            // 3. Grid Header
+            // Col widths: Name 50%, Qty 20%, Total 30%
+            double col1 = contentWidth * 0.50;
+            double col2 = contentWidth * 0.25;
+            double col3 = contentWidth * 0.25;
+
+            double x = margin;
+            gfx.DrawString("PROD", fontBold, XBrushes.Black, new XPoint(x, y + 8));
+            gfx.DrawString("CANT x P", fontBold, XBrushes.Black, new XPoint(x + col1, y + 8));
+            gfx.DrawString("TOTAL", fontBold, XBrushes.Black, new XPoint(x + col1 + col2, y + 8));
+            y += 12;
+            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 3;
+
+            // 4. Items
+            foreach (var item in data.Items)
+            {
+                // Name (Multiline if too long? For simplicity, truncate or wrap manually. PDFsharp doesn't auto wrap easily in DrawString without XTextFormatter)
+                // We'll just draw it.
+                gfx.DrawString(item.Name, fontRegular, XBrushes.Black, new XRect(x, y, col1, 20), XStringFormats.TopLeft);
+
+                gfx.DrawString($"{item.Quantity:#.##} x {item.Price:#.##}", fontRegular, XBrushes.Black, new XRect(x + col1, y, col2, 20), XStringFormats.TopLeft);
+
+                gfx.DrawString($"{item.Subtotal:N2}", fontRegular, XBrushes.Black, new XRect(x + col1 + col2, y, col3, 20), XStringFormats.TopRight);
+
+                y += 12; // Next row
+            }
+            y += 5;
+            gfx.DrawLine(XPens.Black, margin, y, width - margin, y); y += 5;
+
+            // 5. Totals
+            DrawTotalLine(gfx, "Subtotal:", $"{data.Subtotal:N2}", fontRegular, width, margin, ref y);
+            if(data.DiscountTotal > 0)
+                DrawTotalLine(gfx, "Descuento:", $"-{data.DiscountTotal:N2}", fontRegular, width, margin, ref y);
+            DrawTotalLine(gfx, "TOTAL:", $"{data.Total:N2}", fontBold, width, margin, ref y);
+
+            y += 5;
+            DrawTotalLine(gfx, $"Pago ({data.PaymentMethod}):", $"{data.Cash:N2}", fontRegular, width, margin, ref y);
+            DrawTotalLine(gfx, "Cambio:", $"{data.Change:N2}", fontRegular, width, margin, ref y);
+
+            y += 15;
+            DrawCenterText(gfx, "¡Gracias por su compra!", fontBold, width, ref y);
+
+            // Save
+            string fileName = $"Ticket_{data.SaleId}_{DateTime.Now.Ticks}.pdf";
+            StorageFolder folder = ApplicationData.Current.TemporaryFolder;
+            StorageFile file = await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);
+
+            using (var stream = new MemoryStream())
+            {
+                document.Save(stream, false);
+                using (var fileStream = await file.OpenStreamForWriteAsync())
+                {
+                    stream.Position = 0;
+                    await stream.CopyToAsync(fileStream);
+                }
+            }
+            document.Close();
+
+            // Open
+            await Launcher.LaunchFileAsync(file);
         }
 
-        private static void DrawCenterText(PdfGraphics g, string text, PdfFont font, float width, ref float y)
+        private static void DrawCenterText(XGraphics gfx, string text, XFont font, double pageWidth, ref double y)
         {
-            SizeF size = font.MeasureString(text);
-            g.DrawString(text, font, PdfBrushes.Black, new PointF((width - size.Width) / 2, y));
+            XSize size = gfx.MeasureString(text, font);
+            gfx.DrawString(text, font, XBrushes.Black, new XPoint((pageWidth - size.Width) / 2, y));
             y += size.Height + 2;
         }
 
-        private static void DrawRightText(PdfGraphics g, string text, PdfFont font, float width, ref float y)
+        private static void DrawTotalLine(XGraphics gfx, string label, string value, XFont font, double pageWidth, double margin, ref double y)
         {
-            SizeF size = font.MeasureString(text);
-            g.DrawString(text, font, PdfBrushes.Black, new PointF(width - size.Width - 5, y));
-            y += size.Height + 2;
+            gfx.DrawString(label, font, XBrushes.Black, new XPoint(margin, y));
+
+            XSize sizeVal = gfx.MeasureString(value, font);
+            gfx.DrawString(value, font, XBrushes.Black, new XPoint(pageWidth - margin - sizeVal.Width, y));
+            y += sizeVal.Height + 2;
         }
     }
 }
