@@ -66,8 +66,8 @@ namespace ark_app1
                 container.Page(page =>
                 {
                     // Thermal printer width 80mm
-                    page.ContinuousSize(80, Unit.Millimeter);
-                    page.Margin(5, Unit.Millimeter);
+                    page.ContinuousSize(226.77f);   // 80 mm en puntos
+                    page.Margin(14.17f);            // 5 mm en puntos
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(8));
 
                     // Header

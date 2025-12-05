@@ -2,6 +2,7 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using Windows.Graphics;
 
 namespace ark_app1;
 
@@ -18,12 +19,20 @@ public sealed partial class MainPage : Window
         AppWindow = AppWindow.GetFromWindowId(windowId);
 
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-
+        AppWindow.Resize(new SizeInt32(1800, 1000));
+        CenterWindow();
         UserPicture.DisplayName = userFullName;
         AppTitleBar.Subtitle = $"Bienvenido, {userFullName}";
         ContentFrame.Navigate(typeof(HomePage));
     }
-
+     private void CenterWindow()
+    {
+        var area = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)?.WorkArea;
+        if (area == null) return;
+        AppWindow.Move(new PointInt32(
+            (area.Value.Width - AppWindow.Size.Width) / 2,
+            (area.Value.Height - AppWindow.Size.Height) / 2));
+    }
     private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         var selectedItem = (NavigationViewItem)args.SelectedItem;

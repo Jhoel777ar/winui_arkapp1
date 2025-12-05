@@ -12,6 +12,7 @@ namespace ark_app1
     {
         public static Window Window { get; private set; }
         public User? CurrentUser { get; set; } // This will hold the logged-in user's data.
+        public static object MainWindow { get; internal set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -31,6 +32,7 @@ namespace ark_app1
             this.Resources.MergedDictionaries.Add(new Microsoft.UI.Xaml.Controls.XamlControlsResources());
 
             Window = new MainWindow();
+            MainWindow = new MainWindow();
             Window.Activate();
         }
     }

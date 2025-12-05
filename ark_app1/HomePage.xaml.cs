@@ -13,6 +13,7 @@ using QuestPDF.Infrastructure;
 using Windows.Storage;
 using Windows.System;
 using System.IO;
+using WinRT.Interop;
 
 namespace ark_app1
 {
@@ -33,46 +34,43 @@ namespace ark_app1
                 var cmd = new SqlCommand("sp_ObtenerDatosReporte", conn);
                 using var r = await cmd.ExecuteReaderAsync();
 
-                // 1. Chart Data
                 var salesBars = new List<ChartBar>();
                 var profitBars = new List<ChartBar>();
-                decimal maxSale = 1;
-                decimal maxProfit = 1;
+                decimal maxSale = 1, maxProfit = 1;
 
+                // 1. Ventas últimos 7 días
                 while (await r.ReadAsync())
                 {
-                    DateTime date = r.GetDateTime(0);
-                    decimal sale = r.GetDecimal(1);
-                    decimal profit = r.GetDecimal(2);
+                    var date = r.GetDateTime(0);
+                    var sale = r.GetDecimal(1);
+                    var profit = r.GetDecimal(2);
 
                     if (sale > maxSale) maxSale = sale;
                     if (profit > maxProfit) maxProfit = profit;
 
                     string label = date.ToString("dd/MM");
-
-                    salesBars.Add(new ChartBar { Label = label, RawValue = sale, Tooltip = $"Ventas {label}: {sale:C2}" });
-                    profitBars.Add(new ChartBar { Label = label, RawValue = profit, Tooltip = $"Ganancia {label}: {profit:C2}" });
+                    salesBars.Add(new ChartBar { Label = label, RawValue = sale, Tooltip = $"Ventas {label}: Bs. {sale:N2}" });
+                    profitBars.Add(new ChartBar { Label = label, RawValue = profit, Tooltip = $"Ganancia {label}: Bs. {profit:N2}" });
                 }
 
-                // Normalize heights (Max 150px)
-                foreach (var b in salesBars) b.Height = (double)(b.RawValue / maxSale) * 150;
-                foreach (var b in profitBars) b.Height = (double)(b.RawValue / maxProfit) * 150;
+                // Normalizar barras
+                foreach (var b in salesBars) b.Height = maxSale > 0 ? (double)(b.RawValue / maxSale) * 150 : 0;
+                foreach (var b in profitBars) b.Height = maxProfit > 0 ? (double)(b.RawValue / maxProfit) * 150 : 0;
 
                 SalesChart.ItemsSource = salesBars;
                 ProfitChart.ItemsSource = profitBars;
 
-                // 2. Low Stock (Skip for dashboard UI, used for report)
                 await r.NextResultAsync();
+                await r.NextResultAsync(); 
+                await r.NextResultAsync(); 
+                await r.NextResultAsync(); 
+                await r.NextResultAsync(); 
 
-                // 3. Recent Sales (Skip for dashboard UI)
-                await r.NextResultAsync();
-
-                // 4. Totals
-                if (await r.NextResultAsync() && await r.ReadAsync())
+                if (await r.ReadAsync())
                 {
-                    TxtTotalProducts.Text = r.GetInt32(0).ToString();
-                    TxtTotalSales.Text = r.IsDBNull(1) ? "Bs. 0.00" : $"Bs. {r.GetDecimal(1):N2}";
-                    TxtTotalClients.Text = r.GetInt32(2).ToString();
+                    TxtTotalProducts.Text = r.GetInt32(0).ToString("N0");
+                    TxtTotalSales.Text = $"Bs. {r.GetDecimal(1):N2}";
+                    TxtTotalClients.Text = r.GetInt32(2).ToString("N0");
                 }
             }
             catch (Exception ex)
@@ -167,122 +165,169 @@ namespace ark_app1
         {
             var picker = new FileSavePicker();
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            picker.FileTypeChoices.Add("PDF Document", new List<string>() { ".pdf" });
-            picker.SuggestedFileName = $"Reporte_General_{DateTime.Now:yyyyMMdd}";
-
-            // WinUI 3 Window Handle hack (Standard)
-            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
-            WinRT.Interop.InitializeWithWindow.Initialize(picker, hwnd);
-
+            picker.FileTypeChoices.Add("PDF Document", new List<string> { ".pdf" });
+            picker.SuggestedFileName = $"Reporte_General_{DateTime.Now:yyyyMMdd_HHmm}";
+            var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
+            InitializeWithWindow.Initialize(picker, hwnd);
             var file = await picker.PickSaveFileAsync();
             if (file == null) return;
 
             try
             {
-                // Fetch All Data
-                var lowStock = new List<dynamic>();
-                var recentSales = new List<dynamic>();
+                var ventasDiarias = new List<(DateTime Fecha, decimal Total, decimal Ganancia)>();
+                decimal totalSemana = 0;
+                var bajoStock = new List<(string Codigo, string Nombre, decimal Stock, decimal Min)>();
+                var ultimasVentas = new List<(int Id, DateTime Fecha, string Cliente, decimal Total, string Estado)>();
+                var detalleVentas = new List<(int VentaId, string Codigo, string Producto, decimal Cant, decimal Precio, decimal Subtotal)>();
+                var totales = (Productos: 0, VentasHist: 0m, Clientes: 0, StockValor: 0m);
+                var topProductos = new List<(string Nombre, decimal Cantidad, decimal Total)>();
 
-                using (var conn = new SqlConnection(DatabaseManager.ConnectionString))
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = new SqlCommand("sp_ObtenerDatosReporte", conn);
+                using var r = await cmd.ExecuteReaderAsync();
+
+                while (await r.ReadAsync()) ventasDiarias.Add((r.GetDateTime(0), r.GetDecimal(1), r.GetDecimal(2)));
+                await r.NextResultAsync();
+                if (await r.ReadAsync()) totalSemana = r.GetDecimal(0);
+                await r.NextResultAsync();
+                while (await r.ReadAsync()) bajoStock.Add((r.GetString(0), r.GetString(1), r.GetDecimal(2), r.GetDecimal(3)));
+                await r.NextResultAsync();
+                while (await r.ReadAsync()) ultimasVentas.Add((r.GetInt32(0), r.GetDateTime(1), r.GetString(2), r.GetDecimal(3), r.GetString(4)));
+                await r.NextResultAsync();
+                while (await r.ReadAsync()) detalleVentas.Add((r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetDecimal(3), r.GetDecimal(4), r.GetDecimal(5)));
+                await r.NextResultAsync();
+                if (await r.ReadAsync())
                 {
-                    await conn.OpenAsync();
-                    var cmd = new SqlCommand("sp_ObtenerDatosReporte", conn);
-                    using var r = await cmd.ExecuteReaderAsync();
-
-                    // 1. Skip Charts
-                    await r.NextResultAsync();
-
-                    // 2. Low Stock
-                    while(await r.ReadAsync())
-                    {
-                        lowStock.Add(new { Codigo = r.GetString(0), Nombre = r.GetString(1), Stock = r.GetDecimal(2), Min = r.GetDecimal(3) });
-                    }
-                    await r.NextResultAsync();
-
-                    // 3. Sales
-                    while (await r.ReadAsync())
-                    {
-                        recentSales.Add(new { Id = r.GetInt32(0), Fecha = r.GetDateTime(1), Cliente = r.IsDBNull(2)?"":r.GetString(2), Total = r.GetDecimal(3), Estado = r.GetString(4) });
-                    }
+                    totales.Productos = r.GetInt32(0);
+                    totales.VentasHist = r.GetDecimal(1);
+                    totales.Clientes = r.GetInt32(2);
+                    totales.StockValor = r.GetDecimal(3);
                 }
+                await r.NextResultAsync();
+                while (await r.ReadAsync()) topProductos.Add((r.GetString(0), r.GetDecimal(1), r.GetDecimal(2)));
 
-                // Generate PDF
                 QuestPDF.Settings.License = LicenseType.Community;
-
                 Document.Create(container =>
                 {
                     container.Page(page =>
                     {
                         page.Size(PageSizes.A4.Landscape());
-                        page.Margin(1, Unit.Centimeter);
+                        page.Margin(2, Unit.Centimetre);
                         page.DefaultTextStyle(x => x.FontSize(10));
 
-                        page.Header().Row(row =>
+                        page.Header().Column(col =>
                         {
-                            row.RelativeItem().Column(col =>
-                            {
-                                col.Item().Text("Reporte General del Sistema").FontSize(20).Bold();
-                                col.Item().Text($"Generado: {DateTime.Now}").FontSize(10);
-                            });
+                            col.Item().Text("REPORTE GENERAL DEL SISTEMA").FontSize(22).Bold();
+                            col.Item().AlignRight().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}");
                         });
 
-                        page.Content().Column(col =>
+                        page.Content().PaddingVertical(10).Column(col =>
                         {
-                            col.Item().PaddingTop(10).Text("Resumen de Inventario (Bajo Stock)").FontSize(14).Bold();
+                            col.Item().Row(row =>
+                            {
+                                row.RelativeItem().Background(Colors.Grey.Lighten2).Padding(8).Text($"Productos: {totales.Productos:N0}").Bold();
+                                row.RelativeItem().Background(Colors.Grey.Lighten2).Padding(8).Text($"Ventas Totales: Bs. {totales.VentasHist:N2}").Bold();
+                                row.RelativeItem().Background(Colors.Grey.Lighten2).Padding(8).Text($"Clientes: {totales.Clientes:N0}").Bold();
+                                row.RelativeItem().Background(Colors.Grey.Lighten2).Padding(8).Text($"Valor Stock: Bs. {totales.StockValor:N2}").Bold();
+                            });
+
+                            col.Item().PaddingTop(15).Text("Ventas Últimos 7 Días").FontSize(16).Bold();
                             col.Item().Table(table =>
                             {
-                                table.ColumnsDefinition(c =>
+                                table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); });
+                                table.Header(h => { h.Cell().Text("Fecha"); h.Cell().Text("Total"); h.Cell().Text("Ganancia"); });
+                                foreach (var v in ventasDiarias)
                                 {
-                                    c.RelativeColumn();
-                                    c.RelativeColumn(3);
-                                    c.RelativeColumn();
-                                    c.RelativeColumn();
-                                });
-                                table.Header(h => { h.Cell().Text("COD"); h.Cell().Text("Producto"); h.Cell().Text("Stock"); h.Cell().Text("Min"); });
-                                foreach(var item in lowStock)
+                                    table.Cell().Text(v.Fecha.ToString("dd/MM"));
+                                    table.Cell().Text($"Bs. {v.Total:N2}");
+                                    table.Cell().Text($"Bs. {v.Ganancia:N2}");
+                                }
+                                table.Cell().ColumnSpan(3).AlignRight().Text($"TOTAL SEMANA: Bs. {totalSemana:N2}").Bold();
+                            });
+
+                            col.Item().PaddingTop(20).Text("Bajo Stock").FontSize(16).Bold();
+                            col.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(c => { c.RelativeColumn(); c.RelativeColumn(3); c.RelativeColumn(); c.RelativeColumn(); });
+                                table.Header(h => { h.Cell().Text("Cód"); h.Cell().Text("Producto"); h.Cell().Text("Stock"); h.Cell().Text("Mín"); });
+                                foreach (var p in bajoStock)
                                 {
-                                    table.Cell().Text(item.Codigo);
-                                    table.Cell().Text(item.Nombre);
-                                    table.Cell().Text(item.Stock.ToString());
-                                    table.Cell().Text(item.Min.ToString());
+                                    table.Cell().Text(p.Codigo);
+                                    table.Cell().Text(p.Nombre);
+                                    table.Cell().Text(p.Stock.ToString("N0"));
+                                    table.Cell().Text(p.Min.ToString("N0"));
                                 }
                             });
 
-                            col.Item().PaddingTop(20).Text("Últimas Ventas").FontSize(14).Bold();
+                            col.Item().PaddingTop(20).Text("Últimas 20 Ventas").FontSize(16).Bold();
+                            foreach (var venta in ultimasVentas)
+                            {
+                                col.Item().Background(Colors.Grey.Lighten3).Padding(8).Column(c =>
+                                {
+                                    c.Item().Text($"Venta #{venta.Id} • {venta.Fecha:dd/MM/yyyy HH:mm} • {venta.Cliente} • Total: Bs. {venta.Total:N2} • {venta.Estado}").Bold();
+                                    var det = detalleVentas.Where(x => x.VentaId == venta.Id).ToList();
+                                    if (det.Any())
+                                    {
+                                        c.Item().Table(t =>
+                                        {
+                                            t.ColumnsDefinition(cols => { cols.RelativeColumn(); cols.RelativeColumn(3); cols.RelativeColumn(); cols.RelativeColumn(); cols.RelativeColumn(); });
+                                            t.Header(h => { h.Cell().Text("Cód"); h.Cell().Text("Producto"); h.Cell().Text("Cant"); h.Cell().Text("P.U."); h.Cell().Text("Subtotal"); });
+                                            foreach (var d in det)
+                                            {
+                                                t.Cell().Text(d.Codigo);
+                                                t.Cell().Text(d.Producto);
+                                                t.Cell().Text(d.Cant.ToString("N2"));
+                                                t.Cell().Text($"Bs. {d.Precio:N2}");
+                                                t.Cell().Text($"Bs. {d.Subtotal:N2}");
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            col.Item().PaddingTop(20).Text("Top 10 Más Vendidos (30 días)").FontSize(16).Bold();
                             col.Item().Table(table =>
                             {
-                                table.ColumnsDefinition(c =>
+                                table.ColumnsDefinition(c => { c.RelativeColumn(4); c.RelativeColumn(); c.RelativeColumn(); });
+                                table.Header(h => { h.Cell().Text("Producto"); h.Cell().Text("Cantidad"); h.Cell().Text("Total"); });
+                                foreach (var t in topProductos)
                                 {
-                                    c.RelativeColumn();
-                                    c.RelativeColumn(2);
-                                    c.RelativeColumn(2);
-                                    c.RelativeColumn();
-                                    c.RelativeColumn();
-                                });
-                                table.Header(h => { h.Cell().Text("ID"); h.Cell().Text("Fecha"); h.Cell().Text("Cliente"); h.Cell().Text("Total"); h.Cell().Text("Estado"); });
-                                foreach (var item in recentSales)
-                                {
-                                    table.Cell().Text(item.Id.ToString());
-                                    table.Cell().Text(item.Fecha.ToString("g"));
-                                    table.Cell().Text(item.Cliente);
-                                    table.Cell().Text($"{item.Total:N2}");
-                                    table.Cell().Text(item.Estado);
+                                    table.Cell().Text(t.Nombre);
+                                    table.Cell().Text(t.Cantidad.ToString("N0"));
+                                    table.Cell().Text($"Bs. {t.Total:N2}");
                                 }
                             });
                         });
 
                         page.Footer().AlignCenter().Text(x => x.CurrentPageNumber());
                     });
-                }).GeneratePdf(file.Path); // WinUI can write to PickedFile path usually if app has rights or via stream
+                }).GeneratePdf(file.Path);
 
-                // Open
                 await Launcher.LaunchFileAsync(file);
-                ShowInfo("Reporte Generado", "El reporte se ha guardado y abierto.", InfoBarSeverity.Success);
+                ShowInfo("Éxito", "Reporte generado correctamente", InfoBarSeverity.Success);
             }
             catch (Exception ex)
             {
-                ShowInfo("Error", "No se pudo generar el reporte: " + ex.Message, InfoBarSeverity.Error);
+                ShowInfo("Error", ex.Message, InfoBarSeverity.Error);
             }
+        }
+
+        class LowStockItem
+        {
+            public string Codigo { get; set; }
+            public string Nombre { get; set; }
+            public decimal Stock { get; set; }
+            public decimal Min { get; set; }
+        }
+
+        class RecentSaleItem
+        {
+            public int Id { get; set; }
+            public DateTime Fecha { get; set; }
+            public string Cliente { get; set; }
+            public decimal Total { get; set; }
+            public string Estado { get; set; }
         }
 
         private void ShowInfo(string title, string msg, InfoBarSeverity severity)
