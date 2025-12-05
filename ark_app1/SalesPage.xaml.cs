@@ -383,6 +383,40 @@ namespace ark_app1
                 if (success)
                 {
                     ShowInfo("Venta Exitosa", msg, InfoBarSeverity.Success);
+
+                    // Generate Ticket
+                    try
+                    {
+                        string clientName = SelectedClientText.Text.Replace("Cliente: ", "");
+                        string userName = (Application.Current as App)?.CurrentUser?.NombreCompleto ?? "Usuario";
+
+                        var ticket = new TicketData
+                        {
+                            SaleId = (int)pId.Value,
+                            ClientName = clientName,
+                            UserName = userName,
+                            Date = DateTime.Now,
+                            Items = _cart.Select(c => new TicketItem
+                            {
+                                Name = c.Nombre,
+                                Quantity = (decimal)c.Cantidad,
+                                Price = c.PrecioUnitario,
+                                Subtotal = c.Subtotal
+                            }).ToList(),
+                            Subtotal = _cart.Sum(x => x.Subtotal),
+                            DiscountTotal = _cart.Sum(x => x.Subtotal) - totalEsperado,
+                            Total = totalEsperado,
+                            Cash = efectivoRecibido,
+                            Change = efectivoRecibido - totalEsperado,
+                            PaymentMethod = tipoPago
+                        };
+                        _ = TicketGenerator.GenerateAndOpenAsync(ticket);
+                    }
+                    catch (Exception ex)
+                    {
+                        ShowInfo("Aviso", "Venta guardada, pero error al generar ticket: " + ex.Message, InfoBarSeverity.Warning);
+                    }
+
                     ClearCart_Click(null, null);
                     await LoadProducts(ProductSearchBox.Text);
                 }
