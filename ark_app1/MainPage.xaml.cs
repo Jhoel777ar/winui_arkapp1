@@ -24,6 +24,15 @@ public sealed partial class MainPage : Window
         UserPicture.DisplayName = userFullName;
         AppTitleBar.Subtitle = $"Bienvenido, {userFullName}";
         ContentFrame.Navigate(typeof(HomePage));
+
+        this.Closed += MainPage_Closed;
+    }
+
+    private void MainPage_Closed(object sender, WindowEventArgs args)
+    {
+        // Ensure the entire application closes when the main dashboard is closed.
+        // This handles cases where MainWindow is hidden but still running.
+        Application.Current.Exit();
     }
      private void CenterWindow()
     {
