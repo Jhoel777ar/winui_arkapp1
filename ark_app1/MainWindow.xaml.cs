@@ -51,7 +51,9 @@ namespace ark_app1
         public MainWindow()
         {
             this.InitializeComponent();
-            // AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico"); // Icon file missing
+            // AppWindow.SetIcon("Assets/StoreLogo.png");
+            // Relying on Package.appxmanifest for application icon.
+
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
             AppWindow.Resize(new SizeInt32(900, 900));
             CenterWindow();
