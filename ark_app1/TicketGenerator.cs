@@ -14,21 +14,21 @@ namespace ark_app1
     public class TicketData
     {
         public int SaleId { get; set; }
-        public string ClientName { get; set; }
-        public string UserName { get; set; }
+        public string ClientName { get; set; } = "Cliente Ocasional";
+        public string UserName { get; set; } = "Cajero";
         public DateTime Date { get; set; }
-        public List<TicketItem> Items { get; set; }
+        public List<TicketItem> Items { get; set; } = new();
         public decimal Subtotal { get; set; }
         public decimal DiscountTotal { get; set; }
         public decimal Total { get; set; }
         public decimal Cash { get; set; }
         public decimal Change { get; set; }
-        public string PaymentMethod { get; set; }
+        public string PaymentMethod { get; set; } = "Efectivo";
     }
 
     public class TicketItem
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public decimal Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal Subtotal { get; set; }
@@ -42,8 +42,8 @@ namespace ark_app1
             QuestPDF.Settings.License = LicenseType.Community;
 
             string companyName = "Ticket Venta";
-            string companyAddress = null;
-            string companyPhone = null;
+            string? companyAddress = null;
+            string? companyPhone = null;
 
             try
             {

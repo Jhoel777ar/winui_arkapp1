@@ -301,9 +301,9 @@ namespace ark_app1
     {
         public int Id { get; set; }
         public DateTime Fecha { get; set; }
-        public string Proveedor { get; set; }
+        public string Proveedor { get; set; } = string.Empty;
         public decimal Total { get; set; }
-        public string Usuario { get; set; }
-        public string Estado { get; set; }
+        public string Usuario { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
     }
 }

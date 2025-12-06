@@ -14,7 +14,7 @@ namespace ark_app1;
 
 public sealed partial class MainPage : Window
 {
-    public AppWindow AppWindow { get; private set; }
+    public new AppWindow AppWindow { get; private set; }
     MicaController? micaController;
     SystemBackdropConfiguration? configurationSource;
 

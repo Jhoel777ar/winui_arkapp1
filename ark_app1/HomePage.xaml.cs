@@ -315,8 +315,8 @@ namespace ark_app1
 
         class LowStockItem
         {
-            public string Codigo { get; set; }
-            public string Nombre { get; set; }
+            public string Codigo { get; set; } = string.Empty;
+            public string Nombre { get; set; } = string.Empty;
             public decimal Stock { get; set; }
             public decimal Min { get; set; }
         }
@@ -325,15 +325,15 @@ namespace ark_app1
         {
             public int Id { get; set; }
             public DateTime Fecha { get; set; }
-            public string Cliente { get; set; }
+            public string Cliente { get; set; } = string.Empty;
             public decimal Total { get; set; }
-            public string Estado { get; set; }
+            public string Estado { get; set; } = string.Empty;
         }
 
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity)
+        private void ShowInfo(string title, string? msg, InfoBarSeverity severity)
         {
             ResultInfoBar.Title = title;
-            ResultInfoBar.Message = msg;
+            ResultInfoBar.Message = msg ?? string.Empty;
             ResultInfoBar.Severity = severity;
             ResultInfoBar.IsOpen = true;
         }
@@ -341,9 +341,9 @@ namespace ark_app1
 
     public class ChartBar
     {
-        public string Label { get; set; }
+        public string Label { get; set; } = string.Empty;
         public decimal RawValue { get; set; }
         public double Height { get; set; }
-        public string Tooltip { get; set; }
+        public string Tooltip { get; set; } = string.Empty;
     }
 }

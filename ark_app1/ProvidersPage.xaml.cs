@@ -205,12 +205,12 @@ namespace ark_app1
     public class ProveedorEntity
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string RUC { get; set; }
-        public string Telefono { get; set; }
-        public string Direccion { get; set; }
-        public string Email { get; set; }
-        public string Contacto { get; set; }
-        public string Notas { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string RUC { get; set; } = string.Empty;
+        public string Telefono { get; set; } = string.Empty;
+        public string Direccion { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Contacto { get; set; } = string.Empty;
+        public string Notas { get; set; } = string.Empty;
     }
 }

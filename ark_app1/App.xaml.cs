@@ -10,7 +10,7 @@ namespace ark_app1
     /// </summary>
     public partial class App : Application
     {
-        public static Window Window { get; private set; }
+        public static Window? Window { get; private set; }
         public User? CurrentUser { get; set; } // This will hold the logged-in user's data.
 
         // Mutex for single instance check

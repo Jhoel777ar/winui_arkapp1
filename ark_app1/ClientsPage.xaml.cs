@@ -214,10 +214,10 @@ namespace ark_app1
     public class ClienteEntity
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string CI { get; set; }
-        public string Telefono { get; set; }
-        public string Direccion { get; set; }
-        public string Notas { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string CI { get; set; } = string.Empty;
+        public string Telefono { get; set; } = string.Empty;
+        public string Direccion { get; set; } = string.Empty;
+        public string Notas { get; set; } = string.Empty;
     }
 }

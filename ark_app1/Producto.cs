@@ -5,18 +5,18 @@ namespace ark_app1
     public class Producto
     {
         public int Id { get; set; }
-        public string Codigo { get; set; }
-        public string Nombre { get; set; }
+        public string Codigo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
         public int? CategoriaId { get; set; }
-        public string Talla { get; set; }
-        public string Color { get; set; }
+        public string? Talla { get; set; }
+        public string? Color { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public decimal Stock { get; set; }
-        public string UnidadMedida { get; set; }
+        public string UnidadMedida { get; set; } = "Unidad";
         public decimal StockMinimo { get; set; }
         public DateTime FechaRegistro { get; set; }
-        public string CategoriaNombre { get; set; }
+        public string? CategoriaNombre { get; set; }
 
         // Propiedades para la ventana de compras
         public decimal Cantidad { get; set; }
