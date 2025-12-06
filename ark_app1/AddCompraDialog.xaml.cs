@@ -278,15 +278,15 @@ namespace ark_app1
     public class ProductoCompra
     {
         public int? ProductoId { get; set; } // Needed for edits
-        public required string Codigo { get; set; }
-        public required string Nombre { get; set; }
+        public string Codigo { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty;
         public int? CategoriaId { get; set; }
         public string? Talla { get; set; }
         public string? Color { get; set; }
         public decimal PrecioCompra { get; set; }
         public decimal PrecioVenta { get; set; }
         public decimal Cantidad { get; set; }
-        public string UnidadMedida { get; set; }
+        public string UnidadMedida { get; set; } = "Unidad";
         public decimal StockMinimo { get; set; }
 
         [JsonIgnore]
@@ -296,6 +296,6 @@ namespace ark_app1
     public class Proveedor
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
     }
 }

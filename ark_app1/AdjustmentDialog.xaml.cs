@@ -81,7 +81,8 @@ namespace ark_app1
                 var cmd = new SqlCommand("sp_RegistrarAjuste", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
 
-                cmd.Parameters.AddWithValue("@UsuarioId", (Application.Current as App).CurrentUser?.Id ?? 1);
+                var currentUser = (Application.Current as App)?.CurrentUser;
+                cmd.Parameters.AddWithValue("@UsuarioId", currentUser?.Id ?? 1);
                 cmd.Parameters.AddWithValue("@ProductoId", (int)ProductComboBox.SelectedValue);
                 cmd.Parameters.AddWithValue("@Cantidad", (decimal)CantidadBox.Value);
                 cmd.Parameters.AddWithValue("@Motivo", MotivoTextBox.Text);
@@ -103,6 +104,6 @@ namespace ark_app1
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e) => this.Close();
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
+        private void ShowInfo(string title, string? msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg ?? string.Empty; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
     }
 }

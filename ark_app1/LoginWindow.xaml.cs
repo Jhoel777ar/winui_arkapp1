@@ -92,7 +92,8 @@ public sealed partial class LoginWindow : Window
 
                         DispatcherQueue.TryEnqueue(() =>
                         {
-                            (Application.Current as App).CurrentUser = user;
+                            var app = Application.Current as App;
+                            if (app != null) app.CurrentUser = user;
                             var mainPage = new MainPage(user.NombreCompleto);
                             mainPage.Activate();
                             this.Close();

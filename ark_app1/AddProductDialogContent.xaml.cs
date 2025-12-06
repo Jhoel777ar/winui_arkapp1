@@ -10,7 +10,6 @@ namespace ark_app1
     public sealed partial class AddProductDialogContent : Page
     {
         private int? _existingProductId = null;
-        private bool _isEditMode = false;
         private Task _loadCategoriasTask;
 
         public AddProductDialogContent()
@@ -42,7 +41,6 @@ namespace ark_app1
             await _loadCategoriasTask;
 
             _existingProductId = p.Id;
-            _isEditMode = true;
 
             CodigoTextBox.Text = p.Codigo;
             NombreTextBox.Text = p.Nombre;
@@ -77,7 +75,7 @@ namespace ark_app1
             }
         }
 
-        public Producto GetProducto()
+        public Producto? GetProducto()
         {
             ResultInfoBar.IsOpen = false;
 

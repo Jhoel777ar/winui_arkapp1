@@ -202,7 +202,7 @@ namespace ark_app1
             else this.Frame.Navigate(typeof(SalesPage));
         }
 
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity)
+        private void ShowInfo(string title, string? msg, InfoBarSeverity severity)
         {
             InfoBar.Title = title;
             InfoBar.Message = msg ?? string.Empty;

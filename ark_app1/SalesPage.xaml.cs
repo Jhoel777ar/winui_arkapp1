@@ -364,7 +364,7 @@ namespace ark_app1
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 cmd.Parameters.AddWithValue("@UsuarioId", userId);
-                cmd.Parameters.AddWithValue("@ClienteId", (object)_selectedClientId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ClienteId", (object?)_selectedClientId ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Productos", json);
                 cmd.Parameters.AddWithValue("@EfectivoRecibido", efectivoRecibido);
                 cmd.Parameters.AddWithValue("@TipoPago", tipoPago);
@@ -431,7 +431,7 @@ namespace ark_app1
             }
         }
 
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity)
+        private void ShowInfo(string title, string? msg, InfoBarSeverity severity)
         {
             CartInfoBar.Title = title;
             CartInfoBar.Message = msg ?? string.Empty;
@@ -443,7 +443,7 @@ namespace ark_app1
     public class CartItem : INotifyPropertyChanged
     {
         public int ProductoId { get; set; }
-        public required string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
         public decimal PrecioUnitario { get; set; }
 
         private double _cantidad;
@@ -475,7 +475,7 @@ namespace ark_app1
     public class ClientSearchResult
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
         public override string ToString() => Nombre;
     }
 }

@@ -235,9 +235,9 @@ public sealed partial class MainPage : Window
 
 public class GlobalSearchResult
 {
-    public string Type { get; set; }
-    public string Title { get; set; }
-    public string Subtitle { get; set; }
+    public string Type { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Subtitle { get; set; } = string.Empty;
     public int Id { get; set; }
 
     public override string ToString() => $"{Type}: {Title}";

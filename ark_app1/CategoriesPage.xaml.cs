@@ -117,7 +117,7 @@ namespace ark_app1
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => _ = LoadCats(SearchBox.Text);
-        private void ShowInfo(string title, string msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg ?? string.Empty; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
+        private void ShowInfo(string title, string? msg, InfoBarSeverity severity) { InfoBar.Title = title; InfoBar.Message = msg ?? string.Empty; InfoBar.Severity = severity; InfoBar.IsOpen = true; }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
@@ -126,5 +126,5 @@ namespace ark_app1
         }
     }
 
-    public class CategoriaEntity { public int Id { get; set; } public string Nombre { get; set; } }
+    public class CategoriaEntity { public int Id { get; set; } public string Nombre { get; set; } = string.Empty; }
 }

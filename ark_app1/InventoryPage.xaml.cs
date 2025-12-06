@@ -53,7 +53,7 @@ namespace ark_app1
                         Id = r.GetInt32(0),
                         Codigo = r.GetString(1),
                         Nombre = r.GetString(2),
-                        CategoriaId = r.IsDBNull(3) ? null : r.GetInt32(3),
+                        CategoriaId = r.IsDBNull(3) ? null : (int?)r.GetInt32(3),
                         CategoriaNombre = r.IsDBNull(4) ? "Sin Categoría" : r.GetString(4),
                         Talla = r.IsDBNull(5) ? "" : r.GetString(5),
                         Color = r.IsDBNull(6) ? "" : r.GetString(6),
@@ -288,10 +288,10 @@ namespace ark_app1
             _ = LoadProductos(SearchTextBox.Text);
         }
 
-        private void ShowInfoBar(string title, string message, InfoBarSeverity severity)
+        private void ShowInfoBar(string title, string? message, InfoBarSeverity severity)
         {
             InfoBar.Title = title;
-            InfoBar.Message = message;
+            InfoBar.Message = message ?? string.Empty;
             InfoBar.Severity = severity;
             InfoBar.IsOpen = true;
         }
