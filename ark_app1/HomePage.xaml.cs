@@ -167,7 +167,7 @@ namespace ark_app1
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             picker.FileTypeChoices.Add("PDF Document", new List<string> { ".pdf" });
             picker.SuggestedFileName = $"Reporte_General_{DateTime.Now:yyyyMMdd_HHmm}";
-            var hwnd = WindowNative.GetWindowHandle(App.MainWindow);
+            var hwnd = WindowNative.GetWindowHandle(App.Window);
             InitializeWithWindow.Initialize(picker, hwnd);
             var file = await picker.PickSaveFileAsync();
             if (file == null) return;
