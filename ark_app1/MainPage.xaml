@@ -18,7 +18,10 @@
                 <ImageIconSource ImageSource="/Assets/Tiles/GalleryIcon.ico" />
             </TitleBar.IconSource>
             <TitleBar.Content>
-                <AutoSuggestBox Width="360" VerticalAlignment="Center" PlaceholderText="Search..." QueryIcon="Find" />
+                <AutoSuggestBox x:Name="AppSearchBox" Width="360" VerticalAlignment="Center" PlaceholderText="Buscar Productos, Clientes..." QueryIcon="Find"
+                                TextChanged="AppSearchBox_TextChanged"
+                                QuerySubmitted="AppSearchBox_QuerySubmitted"
+                                SuggestionChosen="AppSearchBox_SuggestionChosen"/>
             </TitleBar.Content>
             <TitleBar.RightHeader>
                 <Button x:Name="ProfileMenuButton" Background="Transparent" BorderThickness="0">

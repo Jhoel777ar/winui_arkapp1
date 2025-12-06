@@ -6,6 +6,9 @@ using Windows.Graphics;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Composition.SystemBackdrops;
 using WinRT;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace ark_app1;
 
@@ -141,4 +144,101 @@ public sealed partial class MainPage : Window
         mainWindow.Activate();
         this.Close();
     }
+
+    // --- Global Search Logic ---
+    private async void AppSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            if (string.IsNullOrWhiteSpace(sender.Text) || sender.Text.Length < 2)
+            {
+                sender.ItemsSource = null;
+                return;
+            }
+
+            var results = new ObservableCollection<GlobalSearchResult>();
+            string query = sender.Text;
+
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                    await conn.OpenAsync();
+
+                    // Search Products
+                    var cmdProd = new SqlCommand("SELECT TOP 5 Id, Nombre, Codigo FROM Productos WHERE (Nombre LIKE @q OR Codigo LIKE @q) AND Activo = 1", conn);
+                    cmdProd.Parameters.AddWithValue("@q", $"%{query}%");
+                    using (var r = await cmdProd.ExecuteReaderAsync())
+                    {
+                        while (await r.ReadAsync())
+                        {
+                            string name = r.GetString(1);
+                            string code = r.GetString(2);
+                            results.Add(new GlobalSearchResult { Type = "Producto", Title = name, Subtitle = $"Cód: {code}", Id = r.GetInt32(0) });
+                        }
+                    }
+
+                    // Search Clients
+                    var cmdCli = new SqlCommand("SELECT TOP 5 Id, Nombre, CI FROM Clientes WHERE Nombre LIKE @q OR CI LIKE @q", conn);
+                    cmdCli.Parameters.AddWithValue("@q", $"%{query}%");
+                    using (var r = await cmdCli.ExecuteReaderAsync())
+                    {
+                        while (await r.ReadAsync())
+                        {
+                            string name = r.GetString(1);
+                            string ci = r.IsDBNull(2) ? "S/N" : r.GetString(2);
+                            results.Add(new GlobalSearchResult { Type = "Cliente", Title = name, Subtitle = $"CI: {ci}", Id = r.GetInt32(0) });
+                        }
+                    }
+                }
+                catch { /* Ignore errors during search */ }
+            });
+
+            // Dispatch to UI thread
+            this.DispatcherQueue.TryEnqueue(() =>
+            {
+                sender.ItemsSource = results;
+            });
+        }
+    }
+
+    private void AppSearchBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is GlobalSearchResult result)
+        {
+            if (result.Type == "Producto")
+            {
+                // Navigate to InventoryPage
+                NavView.Header = "Inventario";
+                ContentFrame.Navigate(typeof(InventoryPage));
+                // Note: To filter automatically in InventoryPage, we would need to pass parameters or use a mediator.
+                // For now, navigating to the relevant section is the most robust action without major refactoring.
+            }
+            else if (result.Type == "Cliente")
+            {
+                // Navigate to ClientsPage
+                NavView.Header = "Clientes";
+                ContentFrame.Navigate(typeof(ClientsPage));
+            }
+        }
+    }
+
+    private void AppSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion != null)
+        {
+            AppSearchBox_SuggestionChosen(sender, new AutoSuggestBoxSuggestionChosenEventArgs());
+        }
+    }
+}
+
+public class GlobalSearchResult
+{
+    public string Type { get; set; }
+    public string Title { get; set; }
+    public string Subtitle { get; set; }
+    public int Id { get; set; }
+
+    public override string ToString() => $"{Type}: {Title}";
 }
