@@ -23,7 +23,7 @@ public sealed partial class LoginWindow : Window
     public LoginWindow()
     {
         this.InitializeComponent();
-        AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico");
+        // AppWindow.SetIcon("Assets/Tiles/GalleryIcon.ico"); // Icon file missing
         var presenter = AppWindow.Presenter as OverlappedPresenter;
         if (presenter != null)
         {
