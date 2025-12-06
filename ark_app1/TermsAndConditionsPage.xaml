@@ -16,14 +16,14 @@
                            FontSize="34" HorizontalAlignment="Center"/>
             </StackPanel>
 
-            <TextBlock Text="ARK DEV SYSTEM – Sistema de Ventas e Inventario"
+            <TextBlock Text="ArkStock – Sistema de Ventas e Inventario"
                        Style="{ThemeResource SubtitleTextBlockStyle}"
                        FontSize="22" HorizontalAlignment="Center"/>
 
             <TextBlock TextWrapping="WrapWholeWords" FontSize="16" LineHeight="26" TextAlignment="Center">
-                ARK DEV SYSTEM es un software gratuito de punto de venta e inventario diseñado para cualquier tipo de tienda. 
-                Desarrollado por <Hyperlink NavigateUri="https://ark-dev.org">ARK DEV</Hyperlink>, 
-                subempresa liderada por su CEO Joel Andrés.
+                ArkStock es un software gratuito de punto de venta e inventario diseñado para cualquier tipo de tienda.
+                Desarrollado por <Hyperlink NavigateUri="https://ark-dev.org">ARK DEV SYSTEM</Hyperlink>,
+                una división de ARK DEV liderada por su Creador Principal Joel Andrés.
             </TextBlock>
 
             <TextBlock Text="Privacidad y Seguridad de tus Datos"
@@ -50,15 +50,15 @@
                        Margin="0,20,0,8"/>
 
             <TextBlock TextWrapping="Wrap" FontSize="15" LineHeight="24">
-                Al utilizar ARK DEV SYSTEM aceptas ser el único responsable de la seguridad de tu equipo y de los datos almacenados en él. 
+                Al utilizar ArkStock aceptas ser el único responsable de la seguridad de tu equipo y de los datos almacenados en él.
                 Recomendamos mantener Windows y tu antivirus siempre actualizados.
             </TextBlock>
 
             <TextBlock TextWrapping="Wrap" FontSize="16" LineHeight="28" Margin="0,40,0,0" HorizontalAlignment="Center">
-                <Run FontWeight="SemiBold">Gracias por confiar en ARK DEV SYSTEM.</Run>
+                <Run FontWeight="SemiBold">Gracias por confiar en ArkStock.</Run>
                 <LineBreak/>
                 <Run FontStyle="Italic" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                    Software gratuito • 100% local • Sin rastreo • Desarrollado por Joel Andrés (CEO) con ❤️ para tu negocio
+                    Software gratuito • 100% local • Sin rastreo • Creador principal: Joel Andrés • Revisión: 60% por IA
                 </Run>
             </TextBlock>
 

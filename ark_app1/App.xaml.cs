@@ -31,7 +31,7 @@ namespace ark_app1
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {            
-            const string appName = "ARK_App_SingleInstance_Mutex";
+            const string appName = "ArkStock_SingleInstance_Mutex";
             bool createdNew;
             _mutex = new System.Threading.Mutex(true, appName, out createdNew);
 

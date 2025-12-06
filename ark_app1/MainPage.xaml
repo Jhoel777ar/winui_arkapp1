@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="AppTitleBar" Title="ARK DEV" Subtitle="Bienvenido" IsBackButtonVisible="False" IsPaneToggleButtonVisible="False">
+        <TitleBar x:Name="AppTitleBar" Title="ArkStock" Subtitle="Bienvenido" IsBackButtonVisible="False" IsPaneToggleButtonVisible="False">
             <TitleBar.IconSource>
                 <ImageIconSource ImageSource="/Assets/Tiles/GalleryIcon.ico" />
             </TitleBar.IconSource>
@@ -52,7 +52,7 @@
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />
-                <NavigationViewItem Content="Acerca de ARK DEV" Icon="Help" Tag="AboutArkDev" />
+                <NavigationViewItem Content="Acerca de ArkStock" Icon="Help" Tag="AboutArkDev" />
             </NavigationView.FooterMenuItems>
             <Frame x:Name="ContentFrame" />
         </NavigationView>
@@ -68,7 +68,7 @@
              <StackPanel Orientation="Horizontal" Spacing="10">
                  <Image Source="https://www.ark-dev.org/logos/ark_dev_systemFN.png"
                         Width="36" Height="36"/>
-                 <TextBlock Text="ARK DEV SYSTEM | POWERED BY IA"
+                 <TextBlock Text="ArkStock | POWERED BY ARK DEV SYSTEM"
                             FontWeight="SemiBold"
                             FontSize="13"
                             VerticalAlignment="Center"

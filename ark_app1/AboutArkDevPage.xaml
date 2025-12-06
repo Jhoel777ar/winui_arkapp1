@@ -11,10 +11,10 @@
             <StackPanel HorizontalAlignment="Center" Spacing="20">
                 <Image Source="https://miro.medium.com/v2/resize:fit:640/format:webp/1*v1zSwreBom0xLn0dnA6P7Q.png"
                        Width="320" Height="213" Stretch="Uniform"/>
-                <TextBlock Text="Acerca de ARK DEV"
+                <TextBlock Text="Acerca de ArkStock"
                            Style="{ThemeResource TitleTextBlockStyle}"
                            FontSize="36" HorizontalAlignment="Center"/>
-                <TextBlock Text="Innovación tecnológica desde Bolivia al mundo"
+                <TextBlock Text="Innovación tecnológica de ARK DEV SYSTEM"
                            FontSize="18" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                            HorizontalAlignment="Center"/>
             </StackPanel>
@@ -82,8 +82,10 @@
                     Desde La Paz lideramos proyectos de software a medida, mantenimiento avanzado y soporte técnico,
                     transformando ideas en soluciones de alto impacto para startups y corporaciones internacionales.
                 </TextBlock>
-                <TextBlock Text="Creador y visionario: Joel Andrés (CEO)"
+                <TextBlock Text="Creador principal: Joel Andrés"
                            FontWeight="SemiBold" FontSize="16" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <TextBlock Text="Revisión: 60% por IA"
+                           FontSize="14" HorizontalAlignment="Center" Foreground="Gray"/>
             </StackPanel>
 
             <Button Content="Contáctanos ahora"
