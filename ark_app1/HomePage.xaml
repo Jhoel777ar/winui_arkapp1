@@ -76,7 +76,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- Sales Chart -->
-            <Border Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="20">
+            <Border Background="Transparent" CornerRadius="8" Padding="20">
                 <Grid RowDefinitions="Auto, *">
                     <TextBlock Text="Ventas (Últimos 7 Días)" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
                     <ItemsControl x:Name="SalesChart" Grid.Row="1" VerticalAlignment="Bottom">
@@ -104,7 +104,7 @@
             </Border>
 
             <!-- Profit Chart -->
-            <Border Grid.Column="1" Background="{ThemeResource LayerFillColorDefaultBrush}" CornerRadius="8" Padding="20">
+            <Border Grid.Column="1" Background="Transparent" CornerRadius="8" Padding="20">
                 <Grid RowDefinitions="Auto, *">
                     <TextBlock Text="Ganancia Estimada (Últimos 7 Días)" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,10"/>
                     <ItemsControl x:Name="ProfitChart" Grid.Row="1" VerticalAlignment="Bottom">
