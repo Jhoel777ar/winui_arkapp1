@@ -3,12 +3,17 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using Windows.Graphics;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
+using WinRT;
 
 namespace ark_app1;
 
 public sealed partial class MainPage : Window
 {
     public AppWindow AppWindow { get; private set; }
+    MicaController? micaController;
+    SystemBackdropConfiguration? configurationSource;
 
     public MainPage(string userFullName)
     {
@@ -21,18 +26,81 @@ public sealed partial class MainPage : Window
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
         AppWindow.Resize(new SizeInt32(1800, 1000));
         CenterWindow();
+        TrySetMicaBackdrop();
+
         UserPicture.DisplayName = userFullName;
         AppTitleBar.Subtitle = $"Bienvenido, {userFullName}";
         ContentFrame.Navigate(typeof(HomePage));
 
-        this.Closed += MainPage_Closed;
+        // this.Closed += MainPage_Closed; // Handled by Window_Closed in Mica setup or explicitly below
     }
 
-    private void MainPage_Closed(object sender, WindowEventArgs args)
+    bool TrySetMicaBackdrop()
     {
+        if (MicaController.IsSupported())
+        {
+            configurationSource = new SystemBackdropConfiguration();
+            this.Activated += Window_Activated;
+            this.Closed += Window_Closed;
+            ((FrameworkElement)this.Content).ActualThemeChanged += Window_ThemeChanged;
+
+            configurationSource.IsInputActive = true;
+            SetConfigurationSourceTheme();
+
+            micaController = new MicaController();
+            micaController.Kind = MicaKind.BaseAlt;
+            micaController.AddSystemBackdropTarget(this.As<ICompositionSupportsSystemBackdrop>());
+            micaController.SetSystemBackdropConfiguration(configurationSource);
+
+            return true;
+        }
+        return false;
+    }
+
+    private void Window_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        if (configurationSource is not null)
+        {
+            configurationSource.IsInputActive = args.WindowActivationState != WindowActivationState.Deactivated;
+        }
+    }
+
+    private void Window_Closed(object sender, WindowEventArgs args)
+    {
+        micaController?.Dispose();
+        micaController = null;
+        this.Activated -= Window_Activated;
+        configurationSource = null;
+
         // Ensure the entire application closes when the main dashboard is closed.
         // This handles cases where MainWindow is hidden but still running.
         Application.Current.Exit();
+    }
+
+    private void Window_ThemeChanged(FrameworkElement sender, object args)
+    {
+        if (configurationSource != null)
+        {
+            SetConfigurationSourceTheme();
+        }
+    }
+
+    private void SetConfigurationSourceTheme()
+    {
+        if (configurationSource is not null)
+        {
+            switch (((FrameworkElement)this.Content).ActualTheme)
+            {
+                case ElementTheme.Dark: configurationSource.Theme = SystemBackdropTheme.Dark; break;
+                case ElementTheme.Light: configurationSource.Theme = SystemBackdropTheme.Light; break;
+                case ElementTheme.Default: configurationSource.Theme = SystemBackdropTheme.Default; break;
+            }
+        }
+    }
+
+    private void MainPage_Closed_Legacy(object sender, WindowEventArgs args)
+    {
+       // Handled in Window_Closed
     }
      private void CenterWindow()
     {

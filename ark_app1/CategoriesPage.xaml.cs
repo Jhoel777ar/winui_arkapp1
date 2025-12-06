@@ -60,9 +60,14 @@ namespace ark_app1
                 DefaultButton = ContentDialogButton.Primary
             };
 
-            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
             {
-                if (string.IsNullOrWhiteSpace(txt.Text)) return;
+                if (string.IsNullOrWhiteSpace(txt.Text))
+                {
+                    ShowInfo("Validación", "El nombre es obligatorio", InfoBarSeverity.Warning);
+                    return;
+                }
                 await SaveCat(c?.Id ?? 0, txt.Text, "GUARDAR");
             }
         }
