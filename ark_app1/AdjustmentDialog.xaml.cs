@@ -1,13 +1,14 @@
+using ark_app1.Helpers;
+using Microsoft.Data.SqlClient;
+using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using System.Data;
+using System.Threading.Tasks;
 using Windows.Graphics;
-using Microsoft.UI;
 
 namespace ark_app1
 {
@@ -18,6 +19,7 @@ namespace ark_app1
         public AdjustmentDialog()
         {
             this.InitializeComponent();
+            WindowHelper.SetDefaultIcon(this);
             var presenter = AppWindow.Presenter as OverlappedPresenter;
             if (presenter != null)
             {

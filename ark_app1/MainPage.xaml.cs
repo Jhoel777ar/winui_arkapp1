@@ -1,14 +1,15 @@
+using ark_app1.Helpers;
+using Microsoft.Data.SqlClient;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using Windows.Graphics;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
-using WinRT;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+using Windows.Graphics;
+using WinRT;
 
 namespace ark_app1;
 
@@ -21,7 +22,7 @@ public sealed partial class MainPage : Window
     public MainPage(string userFullName)
     {
         this.InitializeComponent();
-        
+        WindowHelper.SetDefaultIcon(this);
         var windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(windowHandle);
         AppWindow = AppWindow.GetFromWindowId(windowId);

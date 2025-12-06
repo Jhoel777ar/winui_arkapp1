@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Graphics;
 using WinRT;
+using ark_app1.Helpers;
 
 namespace ark_app1;
 
@@ -23,6 +24,7 @@ public sealed partial class LoginWindow : Window
     public LoginWindow()
     {
         this.InitializeComponent();
+        WindowHelper.SetDefaultIcon(this);
         // Relying on Package.appxmanifest for application icon.
         var presenter = AppWindow.Presenter as OverlappedPresenter;
         if (presenter != null)

@@ -1,15 +1,16 @@
+using ark_app1.Helpers;
+using Microsoft.Data.SqlClient;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Data;
-using Microsoft.UI.Windowing;
 using Windows.Graphics;
-using Microsoft.UI;
 
 namespace ark_app1
 {
@@ -22,6 +23,7 @@ namespace ark_app1
         public AddCompraDialog(int? compraId = null)
         {
             this.InitializeComponent();
+            WindowHelper.SetDefaultIcon(this);
             _compraIdToEdit = compraId;
             ProductosDataGrid.ItemsSource = _productosCompra;
 

@@ -1,15 +1,16 @@
-using System;
+using ark_app1.Helpers;
+using Microsoft.Data.SqlClient;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Composition.SystemBackdrops;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
-using Microsoft.Data.SqlClient;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Windows.Graphics;
 using WinRT;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Composition.SystemBackdrops;
 
 namespace ark_app1
 {
@@ -51,8 +52,7 @@ namespace ark_app1
         public MainWindow()
         {
             this.InitializeComponent();
-            // AppWindow.SetIcon("Assets/StoreLogo.png");
-            // Relying on Package.appxmanifest for application icon.
+            WindowHelper.SetDefaultIcon(this);
 
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
             AppWindow.Resize(new SizeInt32(900, 900));
