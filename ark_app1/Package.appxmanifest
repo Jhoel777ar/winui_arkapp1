@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="7eacc386-d94e-4a3d-9677-a846bfe3dc1c"
-    Publisher="CN=ajoe_"
-    Version="1.0.0.0" />
+    Name="ARKDEV.4054D60B703A"
+    Publisher="CN=2511F4E5-F892-4393-AA24-5024D762B3F6"
+    Version="1.0.7.0" />
 
-  <mp:PhoneIdentity PhoneProductId="7eacc386-d94e-4a3d-9677-a846bfe3dc1c" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="5fabfde0-ec0c-40d4-ab98-ba7b6cc5fd1d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>ArkStock</DisplayName>
-    <PublisherDisplayName>ARK DEV SYSTEM</PublisherDisplayName>
+    <DisplayName>ARKSTOCK</DisplayName>
+    <PublisherDisplayName>ARK DEV</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -34,7 +34,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="ArkStock"
+        DisplayName="ARKSTOCK"
         Description="Sistema de Ventas e Inventario - ArkStock"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
