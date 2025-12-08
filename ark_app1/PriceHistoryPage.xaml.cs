@@ -48,10 +48,12 @@ namespace ark_app1
                         Codigo = r.GetString(r.GetOrdinal("Codigo")),
                         Producto = r.GetString(r.GetOrdinal("Producto")),
                         Usuario = r.GetString(r.GetOrdinal("Usuario")),
-                        PrecioCompra = r.GetDecimal(r.GetOrdinal("PrecioCompraRegistrado")),
+                        PrecioCompra = r.GetDecimal(r.GetOrdinal("PrecioCompraEnEsaCompra")),
                         PrecioVentaActual = r.GetDecimal(r.GetOrdinal("PrecioVentaActual")),
                         Cantidad = r.GetDecimal(r.GetOrdinal("Cantidad")),
-                        CompraId = r.GetInt32(r.GetOrdinal("CompraId"))
+                        CompraId = r.GetInt32(r.GetOrdinal("CompraId")),
+                        ObservacionPrecioCompra = r.GetString(r.GetOrdinal("ObservacionPrecioCompra")),
+                        ObservacionMargen = r.GetString(r.GetOrdinal("ObservacionMargen"))
                     });
                 }
 
@@ -104,6 +106,8 @@ namespace ark_app1
         public decimal PrecioVentaActual { get; set; }
         public decimal Cantidad { get; set; }
         public int CompraId { get; set; }
+        public string ObservacionPrecioCompra { get; set; } = string.Empty;
+        public string ObservacionMargen { get; set; } = string.Empty;
 
         public string PrecioCompraDisplay => $"Bs. {PrecioCompra:N2}";
         public string PrecioVentaDisplay => $"Bs. {PrecioVentaActual:N2}";

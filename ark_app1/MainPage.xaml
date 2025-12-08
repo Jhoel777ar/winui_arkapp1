@@ -53,6 +53,7 @@
                 <NavigationViewItemSeparator />
                 <NavigationViewItem Content="Historial Ajustes" Icon="List" Tag="HistoryAdjustments" />
                 <NavigationViewItem Content="Historial Precios" Icon="Tag" Tag="HistoryPrices" />
+                <NavigationViewItem Content="Historial Ventas" Icon="ShowBcc" Tag="HistorySales" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />

@@ -145,6 +145,11 @@ public sealed partial class MainPage : Window
                 NavView.Header = "Historial de Precios";
                 ContentFrame.Navigate(typeof(PriceHistoryPage));
             }
+            else if (selectedItemTag == "HistorySales")
+            {
+                NavView.Header = "Historial de Ventas";
+                ContentFrame.Navigate(typeof(SalesHistoryPage));
+            }
         }
     }
 
