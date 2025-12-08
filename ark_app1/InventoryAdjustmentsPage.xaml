@@ -21,7 +21,13 @@
                            AutoGenerateColumns="False" IsReadOnly="True"
                            GridLinesVisibility="Horizontal">
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Fecha" Binding="{Binding Fecha, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"/>
+                <controls:DataGridTemplateColumn Header="Fecha" Width="140">
+                    <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Fecha, Converter={StaticResource DateTimeToStringConverter}}"/>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                </controls:DataGridTemplateColumn>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
                 <controls:DataGridTextColumn Header="Producto" Binding="{Binding Producto}" Width="*"/>
                 <controls:DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}"/>

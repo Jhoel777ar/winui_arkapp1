@@ -19,6 +19,7 @@ namespace ark_app1
         private readonly ObservableCollection<ProductoCompra> _productosCompra = new();
         private readonly ObservableCollection<Proveedor> _proveedores = new();
         private int? _compraIdToEdit = null;
+        public bool CanDeleteInEditMode { get; set; } = false;
 
         public AddCompraDialog(int? compraId = null)
         {
@@ -42,6 +43,7 @@ namespace ark_app1
                 this.Title = "Editar Compra";
                 HeaderTextBlock.Text = "Editar Compra";
                 _ = InitializeEditAsync();
+                CanDeleteInEditMode = true;
             }
             else
             {
