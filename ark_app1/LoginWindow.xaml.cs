@@ -33,7 +33,7 @@ public sealed partial class LoginWindow : Window
             presenter.IsMaximizable = false;
         }
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-        AppWindow.Resize(new SizeInt32(750, 1004));
+        AppWindow.Resize(new SizeInt32(750, 850));
         CenterWindow();
         EnsureCorrectDatabase();
         TrySetMicaBackdrop();

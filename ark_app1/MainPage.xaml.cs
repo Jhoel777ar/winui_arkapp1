@@ -28,7 +28,7 @@ public sealed partial class MainPage : Window
         AppWindow = AppWindow.GetFromWindowId(windowId);
 
         AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-        AppWindow.Resize(new SizeInt32(1800, 1000));
+        AppWindow.Resize(new SizeInt32(1800, 850));
         CenterWindow();
         TrySetMicaBackdrop();
 

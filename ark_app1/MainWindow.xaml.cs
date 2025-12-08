@@ -55,7 +55,7 @@ namespace ark_app1
             WindowHelper.SetDefaultIcon(this);
 
             AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-            AppWindow.Resize(new SizeInt32(900, 900));
+            AppWindow.Resize(new SizeInt32(900, 750));
             CenterWindow();
             TrySetMicaBackdrop();
         }
