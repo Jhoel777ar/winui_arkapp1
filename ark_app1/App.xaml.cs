@@ -1,4 +1,5 @@
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppNotifications;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -30,7 +31,9 @@ namespace ark_app1
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
-        {            
+        {
+            AppNotificationManager.Default.Register();
+
             const string appName = "ArkStock_SingleInstance_Mutex";
             bool createdNew;
             _mutex = new System.Threading.Mutex(true, appName, out createdNew);

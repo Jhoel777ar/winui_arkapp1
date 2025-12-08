@@ -11,6 +11,8 @@ using System.Text.Json;
 using System.Data;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
+using Microsoft.Windows.AppNotifications;
+using Microsoft.Windows.AppNotifications.Builder;
 
 namespace ark_app1
 {
@@ -33,6 +35,13 @@ namespace ark_app1
         {
             await LoadProducts();
             ProductSearchBox.Focus(FocusState.Programmatic);
+        }
+
+        private async void CashCutButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new CashCutDialog();
+            dialog.XamlRoot = this.Content.XamlRoot;
+            await dialog.ShowAsync();
         }
 
         // --- Client Search Logic ---
@@ -104,7 +113,8 @@ namespace ark_app1
                 using var conn = new SqlConnection(DatabaseManager.ConnectionString);
                 await conn.OpenAsync();
                 var cmd = conn.CreateCommand();
-                cmd.CommandText = "SELECT Id, Codigo, Nombre, Stock, PrecioVenta FROM Productos WHERE Activo = 1 AND Stock > 0";
+                // Adding StockMinimo for alerts
+                cmd.CommandText = "SELECT Id, Codigo, Nombre, Stock, PrecioVenta, StockMinimo FROM Productos WHERE Activo = 1 AND Stock > 0";
                 if (!string.IsNullOrWhiteSpace(filter))
                 {
                     cmd.CommandText += " AND (Nombre LIKE @f OR Codigo LIKE @f)";
@@ -114,14 +124,33 @@ namespace ark_app1
                 using var r = await cmd.ExecuteReaderAsync();
                 while (await r.ReadAsync())
                 {
+                    decimal stock = r.GetDecimal(3);
+                    decimal min = r.GetDecimal(5);
+                    string name = r.GetString(2);
+
                     _products.Add(new Producto
                     {
                         Id = r.GetInt32(0),
                         Codigo = r.GetString(1),
-                        Nombre = r.GetString(2),
-                        Stock = r.GetDecimal(3),
-                        PrecioVenta = r.GetDecimal(4)
+                        Nombre = name,
+                        Stock = stock,
+                        PrecioVenta = r.GetDecimal(4),
+                        StockMinimo = min
                     });
+
+                    // Low Stock Notification
+                    if (stock <= min)
+                    {
+                        try
+                        {
+                            var notification = new AppNotificationBuilder()
+                                .AddText("Stock Bajo")
+                                .AddText($"El producto '{name}' tiene pocas unidades ({stock}).")
+                                .BuildNotification();
+                            AppNotificationManager.Default.Show(notification);
+                        }
+                        catch { /* Ignore notification errors */ }
+                    }
                 }
             }
             catch (Exception ex)
@@ -136,7 +165,7 @@ namespace ark_app1
         }
 
         // --- Cart Logic ---
-        private void AddToCart_Click(object sender, RoutedEventArgs e)
+        private async void AddToCart_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button { Tag: Producto p })
             {
@@ -146,8 +175,26 @@ namespace ark_app1
                     return;
                 }
 
-                var existing = _cart.FirstOrDefault(c => c.ProductoId == p.Id);
-                if (existing != null)
+                string serial = "";
+                // Heuristic: If it's likely a tech product (based on Category or logic), ask for Serial.
+                // Since we can't easily check category here without fetching, we'll ask user via Dialog if they want to add it.
+                // Or simply ALWAYS ask, but with "Omitir" button.
+
+                var serialDialog = new SerialInputDialog(p.Nombre);
+                serialDialog.XamlRoot = this.Content.XamlRoot;
+                var result = await serialDialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    serial = serialDialog.SerialNumber;
+                }
+
+                var existing = _cart.FirstOrDefault(c => c.ProductoId == p.Id && c.SerialNumber == serial);
+                // Note: If serials differ, we treat them as separate lines or same?
+                // Usually unique serial = unique item. So if serial is set, we add new line.
+                // If serial is empty, we merge.
+
+                if (existing != null && string.IsNullOrEmpty(serial))
                 {
                     if ((decimal)existing.Cantidad + 1 > p.Stock)
                     {
@@ -164,7 +211,8 @@ namespace ark_app1
                         Nombre = p.Nombre,
                         PrecioUnitario = p.PrecioVenta,
                         Cantidad = 1,
-                        StockMax = p.Stock
+                        StockMax = p.Stock,
+                        SerialNumber = serial
                     });
                 }
                 CalculateTotal();
@@ -382,6 +430,37 @@ namespace ark_app1
 
                 if (success)
                 {
+                    int ventaId = (int)pId.Value;
+
+                    // --- SAVE SERIAL NUMBERS ---
+                    var itemsWithSerial = _cart.Where(c => !string.IsNullOrEmpty(c.SerialNumber)).ToList();
+                    if (itemsWithSerial.Any())
+                    {
+                        try
+                        {
+                            var jsonSeries = JsonSerializer.Serialize(itemsWithSerial.Select(x => new
+                            {
+                                x.ProductoId,
+                                NumeroSerie = x.SerialNumber
+                            }));
+
+                            var cmdSeries = new SqlCommand("sp_RegistrarSeriesVenta", conn);
+                            cmdSeries.CommandType = CommandType.StoredProcedure;
+                            cmdSeries.Parameters.AddWithValue("@VentaId", ventaId);
+                            cmdSeries.Parameters.AddWithValue("@JsonSeries", jsonSeries);
+
+                            var pResS = cmdSeries.Parameters.Add("@Resultado", SqlDbType.Bit); pResS.Direction = ParameterDirection.Output;
+                            var pMsgS = cmdSeries.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsgS.Direction = ParameterDirection.Output;
+
+                            await cmdSeries.ExecuteNonQueryAsync();
+                        }
+                        catch (Exception exSerial)
+                        {
+                            // Non-critical error, but log or warn
+                            System.Diagnostics.Debug.WriteLine($"Error saving serials: {exSerial.Message}");
+                        }
+                    }
+
                     ShowInfo("Venta Exitosa", msg, InfoBarSeverity.Success);
 
                     // Generate Ticket
@@ -392,7 +471,7 @@ namespace ark_app1
 
                         var ticket = new TicketData
                         {
-                            SaleId = (int)pId.Value,
+                            SaleId = ventaId,
                             ClientName = clientName,
                             UserName = userName,
                             Date = DateTime.Now,
@@ -401,7 +480,8 @@ namespace ark_app1
                                 Name = c.Nombre,
                                 Quantity = (decimal)c.Cantidad,
                                 Price = c.PrecioUnitario,
-                                Subtotal = c.Subtotal
+                                Subtotal = c.Subtotal,
+                                SerialNumber = c.SerialNumber // Pass Serial to Ticket
                             }).ToList(),
                             Subtotal = _cart.Sum(x => x.Subtotal),
                             DiscountTotal = _cart.Sum(x => x.Subtotal) - totalEsperado,
@@ -445,6 +525,7 @@ namespace ark_app1
         public int ProductoId { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public decimal PrecioUnitario { get; set; }
+        public string SerialNumber { get; set; } = string.Empty; // New Property
 
         private double _cantidad;
         public double Cantidad

@@ -32,6 +32,7 @@ namespace ark_app1
         public decimal Quantity { get; set; }
         public decimal Price { get; set; }
         public decimal Subtotal { get; set; }
+        public string SerialNumber { get; set; } = string.Empty;
     }
 
     public static class TicketGenerator
@@ -109,7 +110,14 @@ namespace ark_app1
 
                         foreach (var item in data.Items)
                         {
-                            table.Cell().Text(item.Name);
+                            table.Cell().Column(c =>
+                            {
+                                c.Item().Text(item.Name);
+                                if (!string.IsNullOrEmpty(item.SerialNumber))
+                                {
+                                    c.Item().Text($"SN: {item.SerialNumber}").FontSize(6).Italic();
+                                }
+                            });
                             table.Cell().Text($"{item.Quantity:0.##}x{item.Price:0.00}");
                             table.Cell().AlignRight().Text($"{item.Subtotal:N2}");
                         }
@@ -130,6 +138,9 @@ namespace ark_app1
                         col.Item().AlignRight().Text($"Cambio: {data.Change:N2}");
 
                         col.Item().PaddingTop(10).AlignCenter().Text("¡Gracias por su compra!").Bold();
+
+                        col.Item().PaddingTop(5).AlignCenter().Text("Una vez retirado de tienda, ya no se aceptan devoluciones. Solo se puede consultar sobre el producto y su utilidad.")
+                            .FontSize(6).Italic();
                     });
                 });
             });

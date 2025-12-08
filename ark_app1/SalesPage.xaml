@@ -87,7 +87,15 @@
                 </Grid>
 
                 <Button Content="Cobrar / Finalizar Venta" HorizontalAlignment="Stretch" Style="{StaticResource AccentButtonStyle}" FontSize="16" Height="45" Click="CheckoutButton_Click"/>
-                <Button Content="Limpiar Carrito" HorizontalAlignment="Stretch" Click="ClearCart_Click"/>
+
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Limpiar" HorizontalAlignment="Stretch" Click="ClearCart_Click"/>
+                    <Button Grid.Column="1" Content="Corte de Caja" HorizontalAlignment="Stretch" Click="CashCutButton_Click"/>
+                </Grid>
 
                 <InfoBar x:Name="CartInfoBar" IsOpen="False"/>
             </StackPanel>
