@@ -9,8 +9,8 @@
 
   <Identity
     Name="ARKDEV.4054D60B703A"
-    Publisher="CN=2511F4E5-F892-4393-AA24-5024D762B3F6"
-    Version="1.0.7.0" />
+    Publisher="CN=ARK DEV"
+    Version="1.0.11.0" />
 
   <mp:PhoneIdentity PhoneProductId="5fabfde0-ec0c-40d4-ab98-ba7b6cc5fd1d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

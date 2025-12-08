@@ -62,12 +62,13 @@
 	  <PublishSingleFile>false</PublishSingleFile>
 	  <SelfContained>false</SelfContained>
 	  <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-	  <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+	  <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 	  <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
 	  <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
 	  <GenerateTestArtifacts>True</GenerateTestArtifacts>
 	  <AppxBundle>Always</AppxBundle>
 	  <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
 	  <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+	  <PackageCertificateKeyFile>ark_app1_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
 </Project>
