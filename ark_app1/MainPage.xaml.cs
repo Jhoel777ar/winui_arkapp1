@@ -122,12 +122,28 @@ public sealed partial class MainPage : Window
             string selectedItemTag = selectedItem.Tag.ToString()!;
 
             // Navigate only if a valid page exists
-            if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev" || selectedItemTag == "Inventory" || selectedItemTag == "Sales" || selectedItemTag == "Providers" || selectedItemTag == "Clients")
+            if (selectedItemTag == "Home" || selectedItemTag == "TermsAndConditions" || selectedItemTag == "AboutArkDev" ||
+                selectedItemTag == "Inventory" || selectedItemTag == "Sales" || selectedItemTag == "Providers" ||
+                selectedItemTag == "Clients" || selectedItemTag == "InventoryAdjustments" || selectedItemTag == "PriceHistory")
             {
                 NavView.Header = selectedItem.Content?.ToString() ?? string.Empty;
                 string pageName = "ark_app1." + selectedItemTag + "Page";
                 Type pageType = Type.GetType(pageName);
-                ContentFrame.Navigate(pageType);
+                if (pageType != null)
+                {
+                    ContentFrame.Navigate(pageType);
+                }
+            }
+            // Explicit handling for new pages if tag mismatch occurs or simply clearer logic
+            else if (selectedItemTag == "HistoryAdjustments")
+            {
+                NavView.Header = "Historial de Ajustes";
+                ContentFrame.Navigate(typeof(InventoryAdjustmentsPage));
+            }
+            else if (selectedItemTag == "HistoryPrices")
+            {
+                NavView.Header = "Historial de Precios";
+                ContentFrame.Navigate(typeof(PriceHistoryPage));
             }
         }
     }

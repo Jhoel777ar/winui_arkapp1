@@ -50,6 +50,9 @@
                 <NavigationViewItem Content="Inventario" Icon="Library" Tag="Inventory" />
                 <NavigationViewItem Content="Clientes" Icon="People" Tag="Clients" />
                 <NavigationViewItem Content="Proveedores" Icon="Contact" Tag="Providers" />
+                <NavigationViewItemSeparator />
+                <NavigationViewItem Content="Historial Ajustes" Icon="List" Tag="HistoryAdjustments" />
+                <NavigationViewItem Content="Historial Precios" Icon="Tag" Tag="HistoryPrices" />
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
                 <NavigationViewItem Content="Términos y Condiciones" Icon="Page" Tag="TermsAndConditions" />

@@ -97,7 +97,8 @@ namespace ark_app1
                         Cantidad = r.GetDecimal(7),
                         UnidadMedida = r.IsDBNull(8) ? "Unidad" : r.GetString(8),
                         StockMinimo = r.GetDecimal(9),
-                        ProductoId = r.GetInt32(10)
+                        ProductoId = r.GetInt32(10),
+                        IsReadOnly = true
                     });
                 }
                 UpdateTotal();
@@ -290,6 +291,7 @@ namespace ark_app1
         public decimal Cantidad { get; set; }
         public string UnidadMedida { get; set; } = "Unidad";
         public decimal StockMinimo { get; set; }
+        [JsonIgnore] public bool IsReadOnly { get; set; }
 
         [JsonIgnore]
         public decimal Subtotal => Cantidad * PrecioCompra;

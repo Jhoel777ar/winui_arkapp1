@@ -5,8 +5,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:helpers="using:ark_app1.Helpers"
     mc:Ignorable="d"
     Title="Registrar Compra">
+
+    <Window.Resources>
+        <helpers:BoolNegationConverter x:Key="BoolNegationConverter"/>
+    </Window.Resources>
 
     <Grid Padding="20" RowDefinitions="Auto, Auto, *, Auto">
 
@@ -23,15 +28,26 @@
         <controls:DataGrid x:Name="ProductosDataGrid" Grid.Row="2" AutoGenerateColumns="False">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}" IsReadOnly="True"/>
-                <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}"/>
-                <controls:DataGridTextColumn Header="Cantidad" Binding="{Binding Cantidad}"/>
-                <controls:DataGridTextColumn Header="P. Compra" Binding="{Binding PrecioCompra}"/>
-                <controls:DataGridTextColumn Header="P. Venta" Binding="{Binding PrecioVenta}"/>
-                <controls:DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, Mode=OneWay}"/>
+                <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" IsReadOnly="True"/>
+                <controls:DataGridTemplateColumn Header="Cantidad">
+                     <controls:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Cantidad}" VerticalAlignment="Center" Margin="10,0"/>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellTemplate>
+                    <controls:DataGridTemplateColumn.CellEditingTemplate>
+                        <DataTemplate>
+                            <NumberBox Value="{Binding Cantidad, Mode=TwoWay}" IsEnabled="{Binding IsReadOnly, Converter={StaticResource BoolNegationConverter}}" SpinButtonPlacementMode="Compact"/>
+                        </DataTemplate>
+                    </controls:DataGridTemplateColumn.CellEditingTemplate>
+                </controls:DataGridTemplateColumn>
+                <controls:DataGridTextColumn Header="P. Compra (Bs.)" Binding="{Binding PrecioCompra}" IsReadOnly="True"/>
+                <controls:DataGridTextColumn Header="P. Venta (Bs.)" Binding="{Binding PrecioVenta}" IsReadOnly="True"/>
+                <controls:DataGridTextColumn Header="Subtotal (Bs.)" Binding="{Binding Subtotal, Mode=OneWay}" IsReadOnly="True"/>
                 <controls:DataGridTemplateColumn Header="Acciones">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="Eliminar" Click="RemoveProduct_Click" Tag="{Binding}"/>
+                            <Button Content="Eliminar" Click="RemoveProduct_Click" Tag="{Binding}" IsEnabled="{Binding IsReadOnly, Converter={StaticResource BoolNegationConverter}}"/>
                         </DataTemplate>
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
