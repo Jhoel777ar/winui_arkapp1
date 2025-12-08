@@ -922,3 +922,191 @@ BEGIN
     ORDER BY SUM(vd.Cantidad) DESC;
 END
 GO
+
+-- Procedimiento para registrar series de una venta
+CREATE OR ALTER PROCEDURE sp_RegistrarSeriesVenta
+    @VentaId INT,
+    @JsonSeries NVARCHAR(MAX),
+    @Resultado BIT OUTPUT,
+    @Mensaje NVARCHAR(500) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET @Resultado = 0;
+    SET @Mensaje = '';
+    BEGIN TRY
+        IF NOT EXISTS (SELECT 1 FROM Ventas WHERE Id = @VentaId)
+        BEGIN
+            THROW 51000, 'La venta no existe.', 1;
+        END
+        INSERT INTO VentasSeries (VentaId, ProductoId, NumeroSerie)
+        SELECT @VentaId, ProductoId, NumeroSerie
+        FROM OPENJSON(@JsonSeries)
+        WITH (
+            ProductoId INT '$.ProductoId',
+            NumeroSerie NVARCHAR(100) '$.NumeroSerie'
+        );
+        SET @Resultado = 1;
+        SET @Mensaje = 'Series registradas correctamente.';
+    END TRY
+    BEGIN CATCH
+        SET @Resultado = 0;
+        SET @Mensaje = ERROR_MESSAGE();
+    END CATCH
+END
+GO
+
+-- Procedimiento para Corte de Caja / Arqueo
+CREATE OR ALTER PROCEDURE sp_ObtenerArqueoCaja
+    @UsuarioId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @InicioDia DATETIME2 = CAST(CAST(GETDATE() AS DATE) AS DATETIME2);
+    SELECT
+        u.NombreCompleto AS Usuario,
+        COUNT(v.Id) AS CantidadVentas,
+        ISNULL(SUM(v.Total), 0) AS TotalVendido,
+        ISNULL(SUM(CASE WHEN v.TipoPago = 'Efectivo' THEN v.Total ELSE 0 END), 0) AS TotalEfectivo,
+        ISNULL(SUM(CASE WHEN v.TipoPago = 'Tarjeta' THEN v.Total ELSE 0 END), 0) AS TotalTarjeta,
+        ISNULL(SUM(CASE WHEN v.TipoPago = 'QR' THEN v.Total ELSE 0 END), 0) AS TotalQR,
+        ISNULL(SUM(CASE WHEN v.TipoPago = 'Transferencia' THEN v.Total ELSE 0 END), 0) AS TotalTransferencia,
+        @InicioDia AS FechaInicio
+    FROM Ventas v
+    INNER JOIN Usuarios u ON v.UsuarioId = u.Id
+    WHERE v.UsuarioId = @UsuarioId
+      AND v.Fecha >= @InicioDia
+    GROUP BY u.NombreCompleto;
+    SELECT TOP 20
+        v.Id,
+        v.Fecha,
+        ISNULL(c.Nombre, 'Ocasional') AS Cliente,
+        v.Total,
+        v.TipoPago
+    FROM Ventas v
+    LEFT JOIN Clientes c ON v.ClienteId = c.Id
+    WHERE v.UsuarioId = @UsuarioId
+      AND v.Fecha >= @InicioDia
+    ORDER BY v.Fecha DESC;
+END
+GO
+
+-- Procedimiento para Historial de Ajustes
+CREATE OR ALTER PROCEDURE sp_ObtenerHistorialAjustes
+    @Filtro NVARCHAR(100) = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 20
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    SELECT
+        a.Id,
+        a.Fecha,
+        COALESCE(p.Codigo, 'Eliminado') AS Codigo,
+        COALESCE(p.Nombre, 'Producto Eliminado') AS Producto,
+        COALESCE(u.NombreCompleto, 'Usuario Eliminado') AS Usuario,
+        a.Cantidad,
+        a.Motivo,
+        COUNT(*) OVER() AS TotalRegistros
+    FROM InventarioAjustes a
+    LEFT JOIN Productos p ON a.ProductoId = p.Id
+    LEFT JOIN Usuarios u ON a.UsuarioId = u.Id
+    WHERE (@Filtro IS NULL OR COALESCE(p.Nombre, '') LIKE '%' + @Filtro + '%' OR COALESCE(p.Codigo, '') LIKE '%' + @Filtro + '%' OR COALESCE(u.NombreCompleto, '') LIKE '%' + @Filtro + '%')
+    ORDER BY a.Fecha DESC
+    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+    OPTION (RECOMPILE);
+END
+GO
+
+-- Procedimiento para Historial de Cambios de Precio 
+
+CREATE OR ALTER PROCEDURE sp_ObtenerHistorialPrecios
+    @Filtro     NVARCHAR(100) = NULL,
+    @PageNumber INT = 1,
+    @PageSize   INT = 20
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+    SELECT
+        cd.Id,
+        c.Fecha,
+        c.Id                              AS CompraId,
+        p.Codigo,
+        p.Nombre                           AS Producto,
+        cd.Cantidad,
+        cd.PrecioUnitario                  AS PrecioCompraEnEsaCompra,
+        p.PrecioCompra                     AS PrecioCompraActual,
+        p.PrecioVenta                      AS PrecioVentaActual,
+        u.NombreCompleto                   AS Usuario,
+        CASE 
+            WHEN cd.PrecioUnitario <> p.PrecioCompra THEN N'¡Precio de compra modificado después!'
+            ELSE N''
+        END                                AS ObservacionPrecioCompra,
+        CASE 
+            WHEN cd.PrecioUnitario * 1.3 < p.PrecioVenta THEN N'Margen aumentado'
+            WHEN cd.PrecioUnitario * 1.3 > p.PrecioVenta THEN N'Margen reducido'
+            ELSE N''
+        END                                AS ObservacionMargen,
+        COUNT(*) OVER()                    AS TotalRegistros
+    FROM ComprasDetalle cd
+    INNER JOIN Compras c         ON cd.CompraId = c.Id
+    INNER JOIN Productos p       ON cd.ProductoId = p.Id
+    INNER JOIN Usuarios u        ON c.UsuarioId = u.Id
+    WHERE @Filtro IS NULL
+       OR p.Codigo   LIKE '%' + @Filtro + '%'
+       OR p.Nombre   LIKE '%' + @Filtro + '%'
+    ORDER BY c.Fecha DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY
+    OPTION (RECOMPILE);
+END
+GO
+
+-- Procedimiento para Historial de ventas 
+
+CREATE OR ALTER PROCEDURE sp_ObtenerHistorialVentas
+@Filtro NVARCHAR(100) = NULL,
+@PageNumber INT = 1,
+@PageSize INT = 20
+AS
+BEGIN
+SET NOCOUNT ON;
+DECLARE @Offset INT = (@PageNumber - 1) * @PageSize;
+SELECT
+v.Id AS VentaId,
+v.Fecha,
+COALESCE(u.NombreCompleto, 'Usuario Eliminado') AS Usuario,
+COALESCE(c.Nombre, 'Cliente Anónimo') AS Cliente,
+v.Total,
+v.DescuentoPorcentaje,
+v.DescuentoMonto,
+v.EfectivoRecibido,
+v.Cambio,
+v.Estado,
+v.TipoPago,
+vd.Id AS DetalleId,
+COALESCE(p.Codigo, 'Eliminado') AS CodigoProducto,
+COALESCE(p.Nombre, 'Producto Eliminado') AS Producto,
+vd.Cantidad,
+vd.PrecioUnitario,
+vd.DescuentoPorcentaje AS DescuentoDetallePorc,
+vd.DescuentoMonto AS DescuentoDetalleMonto,
+vd.Subtotal,
+COUNT(*) OVER() AS TotalRegistros
+FROM VentasDetalle vd
+INNER JOIN Ventas v ON vd.VentaId = v.Id
+LEFT JOIN Productos p ON vd.ProductoId = p.Id
+LEFT JOIN Usuarios u ON v.UsuarioId = u.Id
+LEFT JOIN Clientes c ON v.ClienteId = c.Id
+WHERE (@Filtro IS NULL
+OR COALESCE(p.Nombre, '') LIKE '%' + @Filtro + '%'
+OR COALESCE(p.Codigo, '') LIKE '%' + @Filtro + '%'
+OR COALESCE(u.NombreCompleto, '') LIKE '%' + @Filtro + '%'
+OR COALESCE(c.Nombre, '') LIKE '%' + @Filtro + '%')
+ORDER BY v.Fecha DESC
+OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+OPTION (RECOMPILE);
+END
+GO
