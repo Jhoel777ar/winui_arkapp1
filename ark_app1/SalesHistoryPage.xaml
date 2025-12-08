@@ -19,7 +19,11 @@
 
         <controls:DataGrid x:Name="DataGrid" Grid.Row="1" ItemsSource="{x:Bind Records}"
                            AutoGenerateColumns="False" IsReadOnly="True"
-                           GridLinesVisibility="Horizontal">
+                           GridLinesVisibility="Horizontal"
+                           ScrollViewer.VerticalScrollBarVisibility="Auto"
+                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                           ScrollViewer.VerticalScrollMode="Auto"
+                           ScrollViewer.HorizontalScrollMode="Auto">
             <controls:DataGrid.Columns>
                 <controls:DataGridTemplateColumn Header="Fecha" Width="140">
                     <controls:DataGridTemplateColumn.CellTemplate>
