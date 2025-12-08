@@ -137,20 +137,6 @@ namespace ark_app1
                         PrecioVenta = r.GetDecimal(4),
                         StockMinimo = min
                     });
-
-                    // Low Stock Notification
-                    if (stock <= min)
-                    {
-                        try
-                        {
-                            var notification = new AppNotificationBuilder()
-                                .AddText("Stock Bajo")
-                                .AddText($"El producto '{name}' tiene pocas unidades ({stock}).")
-                                .BuildNotification();
-                            AppNotificationManager.Default.Show(notification);
-                        }
-                        catch { /* Ignore notification errors */ }
-                    }
                 }
             }
             catch (Exception ex)
@@ -173,6 +159,20 @@ namespace ark_app1
                 {
                     ShowInfo("Stock", "Producto sin stock", InfoBarSeverity.Warning);
                     return;
+                }
+
+                // Low Stock Alert (triggered on Add, not Search)
+                if (p.Stock <= p.StockMinimo)
+                {
+                    try
+                    {
+                        var notification = new AppNotificationBuilder()
+                            .AddText("Stock Bajo")
+                            .AddText($"El producto '{p.Nombre}' tiene pocas unidades ({p.Stock}).")
+                            .BuildNotification();
+                        AppNotificationManager.Default.Show(notification);
+                    }
+                    catch { /* Ignore */ }
                 }
 
                 string serial = "";

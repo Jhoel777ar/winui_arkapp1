@@ -32,7 +32,15 @@ namespace ark_app1
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            AppNotificationManager.Default.Register();
+            try
+            {
+                AppNotificationManager.Default.Register();
+            }
+            catch (System.Exception ex)
+            {
+                // Fallback for unpackaged or misconfigured scenarios to prevent crash
+                System.Diagnostics.Debug.WriteLine($"Notification Registration Failed: {ex.Message}");
+            }
 
             const string appName = "ArkStock_SingleInstance_Mutex";
             bool createdNew;
