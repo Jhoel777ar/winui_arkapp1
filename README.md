@@ -12,6 +12,46 @@ Todo el sistema se ejecuta de manera **100% local**, garantizando que tus datos 
 
 ---
 
+## 🌟 Funcionalidades Principales
+
+ARKSTOCK integra todas las herramientas necesarias para la gestión diaria de un negocio en una sola interfaz fluida e intuitiva.
+
+### 🏠 Panel de Control (Dashboard)
+Una vista general del estado de tu negocio al instante.
+- **Gráficos en tiempo real:** Visualiza ventas y ganancias recientes.
+- **Accesos directos:** Navegación rápida a las funciones más usadas.
+- **Indicadores Clave (KPIs):** Resumen de stock total, ventas del día y alertas.
+
+### 🛒 Punto de Venta (POS)
+El núcleo del sistema, diseñado para agilizar el proceso de cobro.
+- **Búsqueda Inteligente:** Encuentra productos por código o nombre y clientes al instante.
+- **Carrito de Compras:** Gestión dinámica de items, cantidades y eliminación rápida.
+- **Descuentos Globales:** Aplica descuentos por porcentaje o monto fijo al total de la venta.
+- **Múltiples Métodos de Pago:** Soporte para Efectivo, Tarjeta, QR y Transferencia.
+- **Control de Series:** Registro obligatorio de números de serie para productos tecnológicos o garantizados.
+- **Tickets Automáticos:** Generación e impresión inmediata de recibos en PDF (formato térmico 80mm).
+
+### 📦 Gestión de Inventario
+Control total sobre tus existencias.
+- **Catálogo de Productos:** Alta, baja y modificación de productos con soporte para tallas, colores y categorías.
+- **Alertas de Stock Bajo:** Notificaciones automáticas cuando un producto alcanza su nivel mínimo.
+- **Historial de Precios:** Rastreo de variaciones en costos de compra y precios de venta.
+- **Ajustes de Inventario:** Registro de mermas, pérdidas o correcciones manuales de stock.
+
+### 👥 Gestión de Terceros
+- **Clientes:** Base de datos con historial de compras e información de contacto.
+- **Proveedores:** Registro detallado para facilitar la reposición de mercadería.
+
+### 💰 Caja y Finanzas
+- **Corte de Caja (Arqueo):** Cierre diario con cálculo automático de efectivo esperado vs. real.
+- **Historial de Ventas:** Consulta detallada de transacciones pasadas con filtros por fecha y usuario.
+
+### 📄 Reportes y Documentos
+- Generación de reportes detallados en PDF para auditorías o contabilidad.
+- Exportación de listados de inventario y ventas.
+
+---
+
 ## 📥 Contenido del Paquete de Instalación
 
 El instalador oficial de la versión v1.0.12 contiene **exactamente** los siguientes archivos para una instalación automatizada:
