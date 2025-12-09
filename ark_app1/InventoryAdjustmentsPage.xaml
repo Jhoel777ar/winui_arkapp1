@@ -33,7 +33,7 @@
                     </controls:DataGridTemplateColumn.CellTemplate>
                 </controls:DataGridTemplateColumn>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
-                <controls:DataGridTextColumn Header="Producto" Binding="{Binding Producto}" Width="*"/>
+                <controls:DataGridTextColumn Header="Producto" Binding="{Binding Producto}" Width="SizeToCells"/>
                 <controls:DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}"/>
                 <controls:DataGridTextColumn Header="Motivo" Binding="{Binding Motivo}" Width="2*"/>
                 <controls:DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}"/>

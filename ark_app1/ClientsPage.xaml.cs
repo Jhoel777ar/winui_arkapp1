@@ -59,7 +59,7 @@ namespace ark_app1
 
         private async void EditButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: ClienteEntity c }) await ShowClientDialog(c);
+            if (sender is Button button && button.Tag is ClienteEntity c) await ShowClientDialog(c);
         }
 
         private async Task ShowClientDialog(ClienteEntity? c = null)

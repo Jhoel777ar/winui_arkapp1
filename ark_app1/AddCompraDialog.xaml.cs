@@ -213,7 +213,7 @@ namespace ark_app1
             }
 
             var jsonProductos = JsonConvert.SerializeObject(_productosCompra);
-            int usuarioId = (Application.Current as App).CurrentUser?.Id ?? 0;
+            int usuarioId = (Application.Current as App)?.CurrentUser?.Id ?? 0;
             int proveedorId = (int)ProveedorComboBox.SelectedValue;
 
             try

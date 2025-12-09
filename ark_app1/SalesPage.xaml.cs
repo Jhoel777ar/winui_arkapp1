@@ -156,7 +156,7 @@ namespace ark_app1
         // --- Cart Logic ---
         private async void AddToCart_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: Producto p })
+            if (sender is Button button && button.Tag is Producto p)
             {
                 if (p.Stock <= 0)
                 {
@@ -227,7 +227,7 @@ namespace ark_app1
 
         private void RemoveFromCart_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: CartItem item })
+            if (sender is Button button && button.Tag is CartItem item)
             {
                 _cart.Remove(item);
             }

@@ -28,7 +28,7 @@ namespace ark_app1
             await LoadCompras();
         }
 
-        private async Task LoadProductos(string filter = null)
+        private async Task LoadProductos(string? filter = null)
         {
             _productos.Clear();
             try
@@ -126,7 +126,7 @@ namespace ark_app1
 
         private async void ViewDetails_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button { Tag: Compra compra })
+            if (sender is Button button && button.Tag is Compra compra)
             {
                 var dialog = new ContentDialog
                 {
@@ -197,7 +197,7 @@ namespace ark_app1
         private void EditCompraButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isDialogOpen) return;
-            if (sender is not Button { Tag: Compra compra }) return;
+            if (sender is not Button button || button.Tag is not Compra compra) return;
 
             _isDialogOpen = true;
             var dialog = new AddCompraDialog(compra.Id);
@@ -212,7 +212,7 @@ namespace ark_app1
         private async void EditProductButton_Click(object sender, RoutedEventArgs e)
         {
             if (_isDialogOpen) return;
-            if (sender is not Button { Tag: Producto producto }) return;
+            if (sender is not Button button || button.Tag is not Producto producto) return;
 
             _isDialogOpen = true;
 

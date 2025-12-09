@@ -15,7 +15,7 @@ namespace ark_app1
         public User? CurrentUser { get; set; } // This will hold the logged-in user's data.
 
         // Mutex for single instance check
-        private static System.Threading.Mutex _mutex = null;
+        private static System.Threading.Mutex? _mutex = null;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
