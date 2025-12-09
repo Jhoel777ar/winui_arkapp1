@@ -151,35 +151,60 @@ namespace ark_app1
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-             if (sender is Button { Tag: ProveedorEntity p })
+            if (sender is not Button btn || btn.Tag is not ProveedorEntity p) return;
+            bool tieneCompras = await ProveedorTieneCompras(p.Id);
+            if (tieneCompras)
             {
-                var dialog = new ContentDialog
-                {
-                    XamlRoot = this.XamlRoot,
-                    Title = "Confirmar eliminación",
-                    Content = $"¿Seguro que deseas eliminar a {p.Nombre}?",
-                    PrimaryButtonText = "Eliminar",
-                    CloseButtonText = "Cancelar",
-                    DefaultButton = ContentDialogButton.Close
-                };
+                ShowInfo("No permitido",
+                    $"El proveedor '{p.Nombre}' tiene compras registradas y no se puede eliminar.",
+                    InfoBarSeverity.Warning);
+                return;
+            }
+            var dialog = new ContentDialog
+            {
+                XamlRoot = this.XamlRoot,
+                Title = "Confirmar eliminación",
+                Content = $"¿Eliminar al proveedor {p.Nombre}?",
+                PrimaryButtonText = "Eliminar",
+                CloseButtonText = "Cancelar",
+                DefaultButton = ContentDialogButton.Close
+            };
 
-                if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                try
                 {
-                    try
-                    {
-                        using var conn = new SqlConnection(DatabaseManager.ConnectionString);
-                        await conn.OpenAsync();
-                        var cmd = new SqlCommand("DELETE FROM Proveedores WHERE Id = @id", conn);
-                        cmd.Parameters.AddWithValue("@id", p.Id);
-                        await cmd.ExecuteNonQueryAsync();
-                        ShowInfo("Eliminado", "Proveedor eliminado.", InfoBarSeverity.Success);
-                        await LoadProviders();
-                    }
-                    catch (Exception)
-                    {
-                         ShowInfo("Error", "No se puede eliminar (probablemente tiene compras asociadas).", InfoBarSeverity.Error);
-                    }
+                    using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                    await conn.OpenAsync();
+                    var cmd = new SqlCommand("DELETE FROM Proveedores WHERE Id = @id", conn);
+                    cmd.Parameters.AddWithValue("@id", p.Id);
+                    await cmd.ExecuteNonQueryAsync();
+
+                    ShowInfo("Eliminado", "Proveedor eliminado correctamente.", InfoBarSeverity.Success);
+                    await LoadProviders();
                 }
+                catch (Exception ex)
+                {
+                    ShowInfo("Error", ex.Message, InfoBarSeverity.Error);
+                }
+            }
+        }
+
+        private async Task<bool> ProveedorTieneCompras(int proveedorId)
+        {
+            try
+            {
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT COUNT(1) FROM Compras WHERE ProveedorId = @id";
+                cmd.Parameters.AddWithValue("@id", proveedorId);
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null && Convert.ToInt32(result) > 0;
+            }
+            catch
+            {
+                return true; 
             }
         }
 

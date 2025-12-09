@@ -9,8 +9,10 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Windows.Graphics;
 using WinRT;
+using Microsoft.Win32;
 
 namespace ark_app1
 {
@@ -58,8 +60,60 @@ namespace ark_app1
             AppWindow.Resize(new SizeInt32(900, 750));
             CenterWindow();
             TrySetMicaBackdrop();
+            _ = AutoDetectSqlServerAsync();
         }
-
+        // no tocar esta funcion AutoDetectSqlServerAsync(
+        private async Task AutoDetectSqlServerAsync()
+        {
+            await Task.Delay(200);
+            string? detected = null;
+            try
+            {
+                using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL");
+                var names = key?.GetValueNames();
+                if (names != null && names.Length > 0)
+                {
+                    string inst = names[0];
+                    detected = inst.Equals("MSSQLSERVER", StringComparison.OrdinalIgnoreCase) ? "." : $".\\{inst}";
+                }
+            }
+            catch { }
+            if (string.IsNullOrEmpty(detected))
+            {
+                try
+                {
+                    using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\Microsoft\Microsoft SQL Server\Instance Names\SQL");
+                    var names = key?.GetValueNames();
+                    if (names != null && names.Length > 0)
+                    {
+                        string inst = names[0];
+                        detected = inst.Equals("MSSQLSERVER", StringComparison.OrdinalIgnoreCase) ? "." : $".\\{inst}";
+                    }
+                }
+                catch { }
+            }
+            if (string.IsNullOrEmpty(detected))
+            {
+                foreach (var server in new[] { @".\SQLEXPRESS", ".", "localhost", @".\SQLExpress" })
+                {
+                    try
+                    {
+                        using var conn = new SqlConnection($"Server={server};Database=master;Integrated Security=True;TrustServerCertificate=True;Connect Timeout=2");
+                        await conn.OpenAsync();
+                        detected = server;
+                        break;
+                    }
+                    catch { }
+                }
+            }
+            if (!string.IsNullOrEmpty(detected))
+            {
+                this.DispatcherQueue.TryEnqueue(() =>
+                {
+                    ServerNameTextBox.Text = detected;
+                });
+            }
+        }
         private void CenterWindow()
         {
             var area = DisplayArea.GetFromWindowId(AppWindow.Id, DisplayAreaFallback.Nearest)?.WorkArea;

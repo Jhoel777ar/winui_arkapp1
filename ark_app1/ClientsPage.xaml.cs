@@ -146,53 +146,72 @@ namespace ark_app1
 
         private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-             if (sender is Button { Tag: ClienteEntity c })
+            if (sender is not Button btn || btn.Tag is not ClienteEntity c) return;
+
+            bool tieneVentas = await ClienteTieneVentas(c.Id);
+
+            if (tieneVentas)
             {
-                var dialog = new ContentDialog
+                ShowInfo("No permitido", $"El cliente {c.Nombre} tiene ventas registradas y no se puede eliminar.", InfoBarSeverity.Warning);
+                return;
+            }
+
+            var dialog = new ContentDialog
+            {
+                XamlRoot = this.XamlRoot,
+                Title = "Confirmar eliminación",
+                Content = $"¿Eliminar a {c.Nombre}?",
+                PrimaryButtonText = "Eliminar",
+                CloseButtonText = "Cancelar",
+                DefaultButton = ContentDialogButton.Close
+            };
+            if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                try
                 {
-                    XamlRoot = this.XamlRoot,
-                    Title = "Confirmar eliminación",
-                    Content = $"¿Eliminar a {c.Nombre}?",
-                    PrimaryButtonText = "Eliminar",
-                    CloseButtonText = "Cancelar",
-                    DefaultButton = ContentDialogButton.Close
-                };
-
-                if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+                    using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                    await conn.OpenAsync();
+                    var cmd = new SqlCommand("sp_GestionarCliente", conn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@Id", c.Id);
+                    cmd.Parameters.AddWithValue("@Nombre", ""); // No needed
+                    cmd.Parameters.AddWithValue("@Accion", "ELIMINAR");
+                    var pRes = cmd.Parameters.Add("@Resultado", SqlDbType.Bit); pRes.Direction = ParameterDirection.Output;
+                    var pMsg = cmd.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsg.Direction = ParameterDirection.Output;
+                    await cmd.ExecuteNonQueryAsync();
+                    if ((bool)pRes.Value)
+                    {
+                        ShowInfo("Eliminado", pMsg.Value.ToString(), InfoBarSeverity.Success);
+                        await LoadClients();
+                    }
+                    else
+                    {
+                        ShowInfo("Error", pMsg.Value.ToString(), InfoBarSeverity.Error);
+                    }
+                }
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        using var conn = new SqlConnection(DatabaseManager.ConnectionString);
-                        await conn.OpenAsync();
-                        var cmd = new SqlCommand("sp_GestionarCliente", conn);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Id", c.Id);
-                        cmd.Parameters.AddWithValue("@Nombre", ""); // No needed
-                        cmd.Parameters.AddWithValue("@Accion", "ELIMINAR");
-
-                        var pRes = cmd.Parameters.Add("@Resultado", SqlDbType.Bit); pRes.Direction = ParameterDirection.Output;
-                        var pMsg = cmd.Parameters.Add("@Mensaje", SqlDbType.NVarChar, 500); pMsg.Direction = ParameterDirection.Output;
-
-                        await cmd.ExecuteNonQueryAsync();
-
-                        if ((bool)pRes.Value)
-                        {
-                            ShowInfo("Eliminado", pMsg.Value.ToString(), InfoBarSeverity.Success);
-                            await LoadClients();
-                        }
-                        else
-                        {
-                             ShowInfo("Error", pMsg.Value.ToString(), InfoBarSeverity.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                         ShowInfo("Error", ex.Message, InfoBarSeverity.Error);
-                    }
+                    ShowInfo("Error", ex.Message, InfoBarSeverity.Error);
                 }
             }
         }
-
+        private async Task<bool> ClienteTieneVentas(int clienteId)
+        {
+            try
+            {
+                using var conn = new SqlConnection(DatabaseManager.ConnectionString);
+                await conn.OpenAsync();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = "SELECT COUNT(1) FROM Ventas WHERE ClienteId = @id";
+                cmd.Parameters.AddWithValue("@id", clienteId);
+                var result = await cmd.ExecuteScalarAsync();
+                return result != null && Convert.ToInt32(result) > 0;
+            }
+            catch
+            {
+                return true;
+            }
+        }
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => _ = LoadClients(SearchBox.Text);
         private void RefreshButton_Click(object sender, RoutedEventArgs e) => _ = LoadClients();
 
