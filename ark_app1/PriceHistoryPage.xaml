@@ -16,8 +16,12 @@
             <TextBox x:Name="SearchBox" PlaceholderText="Buscar por producto..."
                      TextChanged="SearchBox_TextChanged" Width="300" HorizontalAlignment="Left"/>
         </StackPanel>
-
-        <controls:DataGrid x:Name="DataGrid" Grid.Row="1" ItemsSource="{x:Bind Records}"
+        <ScrollViewer Grid.Row="1" 
+              VerticalScrollBarVisibility="Auto"
+              HorizontalScrollBarVisibility="Auto"
+              VerticalScrollMode="Auto"
+              HorizontalScrollMode="Auto">
+            <controls:DataGrid x:Name="DataGrid" Grid.Row="1" ItemsSource="{x:Bind Records}"
                            AutoGenerateColumns="False" IsReadOnly="True"
                            GridLinesVisibility="Horizontal"
                            ScrollViewer.VerticalScrollBarVisibility="Auto"
@@ -34,8 +38,17 @@
                 </controls:DataGridTemplateColumn>
                 <controls:DataGridTextColumn Header="Compra ID" Binding="{Binding CompraId}"/>
                 <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
-                <controls:DataGridTextColumn Header="Producto" Binding="{Binding Producto}" Width="*"/>
-                <controls:DataGridTextColumn Header="Cant. Comprada" Binding="{Binding Cantidad}"/>
+                    <controls:DataGridTextColumn Header="Producto" 
+                             Binding="{Binding Producto}" 
+                             Width="SizeToCells">
+                        <controls:DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextWrapping" Value="Wrap"/>
+                                <Setter Property="TextTrimming" Value="None"/>
+                            </Style>
+                        </controls:DataGridTextColumn.ElementStyle>
+                    </controls:DataGridTextColumn>
+                    <controls:DataGridTextColumn Header="Cant. Comprada" Binding="{Binding Cantidad}"/>
                 <controls:DataGridTextColumn Header="P. Compra (Hist)" Binding="{Binding PrecioCompraDisplay}"/>
                 <controls:DataGridTextColumn Header="P. Venta (Actual)" Binding="{Binding PrecioVentaDisplay}"/>
                 <controls:DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}"/>
@@ -43,7 +56,7 @@
                 <controls:DataGridTextColumn Header="Obs. Margen" Binding="{Binding ObservacionMargen}" Width="150"/>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
-
+        </ScrollViewer>
         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,10,0,0">
             <Button x:Name="PrevButton" Content="Anterior" Click="PrevButton_Click"/>
             <TextBlock x:Name="PageInfo" Text="Página 1 de 1" VerticalAlignment="Center"/>
