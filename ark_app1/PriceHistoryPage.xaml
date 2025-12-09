@@ -16,19 +16,15 @@
             <TextBox x:Name="SearchBox" PlaceholderText="Buscar por producto..."
                      TextChanged="SearchBox_TextChanged" Width="300" HorizontalAlignment="Left"/>
         </StackPanel>
-        <ScrollViewer Grid.Row="1" 
-              VerticalScrollBarVisibility="Auto"
-              HorizontalScrollBarVisibility="Auto"
-              VerticalScrollMode="Auto"
-              HorizontalScrollMode="Auto">
-            <controls:DataGrid x:Name="DataGrid" Grid.Row="1" ItemsSource="{x:Bind Records}"
-                           AutoGenerateColumns="False" IsReadOnly="True"
-                           GridLinesVisibility="Horizontal"
-                           ScrollViewer.VerticalScrollBarVisibility="Auto"
-                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                           ScrollViewer.VerticalScrollMode="Auto"
-                           ScrollViewer.HorizontalScrollMode="Auto">
-            <controls:DataGrid.Columns>
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollMode="Auto"
+                      HorizontalScrollMode="Auto">
+            <controls:DataGrid x:Name="DataGrid" ItemsSource="{x:Bind Records}"
+                               AutoGenerateColumns="False" IsReadOnly="True"
+                               GridLinesVisibility="Horizontal">
+                <controls:DataGrid.Columns>
                 <controls:DataGridTemplateColumn Header="Fecha" Width="140">
                     <controls:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

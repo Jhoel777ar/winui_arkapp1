@@ -22,25 +22,31 @@
             <Button Content="Actualizar" Click="RefreshButton_Click"/>
         </StackPanel>
 
-        <controls:DataGrid x:Name="ProvidersGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True">
-            <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="200"/>
-                <controls:DataGridTextColumn Header="RUC" Binding="{Binding RUC}" Width="100"/>
-                <controls:DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="100"/>
-                <controls:DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="150"/>
-                <controls:DataGridTextColumn Header="Contacto" Binding="{Binding Contacto}" Width="150"/>
-                <controls:DataGridTemplateColumn Header="Acciones">
-                    <controls:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="5">
-                                <Button Content="Editar" Click="EditButton_Click" Tag="{Binding}"/>
-                                <Button Content="Eliminar" Click="DeleteButton_Click" Tag="{Binding}" Background="#FFD4D4"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </controls:DataGridTemplateColumn.CellTemplate>
-                </controls:DataGridTemplateColumn>
-            </controls:DataGrid.Columns>
-        </controls:DataGrid>
+        <ScrollViewer Grid.Row="2"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollMode="Auto"
+                      HorizontalScrollMode="Auto">
+            <controls:DataGrid x:Name="ProvidersGrid" AutoGenerateColumns="False" IsReadOnly="True">
+                <controls:DataGrid.Columns>
+                    <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" Width="200"/>
+                    <controls:DataGridTextColumn Header="RUC" Binding="{Binding RUC}" Width="100"/>
+                    <controls:DataGridTextColumn Header="Teléfono" Binding="{Binding Telefono}" Width="100"/>
+                    <controls:DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="150"/>
+                    <controls:DataGridTextColumn Header="Contacto" Binding="{Binding Contacto}" Width="150"/>
+                    <controls:DataGridTemplateColumn Header="Acciones">
+                        <controls:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <Button Content="Editar" Click="EditButton_Click" Tag="{Binding}"/>
+                                    <Button Content="Eliminar" Click="DeleteButton_Click" Tag="{Binding}" Background="#FFD4D4"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </controls:DataGridTemplateColumn.CellTemplate>
+                    </controls:DataGridTemplateColumn>
+                </controls:DataGrid.Columns>
+            </controls:DataGrid>
+        </ScrollViewer>
 
         <InfoBar x:Name="InfoBar" VerticalAlignment="Bottom" Margin="20"/>
     </Grid>

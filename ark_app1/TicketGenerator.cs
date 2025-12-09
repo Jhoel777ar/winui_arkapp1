@@ -59,7 +59,11 @@ namespace ark_app1
                     if (!r.IsDBNull(2)) companyPhone = r.GetString(2);
                 }
             }
-            catch { /* Use defaults */ }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching company info for ticket: {ex.Message}");
+                // Proceed with defaults
+            }
 
             // Generate Document
             var document = Document.Create(container =>

@@ -36,48 +36,60 @@
                 <TextBox x:Name="ProductSearchBox" Header="Producto" PlaceholderText="Buscar por nombre o código..." TextChanged="ProductSearchBox_TextChanged"/>
             </StackPanel>
 
-            <controls:DataGrid x:Name="ProductsGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
-                <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
-                    <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="*"/>
-                    <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}"/>
-                    <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioVenta}"/>
-                    <controls:DataGridTemplateColumn Header="Acción">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="Agregar" Click="AddToCart_Click" Tag="{Binding}"/>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
-                </controls:DataGrid.Columns>
-            </controls:DataGrid>
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollMode="Auto"
+                          HorizontalScrollMode="Auto">
+                <controls:DataGrid x:Name="ProductsGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
+                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="*"/>
+                        <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}"/>
+                        <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioVenta}"/>
+                        <controls:DataGridTemplateColumn Header="Acción">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="Agregar" Click="AddToCart_Click" Tag="{Binding}"/>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
+            </ScrollViewer>
         </Grid>
 
         <!-- Right: Cart & Checkout -->
         <Grid Grid.Column="1" RowDefinitions="Auto, *, Auto" Background="{ThemeResource LayerFillColorDefaultBrush}" Padding="20" CornerRadius="8">
             <TextBlock Text="Carrito de Compras" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,15"/>
 
-            <controls:DataGrid x:Name="CartGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="False" SelectionMode="Single">
-                <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
-                    <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioUnitario}" IsReadOnly="True"/>
-                    <controls:DataGridTemplateColumn Header="Cant.">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <NumberBox Value="{Binding Cantidad, Mode=OneWay}" Minimum="1" SpinButtonPlacementMode="Compact" Width="80" ValueChanged="CartQty_ValueChanged"/>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
-                    <controls:DataGridTextColumn Header="Subtotal" Binding="{Binding SubtotalDisplay}" IsReadOnly="True"/>
-                    <controls:DataGridTemplateColumn Header="X">
-                        <controls:DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Button Content="X" Click="RemoveFromCart_Click" Tag="{Binding}" Foreground="Red"/>
-                            </DataTemplate>
-                        </controls:DataGridTemplateColumn.CellTemplate>
-                    </controls:DataGridTemplateColumn>
-                </controls:DataGrid.Columns>
-            </controls:DataGrid>
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollMode="Auto"
+                          HorizontalScrollMode="Auto">
+                <controls:DataGrid x:Name="CartGrid" AutoGenerateColumns="False" IsReadOnly="False" SelectionMode="Single">
+                    <controls:DataGrid.Columns>
+                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
+                        <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioUnitario}" IsReadOnly="True"/>
+                        <controls:DataGridTemplateColumn Header="Cant.">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <NumberBox Value="{Binding Cantidad, Mode=OneWay}" Minimum="1" SpinButtonPlacementMode="Compact" Width="80" ValueChanged="CartQty_ValueChanged"/>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                        <controls:DataGridTextColumn Header="Subtotal" Binding="{Binding SubtotalDisplay}" IsReadOnly="True"/>
+                        <controls:DataGridTemplateColumn Header="X">
+                            <controls:DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="X" Click="RemoveFromCart_Click" Tag="{Binding}" Foreground="Red"/>
+                                </DataTemplate>
+                            </controls:DataGridTemplateColumn.CellTemplate>
+                        </controls:DataGridTemplateColumn>
+                    </controls:DataGrid.Columns>
+                </controls:DataGrid>
+            </ScrollViewer>
 
             <StackPanel Grid.Row="2" Spacing="10" Margin="0,10,0,0">
                 <!-- Minimal Footer -->

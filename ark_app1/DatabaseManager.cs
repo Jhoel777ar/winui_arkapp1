@@ -6,7 +6,20 @@ namespace ark_app1
 {
     public static class DatabaseManager
     {
-        public static string? ConnectionString { get; set; }
+        private static string? _connectionString;
+        public static string ConnectionString
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_connectionString))
+                {
+                    // Fallback or throw informative error
+                     throw new InvalidOperationException("Database connection string has not been initialized.");
+                }
+                return _connectionString;
+            }
+            set => _connectionString = value;
+        }
 
         public static void UpdateUserPassword(int userId, string newPassword)
         {

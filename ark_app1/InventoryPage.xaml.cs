@@ -151,7 +151,10 @@ namespace ark_app1
                         detailsList.AppendLine($"- {r.GetString(0)}: {r.GetDecimal(1)} x {r.GetDecimal(2):C2} = {r.GetDecimal(3):C2}");
                     }
                 }
-                catch { detailsList.AppendLine("Error al cargar detalles."); }
+                catch (Exception ex)
+                {
+                    detailsList.AppendLine("Error al cargar detalles: " + ex.Message);
+                }
 
                 dialog.Content = new ScrollViewer { Content = new TextBlock { Text = detailsList.ToString(), TextWrapping = TextWrapping.Wrap } };
                 await dialog.ShowAsync();

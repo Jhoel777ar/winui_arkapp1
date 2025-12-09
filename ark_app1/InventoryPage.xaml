@@ -28,31 +28,37 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <controls:DataGrid x:Name="ComprasDataGrid"
-                                   Grid.Row="0" Margin="10"
-                                   AutoGenerateColumns="False"
-                                   CanUserSortColumns="True"
-                                   CanUserResizeColumns="True"
-                                   IsReadOnly="True">
-                        <controls:DataGrid.Columns>
-                            <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
-                            <controls:DataGridTextColumn Header="Fecha" Binding="{Binding Fecha}"/>
-                            <controls:DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor}"/>
-                            <controls:DataGridTextColumn Header="Total" Binding="{Binding Total}" />
-                            <controls:DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}"/>
-                            <controls:DataGridTextColumn Header="Estado" Binding="{Binding Estado}"/>
-                            <controls:DataGridTemplateColumn Header="Acciones">
-                                <controls:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="5">
-                                            <Button Content="Ver Productos" Click="ViewDetails_Click" Tag="{Binding}"/>
-                                            <Button Content="Editar" Click="EditCompraButton_Click" Tag="{Binding}"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </controls:DataGridTemplateColumn.CellTemplate>
-                            </controls:DataGridTemplateColumn>
-                        </controls:DataGrid.Columns>
-                    </controls:DataGrid>
+                    <ScrollViewer Grid.Row="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollMode="Auto"
+                                  HorizontalScrollMode="Auto">
+                        <controls:DataGrid x:Name="ComprasDataGrid"
+                                       Margin="10"
+                                       AutoGenerateColumns="False"
+                                       CanUserSortColumns="True"
+                                       CanUserResizeColumns="True"
+                                       IsReadOnly="True">
+                            <controls:DataGrid.Columns>
+                                <controls:DataGridTextColumn Header="ID" Binding="{Binding Id}"/>
+                                <controls:DataGridTextColumn Header="Fecha" Binding="{Binding Fecha}"/>
+                                <controls:DataGridTextColumn Header="Proveedor" Binding="{Binding Proveedor}"/>
+                                <controls:DataGridTextColumn Header="Total" Binding="{Binding Total}" />
+                                <controls:DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}"/>
+                                <controls:DataGridTextColumn Header="Estado" Binding="{Binding Estado}"/>
+                                <controls:DataGridTemplateColumn Header="Acciones">
+                                    <controls:DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                                <Button Content="Ver Productos" Click="ViewDetails_Click" Tag="{Binding}"/>
+                                                <Button Content="Editar" Click="EditCompraButton_Click" Tag="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </controls:DataGridTemplateColumn.CellTemplate>
+                                </controls:DataGridTemplateColumn>
+                            </controls:DataGrid.Columns>
+                        </controls:DataGrid>
+                    </ScrollViewer>
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10" Margin="10">
                         <Button Content="Anterior" Click="PrevPage_Click"/>
                         <TextBlock x:Name="PageInfoText" Text="Página 1" VerticalAlignment="Center"/>
@@ -61,27 +67,32 @@
                 </Grid>
             </PivotItem>
             <PivotItem Header="Stock (Productos)">
-                <controls:DataGrid x:Name="ProductsDataGrid"
-                                   Margin="10"
-                                   AutoGenerateColumns="False"
-                                   CanUserSortColumns="True"
-                                   CanUserResizeColumns="True"
-                                   IsReadOnly="True">
-                    <controls:DataGrid.Columns>
-                        <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
-                        <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" />
-                        <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
-                        <controls:DataGridTextColumn Header="Precio Venta" Binding="{Binding PrecioVenta}" />
-                        <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}" />
-                        <controls:DataGridTemplateColumn Header="Acciones">
-                            <controls:DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Content="Editar" Click="EditProductButton_Click" Tag="{Binding}"/>
-                                </DataTemplate>
-                            </controls:DataGridTemplateColumn.CellTemplate>
-                        </controls:DataGridTemplateColumn>
-                    </controls:DataGrid.Columns>
-                </controls:DataGrid>
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollMode="Auto"
+                              HorizontalScrollMode="Auto">
+                    <controls:DataGrid x:Name="ProductsDataGrid"
+                                       Margin="10"
+                                       AutoGenerateColumns="False"
+                                       CanUserSortColumns="True"
+                                       CanUserResizeColumns="True"
+                                       IsReadOnly="True">
+                        <controls:DataGrid.Columns>
+                            <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
+                            <controls:DataGridTextColumn Header="Nombre" Binding="{Binding Nombre}" />
+                            <controls:DataGridTextColumn Header="Categoría" Binding="{Binding CategoriaNombre}"/>
+                            <controls:DataGridTextColumn Header="Precio Venta" Binding="{Binding PrecioVenta}" />
+                            <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}" />
+                            <controls:DataGridTemplateColumn Header="Acciones">
+                                <controls:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Content="Editar" Click="EditProductButton_Click" Tag="{Binding}"/>
+                                    </DataTemplate>
+                                </controls:DataGridTemplateColumn.CellTemplate>
+                            </controls:DataGridTemplateColumn>
+                        </controls:DataGrid.Columns>
+                    </controls:DataGrid>
+                </ScrollViewer>
             </PivotItem>
         </Pivot>
         <InfoBar x:Name="InfoBar" Grid.Row="2" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" IsOpen="False"/>

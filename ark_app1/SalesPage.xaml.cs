@@ -69,7 +69,10 @@ namespace ark_app1
                     }
                     sender.ItemsSource = suggestions;
                 }
-                catch { /* Ignore */ }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error fetching clients: {ex.Message}");
+                }
             }
         }
 
@@ -172,7 +175,10 @@ namespace ark_app1
                             .BuildNotification();
                         AppNotificationManager.Default.Show(notification);
                     }
-                    catch { /* Ignore */ }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Notification error: {ex.Message}");
+                    }
                 }
 
                 string serial = "";
