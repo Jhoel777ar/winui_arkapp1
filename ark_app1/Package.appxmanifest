@@ -11,8 +11,8 @@
 
   <Identity
     Name="ARKDEV.4054D60B703A"
-    Publisher="CN=ARK DEV"
-    Version="1.0.11.0" />
+    Publisher="CN=ARK DEV SYSTEM"
+    Version="1.0.12.0" />
 
   <mp:PhoneIdentity PhoneProductId="5fabfde0-ec0c-40d4-ab98-ba7b6cc5fd1d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

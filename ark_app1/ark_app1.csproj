@@ -69,6 +69,6 @@
 	  <AppxBundle>Always</AppxBundle>
 	  <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
 	  <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-	  <PackageCertificateKeyFile>ark_app1_TemporaryKey.pfx</PackageCertificateKeyFile>
+	  <PackageCertificateThumbprint>EF7C6FF2F8EF715BB80424048CA38257F14CCA49</PackageCertificateThumbprint>
   </PropertyGroup>
 </Project>
