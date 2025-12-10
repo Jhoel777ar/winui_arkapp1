@@ -44,7 +44,7 @@
                 <controls:DataGrid x:Name="ProductsGrid" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
                     <controls:DataGrid.Columns>
                         <controls:DataGridTextColumn Header="Código" Binding="{Binding Codigo}"/>
-                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="150"/>
+                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" Width="*"/>
                         <controls:DataGridTextColumn Header="Stock" Binding="{Binding Stock}"/>
                         <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioVenta}"/>
                         <controls:DataGridTemplateColumn Header="Acción">
@@ -70,7 +70,7 @@
                           HorizontalScrollMode="Auto">
                 <controls:DataGrid x:Name="CartGrid" AutoGenerateColumns="False" IsReadOnly="False" SelectionMode="Single">
                     <controls:DataGrid.Columns>
-                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="150"/>
+                        <controls:DataGridTextColumn Header="Producto" Binding="{Binding Nombre}" IsReadOnly="True" Width="*"/>
                         <controls:DataGridTextColumn Header="Precio" Binding="{Binding PrecioUnitario}" IsReadOnly="True"/>
                         <controls:DataGridTemplateColumn Header="Cant.">
                             <controls:DataGridTemplateColumn.CellTemplate>
